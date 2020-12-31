@@ -33,8 +33,7 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
     const readFileAsync = util.promisify(readFile)
-    let markdownOptions;
-    let markdown = new Markdown(markdownOptions);
+    let markdown = new Markdown({});
     let file = await readFileAsync(path.join(serverRuntimeConfig.PROJECT_ROOT, `./public/${params.bip}.md`), "utf-8");
     let data = markdown.toJSON(file);
     if (!data.body) throw new Error(`Failed to parse markdown page for ${params.bip}.md`)

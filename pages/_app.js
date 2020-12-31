@@ -12,12 +12,14 @@ const App = ({ Component, pageProps }) => (
     <header>
       <nav>
         <div>
-          <h1 style={{display: 'inline-block'}}>Bitcoin BIPs</h1>
+          <h1>Bitcoin BIPs</h1>
         </div>
 
         <Link href="/">
           <a>Home</a>
         </Link>
+        &nbsp;/&nbsp; 
+        <a href="https://github.com/dolu89/bitcoin-bips" target="_blank">Github</a>
       </nav>
     </header>
     <main>
@@ -25,12 +27,6 @@ const App = ({ Component, pageProps }) => (
         <Component {...pageProps} />
       </section>
     </main>
-    <footer>
-      <hr />
-      <p>
-        <small>Contact info</small>
-      </p>
-    </footer>
   </>
 )
 export default App

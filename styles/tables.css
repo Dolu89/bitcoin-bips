@@ -1,3 +1,6 @@
 table{
     word-break: initial
 }
+table a {
+    text-decoration: none;
+}
