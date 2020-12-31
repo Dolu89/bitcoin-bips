@@ -1,0 +1,168 @@
+<pre>
+  BIP: 322
+  Layer: Applications
+  Title: Generic Signed Message Format
+  Author: Karl-Johan Alm <karljohan-alm@garage.co.jp>
+  Comments-Summary: No comments yet.
+  Comments-URI: https://github.com/bitcoin/bips/wiki/Comments:BIP-0322
+  Status: Draft
+  Type: Standards Track
+  Created: 2018-09-10
+  License: CC0-1.0
+</pre>
+
+== Abstract ==
+
+A standard for interoperable signed messages based on the Bitcoin Script format, either for proving fund availability, or committing to a message as the intended recipient of funds sent to the invoice address.
+
+== Motivation ==
+
+The current message signing standard only works for P2PKH (1...) invoice addresses. We propose to extend and generalize the standard by using a Bitcoin Script based approach. This approach minimizes the burden for implementers as message signing can be expected to be part of a library or project that includes Bitcoin Script interpreters already.
+
+Additionally, the current message signing only proves that the message has been committed to by the recipient of a given invoice address.
+It does not prove anything about the invoice address itself, nor that the signer has access to the private keys used to implement this invoice.
+More importantly, it does not prove ownership nor access to any funds, even if the same private key would be a valid signer for spending them - and this is a commonly desired use case.
+
+== Specification ==
+
+This BIP follows the specification of BIP-325 challenges and solutions (see Signet comparison below).
+
+Let there be two virtual transactions to_spend and to_sign.
+
+The "to_spend" transaction is:
+
+    nVersion = 0
+    nLockTime = 0
+    vin[0].prevout.hash = 0000...000
+    vin[0].prevout.n = 0xFFFFFFFF
+    vin[0].nSequence = 0
+    vin[0].scriptSig = OP_0 PUSH32[ message_hash ]
+    vin[0].scriptWitness = []
+    vout[0].nValue = 0
+    vout[0].scriptPubKey = message_challenge
+
+where message_hash is a BIP340-tagged hash of the message, i.e. sha256_tag(m), where tag = "BIP0322-signed-message", and message_challenge is the to be proven (public) key script.
+For proving funds, message_challenge shall be simply OP_TRUE.
+
+The "to_sign" transaction is:
+
+    nVersion = 0 or as appropriate (e.g. 2, for time locks)
+    nLockTime = 0 or as appropriate (for time locks)
+    vin[0].prevout.hash = to_spend.txid
+    vin[0].prevout.n = 0
+    vin[0].nSequence = 0 or as appropriate (for time locks)
+    vin[0].scriptWitness = message_signature
+    vout[0].nValue = 0
+    vout[0].scriptPubKey = OP_RETURN
+
+When a proof of funds is being created, additional inputs should be included for virtually spending transaction outputs of desired value.
+
+* All signatures must use the SIGHASH_ALL flag.
+* The proof is considered valid, inconclusive, or invalid based on whether the to_sign transaction is a valid spend of the to_spend transaction or not, according to the rules specified in the "Consensus and standard flags" section below.
+* Proofs of funds may be encumbered with the in_future flag, according to the rules specified in the "Locktime and Sequence" section below, in which case we refer to the result in text form as "valid_in_future", "inconclusive_in_future", etc.
+
+Proofs of funds are the base64-encoding of the to_spend and to_sign transactions concatenated in standard network serialisation, and proofs without additional inputs or time locks (simple proofs) are the base64-encoding of the to_sign script witness.
+
+A validator must verify it is valid and meets the description of virtual transactions as specified above. See "Validation" below.
+
+=== Validation ===
+
+To validate a simple proof, the following steps must be taken:
+
+# construct the to_spend and to_sign transactions, based on the specification above
+# check the signature using consensus rules, then upgradable rules
+
+To validate a proof of funds, the following steps must be taken:
+
+# deserialize the to_spend and to_sign transactions from the proof, and fail if the proof contains extraneous bytes
+# verify that the to_sign transaction uses all inputs covered by the proof of funds, exactly once
+# reconstruct the to_spend' and to_sign' transactions, based on the specification above, copying the version, lock time, and sequence values
+# verify that to_spend = to_spend', that to_sign has at least 1 input, has exactly 1 output, and that to_sign.vin[0] = to_sign'.vin[0]
+# set the "in_future" flag if the transaction's lock time is in the future according to consensus rules
+# establish a "coins map", a mapping of outpoints (hash, vout) to coins (scriptPubKey, amount), initialized to coins_map(to_spend.txid, 0) = (to_spend.vout[0], 0)
+# for each proof of fund input, set the corresponding values in the coins map; abort if the input cannot be found
+# check the signature of each input using consensus rules, then upgradable rules
+
+== Legacy format ==
+
+New proofs should use the new format for all invoice address formats, including P2PKH.
+
+The legacy format MAY be used, but must be restricted to the legacy P2PKH invoice address format.
+
+=== Signing ===
+
+Given the P2PKH invoice address <code>a</code> and the message <code>m</code>, and the pubkey-hash function <code>pkh(P) = ripemd160(sha256(P))</code>:
+
+# let <code>p</code> be the pubkey-hash <code>pkh(P)</code> for the pubkey <code>P</code>, contained in <code>a</code>
+# let <code>x</code> be the private key associated with <code>P</code> so that <code>pkh(xG) = p</code>
+# let <code>digest</code> be <code>SHA56d(0x18||"Bitcoin Signed Message:\n"||compactint(len(m))||m)</code>
+# create a compact signature <code>sig</code> (aka "recoverable ECDSA signature") using <code>x</code> on <code>digest</code>
+
+The resulting proof is <code>sig</code>, serialized using the base64 encoding.
+
+=== Verifying ===
+
+Given the P2PKH invoice address <code>a</code>, the message <code>m</code>, the compact signature <code>sig</code>, and the pubkey-hash function <code>pkh(P) = ripemd160(sha256(P))</code>:
+
+# let <code>p</code> be the pubkey-hash <code>pkh(P)</code> for the pubkey <code>P</code>, contained in <code>a</code>
+# let <code>digest</code> be <code>SHA56d(0x18||"Bitcoin Signed Message:\n"||compactint(len(m))||m)</code>
+# attempt pubkey recovery for <code>digest</code> using the signature <code>sig</code> and store the resulting pubkey into <code>Q</code>
+## fail verification if pubkey recovery above fails
+# let <code>q</code> be the pubkey-hash <code>pkh(Q)</code> for the pubkey <code>Q</code>
+# if <code>p == q</code>, the proof is valid, otherwise it is invalid
+
+== Compatibility ==
+
+This specification is backwards compatible with the legacy signmessage/verifymessage specification through the special case as described above.
+
+== Reference implementation ==
+
+TODO
+
+== Acknowledgements ==
+
+Thanks to David Harding, Jim Posen, Kalle Rosenbaum, Pieter Wuille, and many others for their feedback on the specification.
+
+== References ==
+
+# Original mailing list thread: https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2018-March/015818.html
+
+== Copyright ==
+
+This document is licensed under the Creative Commons CC0 1.0 Universal license.
+
+== Consensus and standard flags ==
+
+Each flag is associated with some type of enforced rule (most often a soft fork). There are two sets of flags: consensus flags (which result in a block being rejected, if violated), and upgradable flags (which are typically policy-rejected by nodes specifically for the purpose of future network upgrades). The upgradable flags are a super-set of the consensus flags.
+
+This BIP specifies that a proof that validates for both rulesets is valid, a proof that validates for consensus rules, but not for upgradable rules, is "inconclusive", and a proof that does not validate for consensus rules is "invalid" (regardless of upgradable rule validation).
+
+The ruleset sometimes changes. This BIP does not intend to be complete, nor does it indicate enforcement of rules, it simply lists the rules as they stand at the point of writing.
+
+=== Consensus rules ===
+
+* P2SH: evaluate P2SH ([https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki BIP16]) subscripts
+* DERSIG: enforce strict DER ([https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki BIP66]) compliance
+* NULLDUMMY: enforce NULLDUMMY ([https://github.com/bitcoin/bips/blob/master/bip-0147.mediawiki BIP147])
+* CHECKLOCKTIMEVERIFY: enable CHECKLOCKTIMEVERIFY ([https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki BIP65])
+* CHECKSEQUENCEVERIFY: enable CHECKSEQUENCEVERIFY ([https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki BIP112])
+* WITNESS: enable WITNESS ([https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki BIP141])
+
+=== Upgradable rules ===
+
+All of the above, plus (subject to change):
+
+* STRICTENC: non-strict DER signature or undefined hashtype
+* MINIMALDATA: require minimal encodings for all push operations
+* DISCOURAGE_UPGRADABLE_NOPS: discourage use of NOPs reserved for upgrades
+* CLEANSTACK: require that only a single stack element remains after evaluation
+* MINIMALIF: Segwit script only: require the argument of OP_IF/NOTIF to be exactly 0x01 or empty vector
+* NULLFAIL: signature(s) must be empty vector if a CHECK(MULTI)SIG operation failed
+* LOW_S: signature with S > order/2 in a checksig operation
+* DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM: v1-16 witness programs are non-standard (i.e. forbidden)
+* WITNESS_PUBKEYTYPE: public keys in segregated witness scripts must be compressed
+* CONST_SCRIPTCODE: OP_CODESEPARATOR and FindAndDelete fail any non-segwit scripts
+
+== Test vectors ==
+
+TODO
