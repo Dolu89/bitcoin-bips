@@ -7,7 +7,7 @@ import getConfig from 'next/config'
 const { serverRuntimeConfig } = getConfig()
 import Utils from '../utils/utils.js'
 
-const TestPage = (props) => {
+const Bip = (props) => {
     return (
         <>
             <Head>
@@ -47,4 +47,4 @@ export async function getStaticProps({ params }) {
 }
 
 
-export default TestPage
+export default Bip
