@@ -34,7 +34,7 @@ const Home = props => {
                 return (
                   <tr key={bip.Number}>
                     <td>
-                      <Link href={`/${Utils.FormatBipAsFile(bip.Number)}`}>
+                      <Link href={`/${bip.Number}`}>
                         <a>{bip.Number}</a>
                       </Link>
                     </td>
