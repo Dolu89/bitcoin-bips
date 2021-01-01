@@ -48,10 +48,12 @@ export async function getStaticProps({ params }) {
     let data = markdown.toJSON(file)
     if (!data.body) throw new Error(`Failed to parse markdown page for ${bipFile}.md`)
     const title = `BIP${(params.bip)} - ${file.substring(file.indexOf('Title: ') + 7, file.indexOf('Author: '))}`
+    //Replace bip-0001.mediawiki url format by 1
+    const content = data.body.replace(/bip-(\d{1,4}).mediawiki/g, (_, bipNumber) => parseInt(bipNumber))
     return {
         props: {
             title,
-            content: data.body
+            content
         }
     }
 }
