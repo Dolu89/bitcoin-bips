@@ -21,6 +21,8 @@ const Bip = (props) => {
         <>
             <Head>
                 <title>{props.title}</title>
+                <meta property="og:title" content={props.title} key="title" />
+                <meta property="og:description" content={`Read more about the BIP${props.bipNumber} on bips.xyz`} key="description" />
             </Head>
             <div
                 dangerouslySetInnerHTML={{
@@ -52,6 +54,7 @@ export async function getStaticProps({ params }) {
     const content = data.body.replace(/bip-(\d{1,4}).mediawiki/g, (_, bipNumber) => parseInt(bipNumber))
     return {
         props: {
+            bipNumber: params.bip,
             title,
             content
         }
