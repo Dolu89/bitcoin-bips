@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@cenguidanos/node-markdown-parser": "^1.0.6-9",
+    "anchor-js": "^4.3.0",
     "axios": "^0.21.1",
     "next": "10.0.4",
     "react": "17.0.1",

@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import axios from 'axios'
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"
 
 const Header = () => {
-    const [syncState, setSyncState] = useState(<>Loading</>);
+    const [syncState, setSyncState] = useState(<>Loading</>)
     useEffect(async () => {
         const bitcoinRepo = await axios.get('https://api.github.com/repos/bitcoin/bips/commits/master')
         const localRepo = await axios.get('https://api.github.com/repos/dolu89/bips/commits/master')

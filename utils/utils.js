@@ -7,7 +7,7 @@ const FormatBipAsTitle = (bipNumber) => {
     return bipNumber
     .toUpperCase()
     .split('-')[1]
-    .replace(/0+/, '');
+    .replace(/0+/, '')
 }
 
 export default {

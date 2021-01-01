@@ -1,13 +1,22 @@
 import Head from 'next/head'
-import { Markdown } from "@cenguidanos/node-markdown-parser";
+import { Markdown } from "@cenguidanos/node-markdown-parser"
 import util from "util"
 import { readFile } from 'fs'
 import path from 'path'
 import getConfig from 'next/config'
 const { serverRuntimeConfig } = getConfig()
 import Utils from '../utils/utils.js'
+import AnchorJS from 'anchor-js'
+import React, { useEffect } from "react"
+
+
 
 const Bip = (props) => {
+    useEffect(() => {
+        const anchors = new AnchorJS()
+        anchors.add()
+    }, [])
+
     return (
         <>
             <Head>
