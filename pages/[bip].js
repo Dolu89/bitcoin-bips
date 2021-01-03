@@ -48,7 +48,7 @@ export async function getStaticProps({ params }) {
     let data = markdown.toJSON(file)
     if (!data.body) throw new Error(`Failed to parse markdown page for ${bipFile}.md`)
     const title = `BIP${(params.bip)} - ${file.substring(file.indexOf('Title: ') + 7, file.indexOf('Author: '))}`
-    const originalURL = `https://github.com/bitcoin/bips/blob/master/bip-${params.bip.padStart(4, '0')}.mediawiki`
+    const originalURL = `https://github.com/bitcoin/bips/blob/master/${bipFile}.mediawiki`
 
     const content = data.body
         // Replace bip-0001.mediawiki url format by 1
