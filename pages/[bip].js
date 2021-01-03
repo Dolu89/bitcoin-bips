@@ -50,8 +50,13 @@ export async function getStaticProps({ params }) {
     let data = markdown.toJSON(file)
     if (!data.body) throw new Error(`Failed to parse markdown page for ${bipFile}.md`)
     const title = `BIP${(params.bip)} - ${file.substring(file.indexOf('Title: ') + 7, file.indexOf('Author: '))}`
-    //Replace bip-0001.mediawiki url format by 1
-    const content = data.body.replace(/bip-(\d{1,4}).mediawiki/g, (_, bipNumber) => parseInt(bipNumber))
+    const originalURL = `https://github.com/bitcoin/bips/blob/master/${bipFile}.mediawiki`
+
+    const content = data.body
+        // Replace bip-0001.mediawiki url format by 1
+        .replace(/bip-(\d{1,4}).mediawiki/g, (_, bipNumber) => parseInt(bipNumber))
+        // link to original BIP file in preamble
+        .replace(/  BIP: \d{1,4}/, (_) => _ + ` <small><a href="${originalURL}" target="_blank">source</a></small>`)
     return {
         props: {
             bipNumber: params.bip,
