@@ -13,12 +13,12 @@ const Home = props => {
       <table>
         <thead>
           <tr>
-            <th>Number</th>
-            <th>Layer</th>
+            <th>#</th>
+            <th className="hide">Layer</th>
             <th>Title</th>
-            <th>Owner</th>
-            <th>Type</th>
-            <th>Status</th>
+            <th className="hide">Owner</th>
+            <th className="hide">Type</th>
+            <th className="hide">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -27,28 +27,28 @@ const Home = props => {
               if (bip.Status == 'BIP number allocated') {
                 return (
                   <tr key={bip.Number}>
-                    <td>{bip.Number}</td>
-                    <td>{bip.Layer}</td>
+                    <td className="col-number">{bip.Number}</td>
+                    <td className="hide">{bip.Layer}</td>
                     <td>{bip.Title}</td>
-                    <td>{bip.Owner}</td>
-                    <td>{bip.Type}</td>
-                    <td>{bip.Status}</td>
+                    <td className="hide">{bip.Owner}</td>
+                    <td className="hide">{bip.Type}</td>
+                    <td className="hide">{bip.Status}</td>
                   </tr>
                 )
               }
               else {
                 return (
                   <tr key={bip.Number}>
-                    <td>
+                    <td className="col-number">
                       <Link href={`/${bip.Number}`}>
                         <a>{bip.Number}</a>
                       </Link>
                     </td>
-                    <td>{bip.Layer}</td>
+                    <td className="hide">{bip.Layer}</td>
                     <td>{bip.Title}</td>
-                    <td>{bip.Owner}</td>
-                    <td>{bip.Type}</td>
-                    <td>{bip.Status}</td>
+                    <td className="hide">{bip.Owner}</td>
+                    <td className="hide">{bip.Type}</td>
+                    <td className="hide">{bip.Status}</td>
                   </tr>
                 )
               }
