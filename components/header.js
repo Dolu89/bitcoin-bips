@@ -26,8 +26,13 @@ const Header = () => {
                 <Link href="/">
                     <a>Home</a>
                 </Link>
-            &nbsp;/&nbsp;
-            <a href="https://github.com/dolu89/bitcoin-bips" target="_blank">Source</a>
+                &nbsp;/&nbsp;
+                <Link href="/docs/api">
+                    <a>API docs</a>
+                </Link>
+                &nbsp;/&nbsp;
+                <a href="https://github.com/dolu89/bitcoin-bips" target="_blank">Source</a>
+            
             </nav>
         </header>
     )

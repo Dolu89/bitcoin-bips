@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Header from '../components/header'
 import '../styles/tables.css'
+import '../styles/apidoc.css'
 
 const App = ({ Component, pageProps }) =>
 (
