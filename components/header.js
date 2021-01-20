@@ -32,7 +32,8 @@ const Header = () => {
                 </Link>
                 &nbsp;/&nbsp;
                 <a href="https://github.com/dolu89/bitcoin-bips" target="_blank">Source</a>
-            
+                &nbsp;/&nbsp;
+                <a href="https://t.me/bipsxyzbot" target="_blank">Telegram bot</a>
             </nav>
         </header>
     )
