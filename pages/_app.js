@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Header from '../components/header'
+import Footer from '../components/footer'
 import '../styles/tables.css'
 import '../styles/apidoc.css'
 
@@ -22,6 +23,7 @@ const App = ({ Component, pageProps }) =>
         <Component {...pageProps} />
       </section>
     </main>
+    <Footer/>
   </>
 )
 export default App
