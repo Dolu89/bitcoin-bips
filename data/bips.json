@@ -1241,6 +1241,15 @@
             "Type": "Standard",
             "Status": "Draft",
 			"LastUpdate": "2021-01-18T07:00:00.000Z"
+        },
+        {
+            "Number": "350",
+            "Layer": "Applications",
+            "Title": "Bech32m format for v1+ witness addresses",
+            "Owner": "Pieter Wuille",
+            "Type": "Standard",
+            "Status": "Draft",
+			"LastUpdate": "2021-01-18T07:00:00.000Z"
         }
     ]
 }
