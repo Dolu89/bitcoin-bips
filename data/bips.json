@@ -1207,6 +1207,15 @@
 			"LastUpdate": "2021-01-18T07:00:00.000Z"
         },
         {
+            "Number": "338",
+            "Layer": "Peer Services",
+            "Title": "Disable transaction relay message",
+            "Owner": "Suhas Daftuar",
+            "Type": "Standard",
+            "Status": "Draft",
+			"LastUpdate": "2021-01-18T07:00:00.000Z"
+        },
+        {
             "Number": "339",
             "Layer": "Peer Services",
             "Title": "WTXID-based transaction relay",
