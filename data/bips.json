@@ -541,6 +541,24 @@
             "LastUpdate": "2021-01-18T07:00:00.000Z"
         },
         {
+            "Number": "87",
+            "Layer": "Applications",
+            "Title": "Hierarchy for Deterministic Multisig Wallets",
+            "Owner": "Robert Spigler",
+            "Type": "Standard",
+            "Status": "Proposed",
+            "LastUpdate": "2021-01-18T07:00:00.000Z"
+        },
+        {
+            "Number": "88",
+            "Layer": "Applications",
+            "Title": "Hierarchical Deterministic Path Templates",
+            "Owner": "Dmitry Petukhov",
+            "Type": "Informational",
+            "Status": "Proposed",
+            "LastUpdate": "2021-01-18T07:00:00.000Z"
+        },
+        {
             "Number": "90",
             "Layer": "",
             "Title": "Buried Deployments",
@@ -1258,6 +1276,15 @@
             "Owner": "Pieter Wuille, Jonas Nick, Anthony Towns",
             "Type": "Standard",
             "Status": "Draft",
+            "LastUpdate": "2021-01-18T07:00:00.000Z"
+        },
+        {
+            "Number": "343",
+            "Layer": "Consensus (soft fork)",
+            "Title": "Mandatory activation of taproot deployment",
+            "Owner": "Shinobius, Michael Folkson",
+            "Type": "Standard",
+            "Status": "Proposed",
             "LastUpdate": "2021-01-18T07:00:00.000Z"
         },
         {
