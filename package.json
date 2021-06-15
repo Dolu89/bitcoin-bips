@@ -25,10 +25,13 @@
   },
   "dependencies": {
     "@adonisjs/core": "^5.1.0",
+    "@adonisjs/redis": "^7.0.6",
     "@adonisjs/repl": "^3.0.0",
     "@adonisjs/session": "^6.0.0",
     "@adonisjs/shield": "^7.0.0",
     "@adonisjs/view": "^6.0.0",
+    "@octokit/rest": "^18.6.0",
+    "node-cron": "^3.0.0",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
     "source-map-support": "^0.5.19"
