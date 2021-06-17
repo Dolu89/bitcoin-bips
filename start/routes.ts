@@ -19,6 +19,12 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route'
+import Env from '@ioc:Adonis/Core/Env'
+
+if (Env.get('NODE_ENV') !== 'production') {
+    Route.get('/update', 'BipsController.updateBips')
+}
 
 Route.get('/', 'BipsController.index')
-Route.get('/:bip', 'BipsController.show')
+Route.get('/:bip', 'BipsController.show').where('bip', '[0-9]')
+Route.get('/*', 'BipsController.github')
