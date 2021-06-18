@@ -30,12 +30,12 @@ body:before {
 
 
 a {
-  color: var(--color);
+  color: $color;
   text-decoration: none;
 }
 
 a:hover {
-  color: var(--color-accent);
+  color: $color-accent;
   text-decoration: underline;
 }
 
@@ -43,6 +43,7 @@ header {
   border-bottom: 2px solid #000;
   display: flex;
   justify-content: center;
+  margin-bottom: 50px;
 
   .wrapper {
     display: flex;
@@ -104,4 +105,41 @@ header {
     }
   }
 
+}
+
+main {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1320px;
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td {
+    border: 1px solid $color;
+    padding: 8px;
+  }
+
+  th {
+    border: 1px solid $color;
+    padding: 8px;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  tr:hover {
+    background-color: #ddd;
+  }
+
+  th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: $color;
+    color: white;
+  }
 }

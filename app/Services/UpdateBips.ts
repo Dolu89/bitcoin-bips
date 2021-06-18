@@ -13,7 +13,7 @@ class UpdateBips {
             })
 
             const files = await octokit.repos.getContent({ owner: 'bitcoin', repo: 'bips', path: '' })
-            let bips: { bip: string, title: string, author: string, status: string, type: string, created: string }[] = []
+            let bips: { bip: string, title: string, authors: string, status: string, type: string, created: string, layer: string }[] = []
 
             for (let index = 0; index < (<[]>files.data).length; index++) {
                 const file: { name: string, sha: string } = files.data[index];
@@ -65,19 +65,24 @@ class UpdateBips {
                     const type = parsedBipDetails.find(t => t[0] === 'Type')
                     const typeValue = type ? type[1] : ''
 
+                    const layer = parsedBipDetails.find(t => t[0] === 'Layer')
+                    const layerValue = layer ? layer[1] : ''
+
                     const created = parsedBipDetails.find(t => t[0] === 'Created')
                     const createdValue = created ? created[1] : ''
 
                     await Redis.hset(bipNumber, [{
+                        bip: bipNumber,
                         title: titleValue,
-                        author: authorValue,
+                        authors: authorValue,
                         status: statusValue,
                         type: typeValue,
                         created: createdValue,
-                        content: htmlContent
+                        content: htmlContent,
+                        layer: layerValue
                     }])
 
-                    bips = [...bips, { bip: bipNumber, title: titleValue, author: authorValue, status: statusValue, type: typeValue, created: createdValue }]
+                    bips = [...bips, { bip: bipNumber, title: titleValue, authors: authorValue, status: statusValue, type: typeValue, created: createdValue, layer: layerValue }]
                 }
 
             }

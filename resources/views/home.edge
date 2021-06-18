@@ -1,38 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AdonisJS - A fully featured web framework for Node.js</title>
-  @entryPointStyles('app')
-  @entryPointScripts('app')
-</head>
-
-<body>
-
-  <header>
-    <div class="wrapper">
-      <div class="title">
-        <span class="icon icon-bitcoin-circle"></span>
-        <h1>BIPs <small>bitcoin improvement proposals</small></h1>
-      </div>
-
-      <div class="menu">
-        <!-- <div class="search">
-          <input type="text" placeholder="SEARCH...">
-          <button><span class="icon icon-search"></span></button>
-        </div> -->
-
-        <div class="items">
-          <span>Home</span>
-          <span>Github</span>
-          <span>Last update : 06/16/2021</span>
-        </div>
-      </div>
-    </div>
-  </header>
-  Hello
-</body>
-
-</html>
+@layout('layouts/master')
+@set('title', 'BIPs (Bitcoin Improvement Proposals)')
+@section('body')
+<!-- {{inspect(bips)}} -->
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th class="hide">Layer</th>
+      <th>Title</th>
+      <th class="hide">Owner</th>
+      <th class="hide">Type</th>
+      <th class="hide">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    @each(bip in bips)
+    <tr>
+      <td class="col-number"><a href="/{{bip.bip}}">{{bip.bip}}</a></td>
+      <td class="hide">{{bip.layer}}</td>
+      <td>{{bip.title}}</td>
+      <td class="hide">{{bip.authors}}</td>
+      <td class="hide">{{bip.type}}</td>
+      <td class="hide">{{bip.status}}</td>
+    </tr>
+    @end
+  </tbody>
+</table>
+@end
