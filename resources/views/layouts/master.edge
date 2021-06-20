@@ -5,16 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+    <meta name="description" content="{{description}}">
+    <meta property="og:title" content="{{ title }}" key="title" />
+    <meta property="og:description" content="{{description}}" key="description" />
+    <meta property="og:image" content="https://bips.xyz/thumbnail.png" />
+    <meta property="og:url" content="https://bips.xyz" />
+    <meta name="twitter:card" content="summary" />
     @entryPointStyles('app')
     @entryPointScripts('app')
-    <!-- <link href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css" rel="stylesheet" /> -->
 </head>
 
 <body>
 
     <header>
         <div class="wrapper">
-            <a  href="/" class="title">
+            <a href="/" class="title">
                 <span class="icon icon-bitcoin-circle"></span>
                 <h1>BIPs <small class="hide">bitcoin improvement proposals</small></h1>
             </a>
@@ -25,11 +30,10 @@
           <button><span class="icon icon-search"></span></button>
         </div> -->
 
-                <div class="items">
-                    <span>Home</span>
-                    <span>Github</span>
-                    <span>Last update : 06/16/2021</span>
-                </div>
+                <!-- <div class="items">
+                    <a href="/">Home</a>
+                    <a href="https://github.com/dolu89/bitcoin-bips" target="_blank">Github</a>
+                </div> -->
             </div>
         </div>
     </header>
@@ -39,6 +43,12 @@
         @!section('body')
 
     </main>
+
+    <footer>
+        <span>Last update: <b>{{updatedDate}}</b></span>
+        <a href="https://github.com/Dolu89/bitcoin-bips">Source code</a>
+        <span>This website is a mirror of the <a href="https://github.com/bitcoin/bips">official BIPs repository.</a></span>
+    </footer>
 
 </body>
 

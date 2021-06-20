@@ -9,7 +9,10 @@ export default class BipsController {
     if (bips === null) {
       throw new Exception('BIPs are not indexed yet', 500)
     }
-    return view.render('home', { bips: JSON.parse(bips) })
+
+    const updatedDate = await Redis.get('updated')
+
+    return view.render('home', { bips: JSON.parse(bips), updatedDate })
   }
 
   public async show({ params, view }: HttpContextContract) {
@@ -20,7 +23,9 @@ export default class BipsController {
       throw new Exception('BIP not found', 404)
     }
 
-    return view.render('bip', data)
+    const updatedDate = await Redis.get('updated')
+
+    return view.render('bip', { bip: data, updatedDate })
   }
 
   public async updateBips() {

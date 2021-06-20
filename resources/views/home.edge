@@ -1,7 +1,27 @@
 @layout('layouts/master')
+
 @set('title', 'BIPs (Bitcoin Improvement Proposals)')
+@set('description', 'A mirror of github BIPs')
+
 @section('body')
-<!-- {{inspect(bips)}} -->
+
+<h2>Bitcoin Improvement Proposals</h2>
+<p>People wishing to submit BIPs, first should propose their idea or document to the <a
+    href="https://lists.linuxfoundation.org/mailman/listinfo/bitcoin-dev"
+    rel="nofollow">bitcoin-dev@lists.linuxfoundation.org</a> mailing list (do <em>not</em> assign a number - read <a
+    href="/2">BIP 2</a> for the full process). After discussion, please open a
+  PR. After copy-editing and acceptance, it will be published here.
+</p>
+<p>We are fairly liberal with approving BIPs, and try not to be too involved in decision making on behalf of the
+  community. The exception is in very rare cases of dispute resolution when a decision is contentious and cannot be
+  agreed upon. In those cases, the conservative option will always be preferred.
+</p>
+<p>Having a BIP here does not make it a formally accepted standard until its status becomes Final or Active.
+</p>
+<p>Those proposing changes should consider that ultimately consent may rest with the consensus of the Bitcoin users (see
+  also: <a href="https://en.bitcoin.it/wiki/Economic_majority" rel="nofollow">economic majority</a>).
+</p>
+
 <table>
   <thead>
     <tr>

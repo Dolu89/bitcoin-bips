@@ -72,7 +72,7 @@ class UpdateBips {
               / {2}BIP: \d{1,4}/,
               (_) =>
                 _ +
-                ` <span class="source"><a href="${originalURL}" target="_blank">source</a></span>`
+                ` <span class="source"><a href="${originalURL}" rel="noreferrer" target="_blank">source</a></span>`
             )
 
           const title = parsedBipDetails.find((t) => t[0] === 'Title')
@@ -122,6 +122,11 @@ class UpdateBips {
       }
 
       await Redis.set('bips', JSON.stringify(bips))
+      const date = new Date()
+      await Redis.set(
+        'updated',
+        `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDate()}`
+      )
       console.log('Update bips end')
     } catch (error) {
       console.error(error)

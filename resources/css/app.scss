@@ -100,12 +100,21 @@ header {
           background: $color;
         }
       }
+
+      .items {
+        display: flex;
+        font-weight: bold;
+
+        a {
+          margin-right: 1rem;
+        }
+      }
     }
   }
 }
 
 @media only screen and (max-width: 760px),
-(min-device-width: 768px) and (max-device-width: 1024px) {
+  (min-device-width: 768px) and (max-device-width: 1024px) {
   table {
     word-break: break-word;
 
@@ -113,8 +122,6 @@ header {
       word-break: initial;
     }
   }
-
-
 
   .hide {
     display: none;
@@ -143,14 +150,15 @@ main {
     background: $code-bg;
     border: 1px solid $code-border;
     border-radius: 4px;
-    font-size: .9rem;
+    font-size: 0.9rem;
   }
 
   code,
   kbd,
   pre,
   samp {
-    font-family: Consolas, monaco, 'Ubuntu Mono', 'Liberation Mono', 'Courier New', Courier, monospace;
+    font-family: Consolas, monaco, 'Ubuntu Mono', 'Liberation Mono', 'Courier New', Courier,
+      monospace;
   }
 
   table:not(#user-content-toc) {
@@ -210,4 +218,14 @@ main {
       margin: 1rem 0;
     }
   }
+}
+
+footer {
+  background-color: $color-accent-lighter;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3rem;
+  padding: 3rem;
 }
