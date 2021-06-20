@@ -1,10 +1,6 @@
 {
   "typescript": true,
-  "commands": [
-    "./commands",
-    "@adonisjs/core/build/commands",
-    "@adonisjs/repl/build/commands"
-  ],
+  "commands": ["./commands", "@adonisjs/core/build/commands", "@adonisjs/repl/build/commands"],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "aliases": {
     "App": "app",
@@ -12,11 +8,7 @@
     "Database": "database",
     "Contracts": "contracts"
   },
-  "preloads": [
-    "./start/cron",
-    "./start/routes",
-    "./start/kernel"
-  ],
+  "preloads": ["./start/cron", "./start/routes", "./start/kernel"],
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
@@ -35,7 +27,5 @@
       "reloadServer": false
     }
   ],
-  "aceProviders": [
-    "@adonisjs/repl"
-  ]
+  "aceProviders": ["@adonisjs/repl"]
 }

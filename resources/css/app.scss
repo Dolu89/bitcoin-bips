@@ -4,17 +4,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
-* {
-  margin: 0;
-  padding: 0;
-}
-
 html,
 body {
   background-color: $color-bg;
   font-family: $font-family;
   color: $color-text;
   position: relative;
+  margin: 0;
+  padding: 0;
 }
 
 body:before {
@@ -26,8 +23,6 @@ body:before {
   height: 6px;
   position: absolute;
 }
-
-
 
 a {
   color: $color;
@@ -53,6 +48,8 @@ header {
 
     .title {
       display: flex;
+      color: $color-text;
+      text-decoration: none;
 
       .icon {
         height: 42px;
@@ -63,6 +60,7 @@ header {
 
       h1 {
         font-weight: 700;
+        margin: 0;
 
         small {
           font-weight: 400;
@@ -104,7 +102,23 @@ header {
       }
     }
   }
+}
 
+@media only screen and (max-width: 760px),
+(min-device-width: 768px) and (max-device-width: 1024px) {
+  table {
+    word-break: break-word;
+
+    .col-number {
+      word-break: initial;
+    }
+  }
+
+
+
+  .hide {
+    display: none;
+  }
 }
 
 main {
@@ -112,34 +126,88 @@ main {
   margin-right: auto;
   max-width: 1320px;
 
-  table {
+  .source {
+    font-weight: bold;
+  }
+
+  pre {
+    padding: 1rem 1.4rem;
+    max-width: 100%;
+    overflow: auto;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    background: $code-bg;
+    border: 1px solid $code-border;
+    border-radius: 4px;
+    font-size: .9rem;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: Consolas, monaco, 'Ubuntu Mono', 'Liberation Mono', 'Courier New', Courier, monospace;
+  }
+
+  table:not(#user-content-toc) {
     border-collapse: collapse;
     width: 100%;
-  }
-
-  td {
+    word-break: initial;
     border: 1px solid $color;
-    padding: 8px;
-  }
 
-  th {
-    border: 1px solid $color;
-    padding: 8px;
-  }
+    td {
+      padding: 8px;
+      border-left: 1px solid $color;
+      border-right: 1px solid $color;
 
-  tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
+      &.col-number {
+        font-weight: bold;
+        text-align: center;
+      }
+    }
 
-  tr:hover {
-    background-color: #ddd;
-  }
+    th {
+      border: 1px solid white;
+      border-top: 1px solid $color;
+      padding: 8px;
 
-  th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
-    background-color: $color;
-    color: white;
+      &:first-child {
+        border-left: 1px solid $color;
+      }
+
+      &:last-child {
+        border-right: 1px solid $color;
+      }
+    }
+
+    tr:nth-child(even) {
+      background-color: $color-accent-light;
+    }
+
+    tr:hover {
+      background-color: $color-accent-lighter;
+    }
+
+    th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: $color;
+      color: white;
+    }
+
+    table,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 1rem 0;
+    }
   }
 }

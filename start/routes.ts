@@ -22,7 +22,7 @@ import Route from '@ioc:Adonis/Core/Route'
 import Env from '@ioc:Adonis/Core/Env'
 
 if (Env.get('NODE_ENV') !== 'production') {
-    Route.get('/update', 'BipsController.updateBips')
+  Route.get('/update', 'BipsController.updateBips')
 }
 
 Route.get('/', 'BipsController.index')
