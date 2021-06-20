@@ -2,6 +2,7 @@ import { Exception } from '@adonisjs/core/build/standalone'
 import Redis from '@ioc:Adonis/Addons/Redis'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import UpdateBips from 'App/Services/UpdateBips'
+import Env from '@ioc:Adonis/Core/Env'
 
 export default class BipsController {
   public async index({ view }: HttpContextContract) {
@@ -28,7 +29,17 @@ export default class BipsController {
     return view.render('bip', { bip: data, updatedDate })
   }
 
-  public async updateBips() {
+  public async updateBips({ request, response }: HttpContextContract) {
+    if (Env.get('NODE_ENV') !== 'production') {
+      UpdateBips.process()
+      return
+    }
+
+    const { updateKey } = request.qs()
+    if (updateKey !== Env.get('UPDATE_KEY')) {
+      return response.unauthorized()
+    }
+
     UpdateBips.process()
   }
 
