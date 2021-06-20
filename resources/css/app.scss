@@ -161,7 +161,7 @@ main {
       monospace;
   }
 
-  table:not(#user-content-toc) {
+  table:not(#toc) {
     border-collapse: collapse;
     width: 100%;
     word-break: initial;
@@ -216,6 +216,19 @@ main {
     h5,
     h6 {
       margin: 1rem 0;
+    }
+  }
+
+  .gist-file {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      .anchor {
+        margin-right: 5px;
+      }
     }
   }
 }

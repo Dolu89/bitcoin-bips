@@ -74,6 +74,10 @@ class UpdateBips {
                 _ +
                 ` <span class="source"><a href="${originalURL}" rel="noreferrer" target="_blank">source</a></span>`
             )
+            // remove "user-content-" from ids
+            .replaceAll('id="user-content-', 'id="')
+            // replace Table of contents _ by - and to lower
+            .replace(/href=\"#\S+\"/g, (value, _) => value.toLowerCase().replaceAll('_', '-'))
 
           const title = parsedBipDetails.find((t) => t[0] === 'Title')
           const titleValue = title ? title[1] : ''
