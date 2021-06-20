@@ -9,6 +9,9 @@
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write ."
   },
+  "engines": {
+    "node": ">=15.6.0"
+  },
   "devDependencies": {
     "@adonisjs/assembler": "^5.0.0",
     "@symfony/webpack-encore": "^1.4.0",
