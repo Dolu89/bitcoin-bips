@@ -1,0 +1,19 @@
+@layout('layouts/master')
+
+@set('title', `"${query}" on bips.xyz`)
+@set('description', `Search results for "${query}"`)
+
+@section('body')
+
+@if(searchResult.length === 0)
+No result
+@end
+
+@each(result in searchResult)
+<h2>
+    <a href="{{route('BipsController.show', { bip: result.bip })}}">{{result.bip}} - {{result.title}}</a>
+</h2>
+<p>{{result.contentSource}}</p>
+@end
+
+@end

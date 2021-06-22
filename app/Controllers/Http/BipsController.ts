@@ -3,6 +3,8 @@ import Redis from '@ioc:Adonis/Addons/Redis'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import UpdateBips from 'App/Services/UpdateBips'
 import Env from '@ioc:Adonis/Core/Env'
+import SearchService from 'App/Services/SearchService'
+import SearchValidator from 'App/Validators/SearchValidator'
 
 export default class BipsController {
   public async index({ view }: HttpContextContract) {
@@ -19,7 +21,7 @@ export default class BipsController {
   public async show({ params, view }: HttpContextContract) {
     const { bip } = params
 
-    const data = await Redis.hgetall(bip)
+    const data = await Redis.hgetall('bip:' + bip)
     if (!data.title) {
       throw new Exception('BIP not found', 404)
     }
@@ -27,6 +29,28 @@ export default class BipsController {
     const updatedDate = await Redis.get('updated')
 
     return view.render('bip', { bip: data, updatedDate })
+  }
+
+  public async search({ request, response, view }: HttpContextContract) {
+    const { q } = await request.validate(SearchValidator)
+    const searchResult = (await SearchService.search(q)).map((s) => {
+      const { content, ...item } = s.item
+      return item
+    })
+
+    for (const result of searchResult) {
+      result.contentSource = result.contentSource.substring(0, 1000)
+    }
+    const updatedDate = await Redis.get('updated')
+
+    switch (request.accepts(['html', 'json'])) {
+      case 'html':
+        return view.render('search', { query: q, searchResult, updatedDate })
+      case 'json':
+        return response.json(searchResult)
+      default:
+        return view.render('search', { query: q, searchResult, updatedDate })
+    }
   }
 
   public async updateBips({ request, response }: HttpContextContract) {

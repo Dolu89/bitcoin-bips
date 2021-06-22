@@ -24,16 +24,10 @@
                 <h1>BIPs <small class="hide">bitcoin improvement proposals</small></h1>
             </a>
 
-            <!-- <div class="search"> -->
-            <div class="search">
-                <input type="text" placeholder="search...">
-                <button><span class="icon icon-search"></span></button>
-            </div>
-
-            <!-- <div class="items">
-                    <a href="/">Home</a>
-                    <a href="https://github.com/dolu89/bitcoin-bips" target="_blank">Github</a>
-                </div> -->
+            <form class="search" method="GET" action="{{route('BipsController.search')}}">
+                <input type="text" name="q" placeholder="search by title, authors, keyword" minlength="3" value="{{query ?? ''}}">
+                <button type="submit"><span class="icon icon-search"></span></button>
+            </form>
         </div>
         </div>
     </header>

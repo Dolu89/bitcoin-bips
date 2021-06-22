@@ -2,6 +2,9 @@ import { Octokit } from '@octokit/rest'
 import Env from '@ioc:Adonis/Core/Env'
 import Redis from '@ioc:Adonis/Addons/Redis'
 import axios from 'axios'
+import Bip from 'App/Models/Bip'
+import BipList from 'App/Models/BipList'
+import SearchService from './SearchService'
 
 class UpdateBips {
   public async process() {
@@ -13,15 +16,7 @@ class UpdateBips {
       })
 
       const files = await octokit.repos.getContent({ owner: 'bitcoin', repo: 'bips', path: '' })
-      let bips: {
-        bip: string
-        title: string
-        authors: string
-        status: string
-        type: string
-        created: string
-        layer: string
-      }[] = []
+      let bips: BipList[] = []
 
       for (let index = 0; index < (<[]>files.data).length; index++) {
         const file: { name: string; sha: string } = files.data[index]
@@ -97,31 +92,30 @@ class UpdateBips {
           const created = parsedBipDetails.find((t) => t[0] === 'Created')
           const createdValue = created ? created[1] : ''
 
-          await Redis.hset(bipNumber, [
-            {
-              bip: bipNumber,
-              title: titleValue,
-              authors: authorValue,
-              status: statusValue,
-              type: typeValue,
-              created: createdValue,
-              content: htmlContent,
-              layer: layerValue,
-            },
-          ])
+          const bip: Bip = {
+            bip: bipNumber,
+            title: titleValue,
+            authors: authorValue,
+            status: statusValue,
+            type: typeValue,
+            created: createdValue,
+            content: htmlContent,
+            contentSource: content,
+            layer: layerValue,
+          }
+          await Redis.hset('bip:' + bipNumber, [bip])
 
-          bips = [
-            ...bips,
-            {
-              bip: bipNumber,
-              title: titleValue,
-              authors: authorValue,
-              status: statusValue,
-              type: typeValue,
-              created: createdValue,
-              layer: layerValue,
-            },
-          ]
+          bips.push({
+            bip: bipNumber,
+            title: titleValue,
+            authors: authorValue,
+            status: statusValue,
+            type: typeValue,
+            created: createdValue,
+            layer: layerValue,
+          })
+
+          console.log(`BIP ${bipNumber} updated`)
         }
       }
 
@@ -131,6 +125,7 @@ class UpdateBips {
         'updated',
         `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDate()}`
       )
+      SearchService.init()
       console.log('Update bips end')
     } catch (error) {
       console.error(error)
