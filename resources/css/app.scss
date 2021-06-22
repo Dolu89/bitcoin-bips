@@ -69,45 +69,33 @@ header {
       }
     }
 
-    .menu {
+    .search {
+      width: 35vw;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      width: 50%;
+      align-content: center;
 
-      .search {
-        flex-grow: 2;
-        display: flex;
-        align-items: center;
-        align-content: center;
+      input {
+        width: 100%;
+        padding: 15px 15px;
+        border: 1px solid $color-accent;
+        border-right: none;
+        font-size: larger;
+        // border-top-left-radius: 5px;
+        // border-bottom-left-radius: 5px;
 
-        input {
-          width: 100%;
-          padding: 15px 5px;
-          border: 1px solid $color-accent;
-          border-right: none;
-          font-size: larger;
-          border-top-left-radius: 5px;
-          border-bottom-left-radius: 5px;
-        }
-
-        button {
-          height: 54px;
-          width: 58px;
-          border: 1px solid $color-accent;
-          border-top-right-radius: 5px;
-          border-bottom-right-radius: 5px;
-          background: $color;
+        &::placeholder {
+          color: $color-text-accent;
         }
       }
 
-      .items {
-        display: flex;
-        font-weight: bold;
-
-        a {
-          margin-right: 1rem;
-        }
+      button {
+        height: 54px;
+        width: 58px;
+        border: 1px solid $color-accent;
+        // border-top-right-radius: 5px;
+        // border-bottom-right-radius: 5px;
+        background: $color;
       }
     }
   }
