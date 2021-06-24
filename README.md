@@ -9,7 +9,7 @@ Just share [bips.xyz/118](https://bips.xyz/118) instead of [https://github.com/b
 ### Search engine
 Search BIP by title, content, authors, ... 
 
-### Others features
+### Other features
 - Keep your favorites BIPs in a list 🚧
 - Last visited BIPs list 🚧
 - Related BIPs 🚧
