@@ -8,7 +8,6 @@
     <meta name="description" content="{{description}}">
     <meta property="og:title" content="{{ title }}" key="title" />
     <meta property="og:description" content="{{description}}" key="description" />
-    <meta property="og:image" content="https://bips.xyz/thumbnail.png" />
     <meta property="og:url" content="https://bips.xyz" />
     <meta name="twitter:card" content="summary" />
     @entryPointStyles('app')
@@ -25,7 +24,8 @@
             </a>
 
             <form class="search" method="GET" action="{{route('BipsController.search')}}">
-                <input type="text" name="q" placeholder="search by title, authors, keyword" minlength="3" value="{{query ?? ''}}">
+                <input type="text" name="q" placeholder="search by title, authors, keyword" minlength="3"
+                    value="{{query ?? ''}}">
                 <button type="submit"><span class="icon icon-search"></span></button>
             </form>
         </div>
