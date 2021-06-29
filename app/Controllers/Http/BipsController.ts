@@ -66,10 +66,4 @@ export default class BipsController {
 
     UpdateBips.process()
   }
-
-  public async github({ params, response }: HttpContextContract) {
-    response.redirect(
-      `https://raw.githubusercontent.com/bitcoin/bips/master/${params['*'].join('/')}`
-    )
-  }
 }
