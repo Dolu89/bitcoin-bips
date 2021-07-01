@@ -17,3 +17,6 @@ Search BIP by title, content, authors, ...
 - Content negociation (HTML or JSON) 🚧
 - Automatically updated everyday
 - **A website WITHOUT any tracking**
+
+### Sponsor
+[<img src="https://docs.cleavr.io/images/deployed-with-cleavr.png" />](https://cleavr.io)
