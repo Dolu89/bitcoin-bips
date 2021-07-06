@@ -19,6 +19,7 @@ class UpdateBips {
       let bips: BipList[] = []
 
       for (let index = 0; index < (<[]>files.data).length; index++) {
+        let bipNumber: string = ''
         try {
           const file: { name: string; sha: string } = files.data[index]
 
@@ -31,7 +32,7 @@ class UpdateBips {
             const buff = Buffer.from(blobResult.data.content, 'base64')
             const content = buff.toString('utf-8')
 
-            const bipNumber = file.name.match('[0-9]+')![0].replace(/0+/, '')
+            bipNumber = file.name.match('[0-9]+')![0].replace(/0+/, '')
             console.log(`Updating BIP ${bipNumber}`)
 
             const bipDetails = content
@@ -124,6 +125,20 @@ class UpdateBips {
             console.log(`BIP ${bipNumber} updated`)
           }
         } catch (error) {
+          if (bipNumber !== '') {
+            const data = await Redis.hgetall('bip:' + bipNumber)
+            if (data.bip) {
+              bips.push({
+                bip: data.bip,
+                title: data.title,
+                authors: data.authors,
+                status: data.status,
+                type: data.type,
+                created: data.created,
+                layer: data.layer,
+              })
+            }
+          }
           console.error(error)
         }
       }
