@@ -147,7 +147,7 @@ class UpdateBips {
       const date = new Date()
       await Redis.set(
         'updated',
-        `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDate()}`
+        `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
       )
       SearchService.init()
       console.log('Update bips end')
