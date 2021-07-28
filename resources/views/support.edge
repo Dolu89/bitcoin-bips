@@ -1,0 +1,30 @@
+@layout('layouts/master')
+
+@set('title', 'Support Bips.xyz')
+@set('description', 'Support Bips.xyz by donating to the project')
+
+@section('body')
+
+<h1>Support the project</h1>
+
+<p>Bips.xyz is hosted on a <a href="https://www.lunanode.com/pricing">cheap Lunanode VPS (m.1s for $3.5/month)</a>.</p>
+<p>Lunanode accepts Bitcoin as currency. <span class="bold">I am committed to use every donations</span> to top up my
+    Lunanode account to keep this website online.</p>
+
+<h2>You can help the website using...</h2>
+
+<h3 class="support-title">LNURL</h3>
+<a href="lightning:LNURL1DP68GURN8GHJ7MRWW3UXYMM59E3K7MF0D3H82UNV9ACXZ7FLW4EK2UNWV9KK20TYDAK82WPEF94WLP">
+    <img src="/images/lnurl-qr.png" alt="lnurl qrcode" height="200" width="200">
+</a>
+
+<h3 class="support-title">Tippin.me</h3>
+<!-- Beginning of tippin.me Button -->
+<div id="tippin-button" data-dest="Dolu_Web"></div>
+<script src="https://tippin.me/buttons/tip.js?0001" type="text/javascript"></script>
+<!-- End of tippin.me Button -->
+
+<h3 class="support-title">Sphinx (recurring payments)</h3>
+<script src="https://sphinx.chat/donation/widget.js"></script><sphinx-widget pubkey="025b98c232a19bb6b96cd7086ff161b1d91fc0af5af04e571783ec90e154dd5b00" title="Support Bips.xyz" subtitle=" " name="Dolu" amount="1000" buttonlabel="Donate"></sphinx-widget>
+
+@end

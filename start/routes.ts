@@ -21,6 +21,7 @@
 import Route from '@ioc:Adonis/Core/Route'
 
 Route.get('/', 'BipsController.index')
+Route.get('/support', async ({ view }) => view.render('support'))
 Route.get('/search', 'BipsController.search')
 Route.get('/update', 'BipsController.updateBips')
 Route.get('/:bip', 'BipsController.show').where('bip', '[0-9]')
