@@ -12,7 +12,9 @@
     <meta name="twitter:card" content="summary" />
     @entryPointStyles('app')
     @entryPointScripts('app')
+    @if(env('NODE_ENV') === 'production')
     <script async defer data-website-id="74b22eed-bc05-4a3b-9f94-cc76a5c815ec" src="https://a.bips.xyz/umami.js" data-do-not-track="true"></script>
+    @endif
 </head>
 
 <body>
