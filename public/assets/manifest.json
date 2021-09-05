@@ -1,6 +1,6 @@
 {
-  "assets/app.css": "http://localhost:8080/assets/app.css",
-  "assets/app.js": "http://localhost:8080/assets/app.js",
-  "assets/images/bitcoin-circle.svg": "http://localhost:8080/assets/images/bitcoin-circle.4d4b8d43.svg",
-  "assets/images/search.svg": "http://localhost:8080/assets/images/search.691963e8.svg"
+  "assets/app.css": "http://localhost:33125/assets/app.css",
+  "assets/app.js": "http://localhost:33125/assets/app.js",
+  "assets/images/bitcoin-circle.svg": "http://localhost:33125/assets/images/bitcoin-circle.46563225.svg",
+  "assets/images/search.svg": "http://localhost:33125/assets/images/search.d9ac2803.svg"
 }

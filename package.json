@@ -41,6 +41,7 @@
     "node-cron": "^3.0.0",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
+    "sitemap-manager": "^2.1.0",
     "source-map-support": "^0.5.19"
   }
 }

@@ -27,6 +27,8 @@ class SearchService {
         status: bip.status,
         title: bip.title,
         type: bip.type,
+        hash: bip.hash,
+        updated: bip.updated,
       })
     }
     const options = {

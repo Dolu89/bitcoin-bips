@@ -5,6 +5,7 @@ import axios from 'axios'
 import Bip from 'App/Models/Bip'
 import BipList from 'App/Models/BipList'
 import SearchService from './SearchService'
+import SitemapService from './SitemapService'
 
 class UpdateBips {
   public async process() {
@@ -23,7 +24,19 @@ class UpdateBips {
         try {
           const file: { name: string; sha: string } = files.data[index]
 
+          // Check if the file is BIP
           if (file.name.match('^bip-([0-9]+).mediawiki$')) {
+            bipNumber = file.name.match('[0-9]+')![0].replace(/0+/, '')
+
+            // Check if the current BIP needs update by checking hash file
+            const savedBip = await Redis.hgetall('bip:' + bipNumber)
+            if (savedBip && savedBip.hash === file.sha) {
+              continue
+            }
+
+            console.log(`Updating BIP ${bipNumber}`)
+
+            // Get BIP file content
             const blobResult = await octokit.git.getBlob({
               owner: 'bitcoin',
               repo: 'bips',
@@ -32,9 +45,7 @@ class UpdateBips {
             const buff = Buffer.from(blobResult.data.content, 'base64')
             const content = buff.toString('utf-8')
 
-            bipNumber = file.name.match('[0-9]+')![0].replace(/0+/, '')
-            console.log(`Updating BIP ${bipNumber}`)
-
+            // Getting head details
             const bipDetails = content
               .substring(content.indexOf('<pre>') + 5, content.indexOf('</pre>'))
               .trim()
@@ -109,6 +120,8 @@ class UpdateBips {
               content: htmlContent,
               contentSource: content,
               layer: layerValue,
+              hash: file.sha,
+              updated: new Date().toISOString(),
             }
             await Redis.hset('bip:' + bipNumber, [bip])
 
@@ -120,6 +133,8 @@ class UpdateBips {
               type: typeValue,
               created: createdValue,
               layer: layerValue,
+              hash: file.sha,
+              updated: new Date().toISOString(),
             })
 
             console.log(`BIP ${bipNumber} updated`)
@@ -136,6 +151,8 @@ class UpdateBips {
                 type: data.type,
                 created: data.created,
                 layer: data.layer,
+                hash: data.hash,
+                updated: data.updated || new Date().toISOString(),
               })
             }
           }
@@ -150,6 +167,7 @@ class UpdateBips {
         `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
       )
       SearchService.init()
+      SitemapService.generate()
       console.log('Update bips end')
     } catch (error) {
       console.error(error)

@@ -8,4 +8,6 @@ export default interface Bip {
   content: string
   contentSource: string
   layer: string
+  hash: string
+  updated: string
 }

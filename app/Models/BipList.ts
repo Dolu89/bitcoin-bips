@@ -6,4 +6,6 @@ export default interface BipList {
   type: string
   created: string
   layer: string
+  hash: string
+  updated: string
 }
