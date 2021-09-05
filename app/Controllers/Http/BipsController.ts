@@ -5,23 +5,24 @@ import UpdateBips from 'App/Services/UpdateBips'
 import Env from '@ioc:Adonis/Core/Env'
 import SearchService from 'App/Services/SearchService'
 import SearchValidator from 'App/Validators/SearchValidator'
+import BipService from 'App/Services/BipService'
 
 export default class BipsController {
   public async index({ view }: HttpContextContract) {
-    const bips = await Redis.get('bips')
-    if (bips === null) {
+    const bips = await BipService.getAll()
+    if (!bips || bips.length === 0) {
       throw new Exception('BIPs are not indexed yet', 500)
     }
 
     const updatedDate = await Redis.get('updated')
 
-    return view.render('home', { bips: JSON.parse(bips), updatedDate })
+    return view.render('home', { bips: bips, updatedDate })
   }
 
   public async show({ params, view }: HttpContextContract) {
     const { bip } = params
 
-    const data = await Redis.hgetall('bip:' + bip)
+    const data = await BipService.getByNumber(bip)
     if (!data.title) {
       throw new Exception('BIP not found', 404)
     }

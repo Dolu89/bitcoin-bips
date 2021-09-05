@@ -3,9 +3,9 @@ import Env from '@ioc:Adonis/Core/Env'
 import Redis from '@ioc:Adonis/Addons/Redis'
 import axios from 'axios'
 import Bip from 'App/Models/Bip'
-import BipList from 'App/Models/BipList'
 import SearchService from './SearchService'
 import SitemapService from './SitemapService'
+import BipService from './BipService'
 
 class UpdateBips {
   public async process() {
@@ -17,7 +17,6 @@ class UpdateBips {
       })
 
       const files = await octokit.repos.getContent({ owner: 'bitcoin', repo: 'bips', path: '' })
-      let bips: BipList[] = []
 
       for (let index = 0; index < (<[]>files.data).length; index++) {
         let bipNumber: string = ''
@@ -125,49 +124,21 @@ class UpdateBips {
             }
             await Redis.hset('bip:' + bipNumber, [bip])
 
-            bips.push({
-              bip: bipNumber,
-              title: titleValue,
-              authors: authorValue,
-              status: statusValue,
-              type: typeValue,
-              created: createdValue,
-              layer: layerValue,
-              hash: file.sha,
-              updated: new Date().toISOString(),
-            })
-
             console.log(`BIP ${bipNumber} updated`)
           }
         } catch (error) {
-          if (bipNumber !== '') {
-            const data = await Redis.hgetall('bip:' + bipNumber)
-            if (data.bip) {
-              bips.push({
-                bip: data.bip,
-                title: data.title,
-                authors: data.authors,
-                status: data.status,
-                type: data.type,
-                created: data.created,
-                layer: data.layer,
-                hash: data.hash,
-                updated: data.updated || new Date().toISOString(),
-              })
-            }
-          }
           console.error(error)
         }
       }
 
-      await Redis.set('bips', JSON.stringify(bips))
       const date = new Date()
       await Redis.set(
         'updated',
         `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
       )
-      SearchService.init()
-      SitemapService.generate()
+      await BipService.initList()
+      await SearchService.init()
+      await SitemapService.generate()
       console.log('Update bips end')
     } catch (error) {
       console.error(error)
