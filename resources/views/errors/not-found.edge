@@ -1,1 +1,10 @@
-<p> It's a 404 </p>
+@layout('layouts/master')
+
+@set('title', 'Nothing to see here')
+@set('description', '404 Is description really useful?')
+
+@section('body')
+<h1>(404) Oops</h1>
+<div>It looks like there is no BIP here</div>
+<div><a href="/">Come back in a safe place</a></div>
+@end
