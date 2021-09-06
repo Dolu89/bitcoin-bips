@@ -3,10 +3,11 @@ import Env from '@ioc:Adonis/Core/Env'
 import BipService from './BipService'
 
 class SitemapService {
+  private static siteUrl: string = Env.get('APP_URL')
   private static sitemap = new SitemapManager({
-    siteURL: Env.get('APP_URL'),
+    siteURL: SitemapService.siteUrl,
   })
-  private routes: string[] = ['/', '/support']
+  private routes: string[] = ['', 'support']
 
   public async generate() {
     let lastUpdate: Date | null = null
@@ -16,7 +17,7 @@ class SitemapService {
     const bips = await BipService.getAll()
     for (const bip of bips) {
       bipsUrls.push({
-        loc: bip.bip,
+        loc: `${SitemapService.siteUrl}/${bip.bip}`,
         lastmod: bip.updated,
       })
 
@@ -31,7 +32,7 @@ class SitemapService {
     let pagesUrls: Url[] = []
     for (const route of this.routes) {
       pagesUrls.push({
-        loc: route,
+        loc: `${SitemapService.siteUrl}/${route}`,
         lastmod: lastUpdate!,
       })
     }
