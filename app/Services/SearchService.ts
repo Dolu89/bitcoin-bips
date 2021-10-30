@@ -1,6 +1,6 @@
-import Redis from '@ioc:Adonis/Addons/Redis'
 import Bip from 'App/Models/Bip'
 import Fuse from 'fuse.js'
+import BipService from './BipService'
 
 class SearchService {
   private fuse: Fuse<Bip>
@@ -12,23 +12,7 @@ class SearchService {
   }
 
   public async init() {
-    const keys = await Redis.keys('bip:*')
-    const bips: Bip[] = []
-
-    for (const key of keys) {
-      const bip = await Redis.hgetall(key)
-      bips.push({
-        bip: bip.bip,
-        authors: bip.authors,
-        content: bip.content,
-        contentSource: bip.contentSource,
-        created: bip.created,
-        layer: bip.layer,
-        status: bip.status,
-        title: bip.title,
-        type: bip.type,
-      })
-    }
+    const bips = await BipService.getAll()
     const options = {
       shouldSort: true,
       includeMatches: true,

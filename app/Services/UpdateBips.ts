@@ -3,8 +3,9 @@ import Env from '@ioc:Adonis/Core/Env'
 import Redis from '@ioc:Adonis/Addons/Redis'
 import axios from 'axios'
 import Bip from 'App/Models/Bip'
-import BipList from 'App/Models/BipList'
 import SearchService from './SearchService'
+import SitemapService from './SitemapService'
+import BipService from './BipService'
 
 class UpdateBips {
   public async process() {
@@ -16,14 +17,25 @@ class UpdateBips {
       })
 
       const files = await octokit.repos.getContent({ owner: 'bitcoin', repo: 'bips', path: '' })
-      let bips: BipList[] = []
 
       for (let index = 0; index < (<[]>files.data).length; index++) {
         let bipNumber: string = ''
         try {
           const file: { name: string; sha: string } = files.data[index]
 
+          // Check if the file is BIP
           if (file.name.match('^bip-([0-9]+).mediawiki$')) {
+            bipNumber = file.name.match('[0-9]+')![0].replace(/0+/, '')
+
+            // Check if the current BIP needs update by checking hash file
+            const savedBip = await Redis.hgetall('bip:' + bipNumber)
+            if (savedBip && savedBip.hash === file.sha) {
+              continue
+            }
+
+            console.log(`Updating BIP ${bipNumber}`)
+
+            // Get BIP file content
             const blobResult = await octokit.git.getBlob({
               owner: 'bitcoin',
               repo: 'bips',
@@ -32,9 +44,7 @@ class UpdateBips {
             const buff = Buffer.from(blobResult.data.content, 'base64')
             const content = buff.toString('utf-8')
 
-            bipNumber = file.name.match('[0-9]+')![0].replace(/0+/, '')
-            console.log(`Updating BIP ${bipNumber}`)
-
+            // Getting head details
             const bipDetails = content
               .substring(content.indexOf('<pre>') + 5, content.indexOf('</pre>'))
               .trim()
@@ -109,47 +119,26 @@ class UpdateBips {
               content: htmlContent,
               contentSource: content,
               layer: layerValue,
+              hash: file.sha,
+              updated: new Date().toISOString(),
             }
             await Redis.hset('bip:' + bipNumber, [bip])
-
-            bips.push({
-              bip: bipNumber,
-              title: titleValue,
-              authors: authorValue,
-              status: statusValue,
-              type: typeValue,
-              created: createdValue,
-              layer: layerValue,
-            })
 
             console.log(`BIP ${bipNumber} updated`)
           }
         } catch (error) {
-          if (bipNumber !== '') {
-            const data = await Redis.hgetall('bip:' + bipNumber)
-            if (data.bip) {
-              bips.push({
-                bip: data.bip,
-                title: data.title,
-                authors: data.authors,
-                status: data.status,
-                type: data.type,
-                created: data.created,
-                layer: data.layer,
-              })
-            }
-          }
           console.error(error)
         }
       }
 
-      await Redis.set('bips', JSON.stringify(bips))
       const date = new Date()
       await Redis.set(
         'updated',
         `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
       )
-      SearchService.init()
+      await BipService.initList()
+      await SearchService.init()
+      await SitemapService.generate()
       console.log('Update bips end')
     } catch (error) {
       console.error(error)

@@ -13,7 +13,7 @@
     "node": ">=15.6.0"
   },
   "devDependencies": {
-    "@adonisjs/assembler": "^5.0.0",
+    "@adonisjs/assembler": "^5.3.7",
     "@symfony/webpack-encore": "^1.4.0",
     "adonis-preset-ts": "^2.1.0",
     "eslint": "^7.28.0",
@@ -29,18 +29,19 @@
     "youch-terminal": "^1.1.1"
   },
   "dependencies": {
-    "@adonisjs/core": "^5.1.0",
-    "@adonisjs/redis": "^7.0.6",
-    "@adonisjs/repl": "^3.0.0",
-    "@adonisjs/session": "^6.0.0",
-    "@adonisjs/shield": "^7.0.0",
-    "@adonisjs/view": "^6.0.0",
+    "@adonisjs/core": "^5.3.2",
+    "@adonisjs/redis": "^7.0.9",
+    "@adonisjs/repl": "^3.1.6",
+    "@adonisjs/session": "^6.1.2",
+    "@adonisjs/shield": "^7.0.6",
+    "@adonisjs/view": "^6.1.0",
     "@octokit/rest": "^18.6.0",
     "axios": "^0.21.1",
     "fuse.js": "^6.4.6",
     "node-cron": "^3.0.0",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
+    "sitemap-manager": "^2.1.0",
     "source-map-support": "^0.5.19"
   }
 }
