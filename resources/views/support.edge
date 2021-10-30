@@ -13,27 +13,12 @@
 
 <h2>You can help the website using...</h2>
 
-<h3 class="support-title">BTCPayServer (BTC/LN)</h3>
-<style type="text/css"> .btcpay-form { display: inline-flex; align-items: center; justify-content: center; } .btcpay-form--inline { flex-direction: row; } .btcpay-form--block { flex-direction: column; } .btcpay-form--inline .submit { margin-left: 15px; } .btcpay-form--block select { margin-bottom: 10px; } .btcpay-form .btcpay-custom-container{ text-align: center; }.btcpay-custom { display: flex; align-items: center; justify-content: center; } .btcpay-form .plus-minus { cursor:pointer; font-size:25px; line-height: 25px; background: #DFE0E1; height: 30px; width: 45px; border:none; border-radius: 60px; margin: auto 5px; display: inline-flex; justify-content: center; } .btcpay-form select { -moz-appearance: none; -webkit-appearance: none; appearance: none; color: currentColor; background: transparent; border:1px solid transparent; display: block; padding: 1px; margin-left: auto; margin-right: auto; font-size: 11px; cursor: pointer; } .btcpay-form select:hover { border-color: #ccc; } #btcpay-input-price { -moz-appearance: none; -webkit-appearance: none; border: none; box-shadow: none; text-align: center; font-size: 25px; margin: auto; border-radius: 5px; line-height: 35px; background: #fff; } #btcpay-input-price::-webkit-outer-spin-button, #btcpay-input-price::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } </style>
-<form method="POST"  action="https://ln.swapmarket.org/api/v1/invoices" class="btcpay-form btcpay-form--block">
-  <input type="hidden" name="storeId" value="5yVQeT3Vhb8nzpfPdLg9fKpXyAmB5CA4iC5fXH4aWB5L" />
-  <div class="btcpay-custom-container">
-    <div class="btcpay-custom">
-      <button class="plus-minus" onclick="event.preventDefault(); var el=document.querySelector('#btcpay-input-price'); var price = parseInt(el.value); if((price - 1 )< 1) { el.value = 1} else {el.value = parseInt(el.value) - 1 }">-</button>
-      <input id="btcpay-input-price" name="price" type="number" min="1" max="10000000" step="1" value="10" style="width: 3em;" oninput="event.preventDefault();isNaN(event.target.value)? document.querySelector('#btcpay-input-price').value = 10 : event.target.value; if (this.value < 1) {this.value = 1; } else if(this.value > 10000000){  this.value = 10000000;}"  />
-      <button class="plus-minus" onclick="event.preventDefault(); var el=document.querySelector('#btcpay-input-price'); var price = parseInt(el.value); if((price + 1 )> 10000000) { el.value = 10000000} else {el.value = parseInt(el.value) + 1 }">+</button>
-    </div>
-    <select name="currency">
-      <option value="USD" selected>USD</option>
-      <option value="GBP">GBP</option>
-      <option value="EUR">EUR</option>
-      <option value="BTC">BTC</option>
-    </select>
-  </div>
-  <input type="image" class="submit" name="submit" src="https://ln.swapmarket.org/img/paybutton/pay.svg" style="width:168px" alt="Pay with BtcPay, Self-Hosted Bitcoin Payment Processor">
-</form>
+<h3 class="support-title">Bitcoin (LN)</h3>
+<div id="tippin-button" data-dest="Dolu_Web"></div>
+<script src="https://tippin.me/buttons/tip.js?0001" type="text/javascript"></script>
 
-<h3 class="support-title">(beta) Sphinx (recurring payments)</h3>
-<script src="https://sphinx.chat/donation/widget.js"></script><sphinx-widget pubkey="025b98c232a19bb6b96cd7086ff161b1d91fc0af5af04e571783ec90e154dd5b00" title="Support Bips.xyz" subtitle=" " name="Dolu" amount="1000" buttonlabel="Donate"></sphinx-widget>
+<h3 class="support-title">Lightning address</h3>
+<pre>dolu89@lntxbot.com</pre>
+
 
 @end
