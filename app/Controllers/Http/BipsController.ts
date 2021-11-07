@@ -40,7 +40,7 @@ export default class BipsController {
     })
 
     for (const result of searchResult) {
-      result.contentSource = result.contentSource.substring(0, 1000)
+      result.contentSource = result.contentSource.substring(0, 1000) + '...'
     }
     const updatedDate = await Redis.get('updated')
 

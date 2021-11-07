@@ -25,23 +25,35 @@
 <table>
   <thead>
     <tr>
-      <th>#</th>
-      <th class="hide">Layer</th>
+      <th class="center">#</th>
       <th>Title</th>
-      <th class="hide">Owner</th>
-      <th class="hide">Type</th>
+      <th class="hide">Layer</th>
       <th class="hide">Status</th>
+      <th class="hide">Type</th>
+      <th class="hide">Owner</th>
     </tr>
   </thead>
   <tbody>
     @each(bip in bips)
     <tr>
       <td class="col-number"><a href="/{{bip.bip}}">{{bip.bip}}</a></td>
+      <td class="bold"><a href="/{{bip.bip}}">{{bip.title}}</a></td>
       <td class="hide">{{bip.layer}}</td>
-      <td>{{bip.title}}</td>
-      <td class="hide">{{bip.authors}}</td>
-      <td class="hide">{{bip.type}}</td>
       <td class="hide">{{bip.status}}</td>
+      <td class="hide">{{bip.type}}</td>
+      <td class="hide">
+        @set('authors', bip.authors.split(','))
+        @set('authorIndex', 0)
+        @set('separator', ', ')
+        @each(author in authors)
+          @set('authorName', author.split('<')[0].trim())
+          @if(authorIndex + 1 === authors.length)
+            @set('separator', '')
+          @end
+          <a href="/search?q={{authorName}}">{{authorName}}</a>{{separator}}
+          @set('authorIndex', authorIndex + 1)
+        @end
+      </td>
     </tr>
     @end
   </tbody>
