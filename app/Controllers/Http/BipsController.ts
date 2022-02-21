@@ -6,6 +6,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import SearchService from 'App/Services/SearchService'
 import SearchValidator from 'App/Validators/SearchValidator'
 import BipService from 'App/Services/BipService'
+import { string } from '@ioc:Adonis/Core/Helpers'
 
 export default class BipsController {
   public async index({ view }: HttpContextContract) {
@@ -35,13 +36,12 @@ export default class BipsController {
   public async search({ request, response, view }: HttpContextContract) {
     const { q } = await request.validate(SearchValidator)
     const searchResult = (await SearchService.search(q)).map((s) => {
+      const contentTruncate = string.excerpt(s.item.contentSource, 1000)
       const { content, ...item } = s.item
+      item.contentSource = contentTruncate
       return item
     })
 
-    for (const result of searchResult) {
-      result.contentSource = result.contentSource.substring(0, 1000) + '...'
-    }
     const updatedDate = await Redis.get('updated')
 
     switch (request.accepts(['html', 'json'])) {
