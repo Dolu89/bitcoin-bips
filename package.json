@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "node ace build --production",
+    "postbuild": "cd build && yarn install --production",
     "start": "node build/server.js",
     "dev": "node ace serve --watch",
     "lint": "eslint . --ext=.ts",
