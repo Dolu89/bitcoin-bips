@@ -45,10 +45,13 @@
     "pino-pretty": "^10.3.1",
     "prettier": "^3.2.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
   },
   "dependencies": {
     "@adonisjs/core": "^6.2.0",
+    "@adonisjs/vite": "^2.0.2",
+    "edge.js": "^6.0.1",
     "reflect-metadata": "^0.2.1"
   },
   "eslintConfig": {
