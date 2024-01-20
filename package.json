@@ -44,6 +44,7 @@
     "eslint": "^8.56.0",
     "pino-pretty": "^10.3.1",
     "prettier": "^3.2.4",
+    "sass": "^1.70.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "vite": "^5.0.12"
@@ -51,8 +52,12 @@
   "dependencies": {
     "@adonisjs/core": "^6.2.0",
     "@adonisjs/vite": "^2.0.2",
+    "@octokit/rest": "^20.0.2",
+    "bentocache": "1.0.0-beta.6",
+    "cheerio": "1.0.0-rc.12",
     "edge.js": "^6.0.1",
-    "reflect-metadata": "^0.2.1"
+    "reflect-metadata": "^0.2.1",
+    "undici": "^6.4.0"
   },
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/app"

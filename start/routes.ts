@@ -8,8 +8,7 @@
 */
 
 import router from '@adonisjs/core/services/router'
+const BipsController = () => import('#controllers/bips_controller')
 
 
-router.get('/', async ({ view }) => {
-    return view.render('index')
-})
+router.get('/', [BipsController, 'index'])

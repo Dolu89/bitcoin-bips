@@ -1,0 +1,14 @@
+.icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+  
+    &.icon-bitcoin-circle {
+      background-image: url(../../public/icons/bitcoin-circle.svg);
+    }
+  
+    &.icon-search {
+      background-image: url(../../public/icons/search.svg);
+    }
+  }

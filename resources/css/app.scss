@@ -1,0 +1,256 @@
+@import 'variables.scss';
+@import 'icons.scss';
+
+@import url('https://api.fonts.coollabs.io/css2?family=Poppins:wght@400;500&display=swap');
+@import url('https://api.fonts.coollabs.io/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+html,
+body {
+  background-color: $color-bg;
+  font-family: $font-family;
+  color: $color-text;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+body:before {
+  content: '';
+  background: $color;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  position: absolute;
+}
+
+a {
+  color: $color;
+  text-decoration: none;
+}
+
+a:hover {
+  color: $color-accent;
+  text-decoration: underline;
+}
+
+header {
+  border-bottom: 2px solid #000;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
+
+  .wrapper {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 10px 10px 10px;
+    width: 80%;
+
+    .title {
+      display: flex;
+      color: $color-text;
+      text-decoration: none;
+
+      .icon {
+        height: 42px;
+        width: 42px;
+        top: 3px;
+        position: relative;
+      }
+
+      h1 {
+        font-weight: 700;
+        margin: 0;
+
+        small {
+          font-weight: 400;
+          font-size: 20px;
+        }
+      }
+    }
+
+    .search {
+      width: 35vw;
+      display: flex;
+      align-items: center;
+      align-content: center;
+
+      input {
+        width: 100%;
+        padding: 15px 15px;
+        border: 1px solid $color-accent;
+        border-right: none;
+        font-size: larger;
+        // border-top-left-radius: 5px;
+        // border-bottom-left-radius: 5px;
+
+        &::placeholder {
+          color: $color-text-accent;
+        }
+      }
+
+      button {
+        height: 54px;
+        width: 58px;
+        border: 1px solid $color-accent;
+        // border-top-right-radius: 5px;
+        // border-bottom-right-radius: 5px;
+        background: $color;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 760px),
+  (min-device-width: 768px) and (max-device-width: 1024px) {
+  main {
+    padding: 0 15px;
+  }
+
+  table {
+    word-break: break-word;
+
+    .col-number {
+      word-break: initial;
+    }
+  }
+
+  .hide {
+    display: none;
+  }
+}
+
+main {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1320px;
+
+  .source {
+    font-weight: bold;
+  }
+
+  pre {
+    padding: 1rem 1.4rem;
+    max-width: 100%;
+    overflow: auto;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    background: $code-bg;
+    border: 1px solid $code-border;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: Consolas, monaco, 'Ubuntu Mono', 'Liberation Mono', 'Courier New', Courier,
+      monospace;
+  }
+
+  table:not(#toc) {
+    border-collapse: collapse;
+    width: 100%;
+    word-break: initial;
+    border: 1px solid $color;
+
+    td {
+      padding: 8px;
+      border-left: 1px solid $color;
+      border-right: 1px solid $color;
+
+      &.col-number {
+        font-weight: bold;
+        text-align: center;
+      }
+    }
+
+    th {
+      border: 1px solid white;
+      border-top: 1px solid $color;
+      padding: 8px;
+
+      &:first-child {
+        border-left: 1px solid $color;
+      }
+
+      &:last-child {
+        border-right: 1px solid $color;
+      }
+    }
+
+    tr:nth-child(even) {
+      background-color: $color-accent-light;
+    }
+
+    tr:hover {
+      background-color: $color-accent-lighter;
+    }
+
+    th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: $color;
+      color: white;
+    }
+
+    table,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 1rem 0;
+    }
+  }
+
+  .gist-file {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      .anchor {
+        margin-right: 5px;
+      }
+    }
+  }
+}
+
+footer {
+  background-color: $color-accent-lighter;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3rem;
+  padding: 3rem;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+button {
+  cursor: pointer;
+}
+
+.hightlight-search {
+  background-color: yellow;
+}
+
+.support-title {
+  margin-top: 50px;
+}
+
+.center {
+  text-align: center !important;
+}

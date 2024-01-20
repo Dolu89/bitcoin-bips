@@ -18,4 +18,5 @@ export default await Env.create(new URL('../', import.meta.url), {
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.string(),
   CACHE_VIEWS: Env.schema.boolean(),
+  GITHUB_API_KEY: Env.schema.string.optional(),
 })
