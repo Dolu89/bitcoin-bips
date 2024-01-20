@@ -1,29 +1,35 @@
-/*
-|--------------------------------------------------------------------------
-| Http Exception Handler
-|--------------------------------------------------------------------------
-|
-| AdonisJs will forward all exceptions occurred during an HTTP request to
-| the following class. You can learn more about exception handling by
-| reading docs.
-|
-| The exception handler extends a base `HttpExceptionHandler` which is not
-| mandatory, however it can do lot of heavy lifting to handle the errors
-| properly.
-|
-*/
+import app from '@adonisjs/core/services/app'
+import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 
-import Logger from '@ioc:Adonis/Core/Logger'
-import HttpExceptionHandler from '@ioc:Adonis/Core/HttpExceptionHandler'
+export default class HttpExceptionHandler extends ExceptionHandler {
+  /**
+   * In debug mode, the exception handler will display verbose errors
+   * with pretty printed stack traces.
+   */
+  protected debug = !app.inProduction
 
-export default class ExceptionHandler extends HttpExceptionHandler {
-  protected statusPages = {
-    '403': 'errors/unauthorized',
-    '404': 'errors/not-found',
-    '500..599': 'errors/server-error',
+  /**
+   * Status pages are used to display a custom HTML pages for certain error
+   * codes. You might want to enable them in production only, but feel
+   * free to enable them in development as well.
+   */
+  protected renderStatusPages = app.inProduction
+
+  /**
+   * The method is used for handling errors and returning
+   * response to the client
+   */
+  async handle(error: unknown, ctx: HttpContext) {
+    return super.handle(error, ctx)
   }
 
-  constructor() {
-    super(Logger)
+  /**
+   * The method is used to report error to the logging service or
+   * the a third party error monitoring service.
+   *
+   * @note You should not attempt to send a response from this method.
+   */
+  async report(error: unknown, ctx: HttpContext) {
+    return super.report(error, ctx)
   }
 }

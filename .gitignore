@@ -1,8 +1,2 @@
-node_modules
-build
-coverage
-.vscode
-.DS_STORE
+node_modules/
 .env
-tmp
-public/sitemap*
