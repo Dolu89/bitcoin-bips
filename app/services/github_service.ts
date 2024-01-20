@@ -17,7 +17,7 @@ export default class GithubService {
         })
 
         // Gist creation
-        const fileName = `test.md`
+        const fileName = `tmp-bips.mediawiki`
         const gistCreationResult = await octokit.gists.create({
             public: false,
             files: { [fileName]: { content: content } },
