@@ -57,7 +57,6 @@
     "@adonisjs/vite": "^2.0.2",
     "@octokit/rest": "^20.0.2",
     "@vinejs/vine": "^1.7.0",
-    "bentocache": "1.0.0-beta.6",
     "cheerio": "1.0.0-rc.12",
     "edge.js": "^6.0.1",
     "fuse.js": "^7.0.0",

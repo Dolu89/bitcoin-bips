@@ -23,9 +23,6 @@ dependencies:
   '@vinejs/vine':
     specifier: ^1.7.0
     version: 1.7.0
-  bentocache:
-    specifier: 1.0.0-beta.6
-    version: 1.0.0-beta.6(tslib@2.6.2)
   cheerio:
     specifier: 1.0.0-rc.12
     version: 1.0.0-rc.12

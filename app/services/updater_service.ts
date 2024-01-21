@@ -120,7 +120,6 @@ export default class UpdaterService {
 
           bips.push(bip)
           await this.bipService.saveBip(bip)
-          console.log('BIP updated', bipNumber)
         }
       } catch (error) {
         console.log('Error updating bip', file.path, error)

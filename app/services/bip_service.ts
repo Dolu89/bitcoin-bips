@@ -1,5 +1,4 @@
 import Bip from '#models/bip'
-// import CacheService from '#services/cache_service'
 import cache from '@adonisjs/cache/services/main'
 
 export default class BipService {
@@ -34,7 +33,6 @@ export default class BipService {
 
   public async getLastUpdate() {
     const lastUpdate = (await cache.namespace('bips').get('lastUpdate')) as string | null
-    console.log('lastUpdate', lastUpdate)
     return lastUpdate
   }
 }
