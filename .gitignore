@@ -2,3 +2,4 @@ node_modules/
 .env
 cache
 public/sitemap*.*
+**/.DS_Store
