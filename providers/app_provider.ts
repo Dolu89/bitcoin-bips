@@ -3,7 +3,7 @@ import SearchService from '#services/search_service'
 import type { ApplicationService } from '@adonisjs/core/types'
 
 export default class AppProvider {
-  constructor(protected app: ApplicationService) { }
+  constructor(protected app: ApplicationService) {}
 
   /**
    * Register bindings to the container
@@ -18,20 +18,20 @@ export default class AppProvider {
   /**
    * The container bindings have booted
    */
-  async boot() { }
+  async boot() {}
 
   /**
    * The application has been booted
    */
-  async start() { }
+  async start() {}
 
   /**
    * The process has been started
    */
-  async ready() { }
+  async ready() {}
 
   /**
    * Preparing to shutdown the app
    */
-  async shutdown() { }
+  async shutdown() {}
 }

@@ -5,34 +5,33 @@ import BipService from '#services/bip_service'
 
 @inject()
 export default class SearchService {
+  constructor(private bipService: BipService) {}
 
-    constructor(private bipService: BipService) { }
+  private fuse: Fuse<Bip> | null = null
 
-    private fuse: Fuse<Bip> | null = null
-
-    public async search(terms: string): Promise<FuseResult<Bip>[]> {
-        if (!this.fuse) {
-            return []
-        }
-
-        return this.fuse.search(terms)
+  public async search(terms: string): Promise<FuseResult<Bip>[]> {
+    if (!this.fuse) {
+      return []
     }
 
-    public async init() {
-        const bips = await this.bipService.getBips()
-        if (!bips) return
+    return this.fuse.search(terms)
+  }
 
-        const options = {
-            shouldSort: true,
-            includeMatches: true,
-            threshold: 0.1,
-            location: 0,
-            distance: 100000,
-            maxPatternLength: 32,
-            minMatchCharLength: 1,
-            keys: [{ name: 'title', weight: 2 }, 'authors', 'contentSource'],
-        }
+  public async init() {
+    const bips = await this.bipService.getBips()
+    if (!bips) return
 
-        this.fuse = new Fuse(bips, options)
+    const options = {
+      shouldSort: true,
+      includeMatches: true,
+      threshold: 0.1,
+      location: 0,
+      distance: 100000,
+      maxPatternLength: 32,
+      minMatchCharLength: 1,
+      keys: [{ name: 'title', weight: 2 }, 'authors', 'contentSource'],
     }
+
+    this.fuse = new Fuse(bips, options)
+  }
 }

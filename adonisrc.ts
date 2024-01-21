@@ -32,7 +32,7 @@ export default defineConfig({
     () => import('@adonisjs/vite/vite_provider'),
     () => import('@adonisjs/core/providers/vinejs_provider'),
     () => import('#providers/app_provider'),
-    () => import('@adonisjs/static/static_provider')
+    () => import('@adonisjs/static/static_provider'),
   ],
 
   /*
@@ -43,7 +43,12 @@ export default defineConfig({
   | List of modules to import before starting the application.
   |
   */
-  preloads: [() => import('#start/routes'), () => import('#start/kernel'), () => import('#start/jobs'), () => import('#start/view')],
+  preloads: [
+    () => import('#start/routes'),
+    () => import('#start/kernel'),
+    () => import('#start/jobs'),
+    () => import('#start/view'),
+  ],
 
   /*
   |--------------------------------------------------------------------------
@@ -69,13 +74,14 @@ export default defineConfig({
     ],
     forceExit: false,
   },
-  metaFiles: [{
-    pattern: 'resources/views/**/*.edge',
-    reloadServer: false,
-  },
-  {
-    pattern: 'public/**',
-    reloadServer: false,
-  }
-  ]
+  metaFiles: [
+    {
+      pattern: 'resources/views/**/*.edge',
+      reloadServer: false,
+    },
+    {
+      pattern: 'public/**',
+      reloadServer: false,
+    },
+  ],
 })
