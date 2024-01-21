@@ -12,7 +12,7 @@ export default class UpdaterService {
     private bipService: BipService,
     private searchService: SearchService,
     private sitemapService: SitemapService
-  ) {}
+  ) { }
 
   public async updateBips() {
     const files = await this.githubService.getFilesFromRepo('bitcoin', 'bips')
@@ -59,6 +59,7 @@ export default class UpdaterService {
           const htmlContentResult = await this.githubService.convertMediwikiToHtml(content)
 
           if (!htmlContentResult) {
+            console.error('Error converting mediawiki to html')
             throw new Error('Error converting mediawiki to html')
           }
 
@@ -119,16 +120,31 @@ export default class UpdaterService {
 
           bips.push(bip)
           await this.bipService.saveBip(bip)
+          console.log('BIP updated', bipNumber)
         }
       } catch (error) {
         console.log('Error updating bip', file.path, error)
       }
-    }
+    } 
 
     console.log(`Indexing ${bips.length} bips...`)
-    await this.bipService.saveBips(bips)
-    await this.searchService.init()
-    await this.bipService.setLastUpdate()
-    await this.sitemapService.generate()
+    await this.bipService.saveBips(bips).catch((error) => {
+      console.log('Error saving bips', error)
+    })
+
+    console.log('Updating search index...')
+    await this.searchService.init().catch((error) => {
+      console.log('Error updating search index', error)
+    })
+
+    console.log('Updating last update date...')
+    await this.bipService.setLastUpdate().catch((error) => {
+      console.log('Error updating last update date', error)
+    })
+
+    console.log('Updating sitemap...')
+    await this.sitemapService.generate().catch((error) => {
+      console.log('Error updating sitemap', error)
+    })
   }
 }

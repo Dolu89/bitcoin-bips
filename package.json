@@ -51,6 +51,7 @@
     "vite": "^5.0.12"
   },
   "dependencies": {
+    "@adonisjs/cache": "1.0.0-1",
     "@adonisjs/core": "^6.2.0",
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^2.0.2",

@@ -20,4 +20,5 @@ export default await Env.create(new URL('../', import.meta.url), {
   LOG_LEVEL: Env.schema.string(),
   CACHE_VIEWS: Env.schema.boolean(),
   GITHUB_API_KEY: Env.schema.string.optional(),
+  CACHE_FOLDER: Env.schema.string(),
 })
