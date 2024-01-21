@@ -1,27 +1,16 @@
 /*
 |--------------------------------------------------------------------------
-| Routes
+| Routes file
 |--------------------------------------------------------------------------
 |
-| This file is dedicated for defining HTTP routes. A single file is enough
-| for majority of projects, however you can define routes in different
-| files and just make sure to import them inside this file. For example
-|
-| Define routes in following two files
-| ├── start/routes/cart.ts
-| ├── start/routes/customer.ts
-|
-| and then import them inside `start/routes.ts` as follows
-|
-| import './routes/cart'
-| import './routes/customer''
+| The routes file is used for defining the HTTP routes.
 |
 */
 
-import Route from '@ioc:Adonis/Core/Route'
+import router from '@adonisjs/core/services/router'
+const BipsController = () => import('#controllers/bips_controller')
 
-Route.get('/', 'BipsController.index')
-Route.get('/support', async ({ view }) => view.render('support'))
-Route.get('/search', 'BipsController.search')
-Route.get('/update', 'BipsController.updateBips')
-Route.get('/:bip', 'BipsController.show').where('bip', '[0-9]')
+router.get('/', [BipsController, 'index'])
+router.get('/search', [BipsController, 'search']).as('search')
+router.get('/support', async ({ view }) => view.render('support'))
+router.get('/:bip', [BipsController, 'show']).where('bip', '[0-9]').as('show')
