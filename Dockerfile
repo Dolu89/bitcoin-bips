@@ -19,4 +19,4 @@ COPY --from=BUILD_IMAGE /usr/src/app/build ./build
 
 EXPOSE 3333
 
-CMD [ "node", "bin/server.js" ]
+CMD [ "node", "build/bin/server.js" ]
