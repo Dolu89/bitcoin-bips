@@ -116,7 +116,7 @@ export default class UpdaterService {
             }
         }
 
-        console.log(`Saving ${bips.length} bips`)
+        console.log(`Indexing ${bips.length} bips...`)
         await this.bipService.saveBips(bips)
         await this.bipService.setLastUpdate()
     }
