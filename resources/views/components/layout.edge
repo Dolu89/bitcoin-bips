@@ -11,7 +11,9 @@
     <meta property="og:url" content="https://bips.xyz" />
     <meta name="twitter:card" content="summary" />
     @vite(['resources/js/app.js'])
-    
+    @if(app.nodeEnvironment === 'production')
+    <script async data-website-id="74b22eed-bc05-4a3b-9f94-cc76a5c815ec" src="https://a.bips.xyz/script.js" data-do-not-track="true"></script>
+    @end
 </head>
 
 <body>
