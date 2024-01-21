@@ -16,7 +16,6 @@ WORKDIR /usr/src/app
 
 # copy from build image
 COPY --from=BUILD_IMAGE /usr/src/app/build ./build
-COPY --from=BUILD_IMAGE /usr/src/app/docker-startup.sh ./build
 
 EXPOSE 3333
 
