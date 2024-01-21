@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node bin/server.js",
     "build": "node ace build",
+    "postbuild": "cd build && pnpm install --production",
     "dev": "node ace serve --watch",
     "test": "node ace test",
     "lint": "eslint .",
