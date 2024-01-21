@@ -31,7 +31,8 @@ export default defineConfig({
     () => import('@adonisjs/core/providers/edge_provider'),
     () => import('@adonisjs/vite/vite_provider'),
     () => import('@adonisjs/core/providers/vinejs_provider'),
-    () => import('#providers/app_provider')
+    () => import('#providers/app_provider'),
+    () => import('@adonisjs/static/static_provider')
   ],
 
   /*

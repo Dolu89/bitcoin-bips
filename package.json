@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "@adonisjs/core": "^6.2.0",
+    "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^2.0.2",
     "@octokit/rest": "^20.0.2",
     "@vinejs/vine": "^1.7.0",
@@ -59,6 +60,7 @@
     "edge.js": "^6.0.1",
     "fuse.js": "^7.0.0",
     "reflect-metadata": "^0.2.1",
+    "sitemap-manager": "^2.2.0",
     "undici": "^6.4.0"
   },
   "eslintConfig": {
