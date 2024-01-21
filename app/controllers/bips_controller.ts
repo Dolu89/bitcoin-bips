@@ -22,9 +22,8 @@ export default class BipsController {
         if (!data?.title) {
             return response.notFound()
         }
-        const lastUpdate = await this.bipService.getLastUpdate()
 
-        return view.render('bip', { bip: data, lastUpdate })
+        return view.render('bip', { bip: data })
     }
 
     public async search({ request, response, view }: HttpContext) {
@@ -36,16 +35,13 @@ export default class BipsController {
             return item
         })
 
-        const lastUpdate = await this.bipService.getLastUpdate()
-
-
         switch (request.accepts(['html', 'json'])) {
             case 'html':
-                return view.render('search', { query: q, searchResult, lastUpdate })
+                return view.render('search', { query: q, searchResult })
             case 'json':
                 return response.json(searchResult)
             default:
-                return view.render('search', { query: q, searchResult, lastUpdate })
+                return view.render('search', { query: q, searchResult })
         }
     }
 }
