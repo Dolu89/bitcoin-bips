@@ -1,10 +1,13 @@
 import BipService from '#services/bip_service'
+import SearchService from '#services/search_service'
+import { searchBipsValidator } from '#validators/search'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import string from '@adonisjs/core/helpers/string'
 
 @inject()
 export default class BipsController {
-    constructor(private bipService: BipService) { }
+    constructor(private bipService: BipService, private searchService: SearchService) { }
 
     public async index({ view }: HttpContext) {
         const bips = await this.bipService.getBips()
@@ -20,7 +23,29 @@ export default class BipsController {
             return response.notFound()
         }
         const lastUpdate = await this.bipService.getLastUpdate()
-        
+
         return view.render('bip', { bip: data, lastUpdate })
+    }
+
+    public async search({ request, response, view }: HttpContext) {
+        const { q } = await searchBipsValidator.validate(request.all())
+        const searchResult = (await this.searchService.search(q)).map((s) => {
+            const contentTruncate = string.excerpt(s.item.contentSource, 1000)
+            const { content, ...item } = s.item
+            item.contentSource = contentTruncate
+            return item
+        })
+
+        const lastUpdate = await this.bipService.getLastUpdate()
+
+
+        switch (request.accepts(['html', 'json'])) {
+            case 'html':
+                return view.render('search', { query: q, searchResult, lastUpdate })
+            case 'json':
+                return response.json(searchResult)
+            default:
+                return view.render('search', { query: q, searchResult, lastUpdate })
+        }
     }
 }

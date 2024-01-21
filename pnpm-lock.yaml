@@ -7,13 +7,16 @@ settings:
 dependencies:
   '@adonisjs/core':
     specifier: ^6.2.0
-    version: 6.2.0(@adonisjs/assembler@7.1.0)(edge.js@6.0.1)
+    version: 6.2.0(@adonisjs/assembler@7.1.0)(@vinejs/vine@1.7.0)(edge.js@6.0.1)
   '@adonisjs/vite':
     specifier: ^2.0.2
     version: 2.0.2(@adonisjs/core@6.2.0)(edge.js@6.0.1)(vite@5.0.12)
   '@octokit/rest':
     specifier: ^20.0.2
     version: 20.0.2
+  '@vinejs/vine':
+    specifier: ^1.7.0
+    version: 1.7.0
   bentocache:
     specifier: 1.0.0-beta.6
     version: 1.0.0-beta.6(tslib@2.6.2)
@@ -23,6 +26,9 @@ dependencies:
   edge.js:
     specifier: ^6.0.1
     version: 6.0.1
+  fuse.js:
+    specifier: ^7.0.0
+    version: 7.0.0
   reflect-metadata:
     specifier: ^0.2.1
     version: 0.2.1
@@ -164,7 +170,7 @@ packages:
     dependencies:
       '@poppinss/utils': 6.7.1
 
-  /@adonisjs/core@6.2.0(@adonisjs/assembler@7.1.0)(edge.js@6.0.1):
+  /@adonisjs/core@6.2.0(@adonisjs/assembler@7.1.0)(@vinejs/vine@1.7.0)(edge.js@6.0.1):
     resolution: {integrity: sha512-fIucNf4YjX+nIbjp6amJSShBi+2b/cnxo0KgFtOsiFLgoPcG/rUgKKrRAuOiYSXhEyg0viXz1OVFFMqEtl3jCg==}
     engines: {node: '>=18.16.0'}
     hasBin: true
@@ -204,6 +210,7 @@ packages:
       '@poppinss/utils': 6.7.1
       '@sindresorhus/is': 6.1.0
       '@types/he': 1.2.3
+      '@vinejs/vine': 1.7.0
       edge.js: 6.0.1
       he: 1.2.0
       parse-imports: 1.1.2
@@ -369,7 +376,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      '@adonisjs/core': 6.2.0(@adonisjs/assembler@7.1.0)(edge.js@6.0.1)
+      '@adonisjs/core': 6.2.0(@adonisjs/assembler@7.1.0)(@vinejs/vine@1.7.0)(edge.js@6.0.1)
       defu: 6.1.4
       edge-error: 4.0.1
       edge.js: 6.0.1
@@ -754,7 +761,7 @@ packages:
       playwright:
         optional: true
     dependencies:
-      '@adonisjs/core': 6.2.0(@adonisjs/assembler@7.1.0)(edge.js@6.0.1)
+      '@adonisjs/core': 6.2.0(@adonisjs/assembler@7.1.0)(@vinejs/vine@1.7.0)(edge.js@6.0.1)
       '@japa/runner': 3.1.1
     dev: true
 
@@ -1370,6 +1377,9 @@ packages:
     resolution: {integrity: sha512-dn1l8LaMea/IjDoHNd9J52uBbInB796CDffS6VdIxvqYCPSG0V0DzHp76GpaWnlhg88uYyPbXCDIowa86ybd5A==}
     dev: true
 
+  /@types/validator@13.11.8:
+    resolution: {integrity: sha512-c/hzNDBh7eRF+KbCf+OoZxKbnkpaK/cKp9iLQWqB7muXtM+MtL9SUUH8vCFcLn6dH1Qm05jiexK0ofWY7TfOhQ==}
+
   /@types/yargs-parser@21.0.3:
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
     dev: true
@@ -1515,6 +1525,23 @@ packages:
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
+
+  /@vinejs/compiler@2.4.0:
+    resolution: {integrity: sha512-qEhp+Ux4wCeyYlQpB5TddjlRRyxbZz4RVYG/UHGnnnn3eOw326dZGCJldOOEl6huBFoOguMUQfhKLLSjJ0v+XQ==}
+    engines: {node: '>=18.0.0'}
+
+  /@vinejs/vine@1.7.0:
+    resolution: {integrity: sha512-omz9pofSHysjFpMHGOpGPSR4ZQyIa0cjVmDndKuJjG9AyUxf2TiJvAbljTjUmNcu+tqXIORZOaSA+R7T+9vX+Q==}
+    engines: {node: '>=18.16.0'}
+    dependencies:
+      '@poppinss/macroable': 1.0.1
+      '@types/validator': 13.11.8
+      '@vinejs/compiler': 2.4.0
+      camelcase: 8.0.0
+      dayjs: 1.11.10
+      dlv: 1.1.3
+      normalize-url: 8.0.0
+      validator: 13.11.0
 
   /abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -1787,6 +1814,10 @@ packages:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
     dev: true
+
+  /camelcase@8.0.0:
+    resolution: {integrity: sha512-8WB3Jcas3swSvjIeA2yvCJ+Miyz5l1ZmB6HFb9R1317dt9LCQoswg/BGrmAmkWVEszSrrg4RwmO46qIm2OEnSA==}
+    engines: {node: '>=16'}
 
   /case-anything@2.1.13:
     resolution: {integrity: sha512-zlOQ80VrQ2Ue+ymH5OuM/DlDq64mEm+B9UTdHULv5osUMD6HalNTblf2b1u/m6QecjsnOkBpqVZ+XPwIVsy7Ng==}
@@ -2073,6 +2104,9 @@ packages:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
     dev: true
 
+  /dayjs@1.11.10:
+    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
+
   /debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
     engines: {node: '>=6.0'}
@@ -2150,6 +2184,9 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       path-type: 4.0.0
+
+  /dlv@1.1.3:
+    resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
 
   /doctrine@3.0.0:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
@@ -2664,6 +2701,11 @@ packages:
 
   /function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
+
+  /fuse.js@7.0.0:
+    resolution: {integrity: sha512-14F4hBIxqKvD4Zz/XjDc3y94mNZN6pRv3U13Udo0lNLCWRBUsrMv2xwcF/y/Z5sV6+FQW+/ow68cHpm4sunt8Q==}
+    engines: {node: '>=10'}
+    dev: false
 
   /get-east-asian-width@1.2.0:
     resolution: {integrity: sha512-2nk+7SIVb14QrgXFHcm84tD4bKQz0RxPuMT8Ag5KPOq7J5fEmAg0UbXdTOSHqNuHSU28k55qnceesxXRZGzKWA==}
@@ -3347,6 +3389,10 @@ packages:
   /normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
+
+  /normalize-url@8.0.0:
+    resolution: {integrity: sha512-uVFpKhj5MheNBJRTiMZ9pE/7hD1QTeEvugSJW/OmLzAp78PB5O6adfMNTvmfKhXBkvCzC+rqifWcVYpGFwTjnw==}
+    engines: {node: '>=14.16'}
 
   /npm-run-path@5.2.0:
     resolution: {integrity: sha512-W4/tgAXFqFA0iL7fk0+uQ3g7wkL8xJmx3XdK0VGb4cHW//eZTtKGvFBBoRKVTpY7n6ze4NL9ly7rgXcHufqXKg==}

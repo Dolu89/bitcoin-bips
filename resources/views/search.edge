@@ -1,0 +1,15 @@
+@layout({
+    title: `"${query}" on bips.xyz`,
+    description: `Search results for "${query}"`
+})
+    @if(searchResult.length === 0)
+    No result
+    @end
+
+    @each(result in searchResult)
+    <h2>
+        <a href="{{route('show', { bip: result.bip })}}">{{result.bip}} - {{result.title}}</a>
+    </h2>
+    <p>{{result.contentSource}}</p>
+    @end
+@end

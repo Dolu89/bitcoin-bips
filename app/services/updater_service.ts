@@ -2,10 +2,11 @@ import GithubService from "#services/github_service";
 import { inject } from "@adonisjs/core";
 import Bip from "#models/bip";
 import BipService from "#services/bip_service";
+import SearchService from "#services/search_service";
 
 @inject()
 export default class UpdaterService {
-    constructor(private githubService: GithubService, private bipService: BipService) { }
+    constructor(private githubService: GithubService, private bipService: BipService, private searchService: SearchService) { }
 
     public async updateBips() {
         const files = await this.githubService.getFilesFromRepo('bitcoin', 'bips')
@@ -22,6 +23,8 @@ export default class UpdaterService {
                         bips.push(savedBip)
                         continue
                     }
+
+                    console.log('Updating BIP', bipNumber)
 
                     // Get BIP file content
                     const content = await this.githubService.getFileContent('bitcoin', 'bips', file.path)
@@ -118,6 +121,7 @@ export default class UpdaterService {
 
         console.log(`Indexing ${bips.length} bips...`)
         await this.bipService.saveBips(bips)
+        await this.searchService.init()
         await this.bipService.setLastUpdate()
     }
 }

@@ -23,7 +23,7 @@
                 <h1>BIPs <small class="hide">bitcoin improvement proposals</small></h1>
             </a>
 
-            <form class="search" method="GET" action="">
+            <form class="search" method="GET" action="{{route('search')}}">
                 <input type="text" name="q" placeholder="search by title, authors, keyword" minlength="3"
                     value="{{query ?? ''}}">
                 <button type="submit" aria-label="Launch search"><span class="icon icon-search" aria-hidden="true"></span></button>
