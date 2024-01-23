@@ -8,24 +8,32 @@
     <meta name="description" content="{{description}}">
     <meta property="og:title" content="{{ title }}" key="title" />
     <meta property="og:description" content="{{description}}" key="description" />
-    <meta property="og:url" content="https://bips.xyz" />
+    <meta property="og:url" content="https://{{appUrl}}" />
     <meta name="twitter:card" content="summary" />
-    @vite(['resources/js/app.js'])
+    @if(isBips)
+    @vite(['resources/js/bips.js'])
+    @elseif(isNips)
+    @vite(['resources/js/nips.js'])
+    @end
     @if(app.nodeEnvironment === 'production')
     <script async data-website-id="74b22eed-bc05-4a3b-9f94-cc76a5c815ec" src="https://a.bips.xyz/script.js" data-do-not-track="true"></script>
     @end
 </head>
 
 <body>
-
     <header>
         <div class="wrapper">
             <a href="/" class="title">
+            @if(isBips)
                 <span class="icon icon-bitcoin-circle"></span>
                 <h1>BIPs <small class="hide">bitcoin improvement proposals</small></h1>
+            @elseif(isNips)
+                <span class="icon icon-nostr-circle"></span>
+                <h1>NIPs <small class="hide">nostr improvement proposals</small></h1>
+            @end
             </a>
 
-            <form class="search" method="GET" action="{{route('search')}}">
+            <form class="search" method="GET" action="/search">
                 <input type="text" name="q" placeholder="search by title, authors, keyword" minlength="3"
                     value="{{query ?? ''}}">
                 <button type="submit" aria-label="Launch search"><span class="icon icon-search" aria-hidden="true"></span></button>
@@ -42,10 +50,15 @@
 
     <footer>
         <span>Last update: <b>{{lastUpdate}}</b></span>
-        <a href="https://github.com/Dolu89/bitcoin-bips">Source code</a>
+        @if(isBips)
         <span>This website is a mirror of the <a href="https://github.com/bitcoin/bips">official BIPs
                 repository.</a></span>
-        <span class="bold">Support Bips.xyz <a href="/support">donate</a></span>
+        @elseif(isNips)
+        <span>This website is a mirror of the <a href="https://github.com/nostr-protocol/nips">official NIPs
+                repository.</a></span>
+        @end
+        <span class="bold">Support this project <a href="/support">donate</a></span>
+        <a href="https://github.com/Dolu89/bitcoin-bips">Source code</a>
     </footer>
 
 </body>

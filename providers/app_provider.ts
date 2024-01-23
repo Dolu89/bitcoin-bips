@@ -1,4 +1,5 @@
 import BipService from '#services/bip_service'
+import NipService from '#services/nip_service'
 import SearchService from '#services/search_service'
 import type { ApplicationService } from '@adonisjs/core/types'
 
@@ -11,7 +12,8 @@ export default class AppProvider {
   register() {
     this.app.container.singleton(SearchService, async (resolver) => {
       const bipService = await resolver.make(BipService)
-      return new SearchService(bipService)
+      const nipService = await resolver.make(NipService)
+      return new SearchService(bipService, nipService)
     })
   }
 
