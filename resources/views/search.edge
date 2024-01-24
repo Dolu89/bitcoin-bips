@@ -1,5 +1,5 @@
 @layout({
-    title: `"${query}" on bips.xyz`,
+    title: `"${query}" on {{appUrl}}`,
     description: `Search results for "${query}"`,
     query: query
 })
@@ -9,8 +9,12 @@
 
     @each(result in searchResult)
     <h2>
-        <a href="{{route('show', { bip: result.bip })}}">{{result.bip}} - {{result.title}}</a>
+        @if(isBips)
+        <a href="/{{result.bip}}">{{result.bip}} - {{result.title}}</a>
+        @elseif(isNips)
+        <a href="/{{result.nip}}">{{result.title}}</a>
+        @end
     </h2>
-    <p>{{result.contentSource}}</p>
+    <p>{{result.contentTextOnly}}</p>
     @end
 @end

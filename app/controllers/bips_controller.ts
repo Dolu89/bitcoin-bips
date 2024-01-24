@@ -15,7 +15,7 @@ export default class BipsController {
   public async index({ view }: HttpContext) {
     const bips = await this.bipService.getBips()
     const lastUpdate = await this.bipService.getLastUpdate()
-    return view.render('index', { bips, lastUpdate })
+    return view.render('bips/index', { bips, lastUpdate })
   }
 
   public async show({ params, view, response }: HttpContext) {
@@ -26,15 +26,15 @@ export default class BipsController {
       return response.notFound()
     }
 
-    return view.render('bip', { bip: data })
+    return view.render('bips/bip', { bip: data })
   }
 
   public async search({ request, response, view }: HttpContext) {
     const { q } = await searchBipsValidator.validate(request.all())
-    const searchResult = (await this.searchService.search(q)).map((s) => {
-      const contentTruncate = string.excerpt(s.item.contentSource, 1000)
+    const searchResult = (await this.searchService.searchBips(q)).map((s) => {
+      const contentTruncate = string.excerpt(s.item.contentTextOnly, 1000)
       const { content, ...item } = s.item
-      item.contentSource = contentTruncate
+      item.contentTextOnly = contentTruncate
       return item
     })
 

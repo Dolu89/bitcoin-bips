@@ -6,7 +6,7 @@ export default interface Bip {
   type: string
   created: string
   content: string
-  contentSource: string
+  contentTextOnly: string
   layer: string
   hash: string
   updated: string

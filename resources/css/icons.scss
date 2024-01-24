@@ -1,3 +1,4 @@
+
 .icon {
   display: inline-block;
   width: 20px;
@@ -8,7 +9,20 @@
     background-image: url(../../public/icons/bitcoin-circle.svg);
   }
 
+  &.icon-nostr-circle {
+    color:$color;
+    background-image: url(../../public/icons/nostr-logo.svg);
+    margin-right: 5px;
+  }
+
   &.icon-search {
     background-image: url(../../public/icons/search.svg);
+  }
+
+  &.icon-link {
+    background-image: url(../../public/icons/anchor.svg);
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
   }
 }
