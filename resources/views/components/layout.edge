@@ -15,8 +15,10 @@
     @elseif(isNips)
     @vite(['resources/js/nips.js'])
     @end
-    @if(app.nodeEnvironment === 'production')
-    <script async data-website-id="74b22eed-bc05-4a3b-9f94-cc76a5c815ec" src="https://a.bips.xyz/script.js" data-do-not-track="true"></script>
+    @if(isBips && app.nodeEnvironment === 'production')
+    <script async src="https://a.bips.xyz/script.js" data-website-id="74b22eed-bc05-4a3b-9f94-cc76a5c815ec"></script>
+    @elseif(isNips && app.nodeEnvironment === 'production')
+    <script async src="https://a.bips.xyz/script.js" data-website-id="c20e50b1-b1db-4667-a812-4d9ab3e8ff51"></script>
     @end
 </head>
 
