@@ -18,19 +18,19 @@ export default class NipService {
     }
 
     public async saveNips(nips: Nip[]) {
-        await cache.namespace(NipService.cacheNamespace).setForever(
+        await cache.namespace(NipService.cacheNamespace).set(
             NipService.cacheAll,
             nips.sort((a: Nip, b: Nip) => Number.parseInt(a.nip) - Number.parseInt(b.nip))
         )
     }
 
     public async saveNip(nip: Nip) {
-        await cache.namespace(NipService.cacheNamespace).setForever(nip.nip, nip)
+        await cache.namespace(NipService.cacheNamespace).set(nip.nip, nip)
     }
 
     public async setLastUpdate() {
         const date = new Date()
-        await cache.namespace(NipService.cacheNamespace).setForever(
+        await cache.namespace(NipService.cacheNamespace).set(
             NipService.cacheLastUpdate,
             `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
         )
@@ -42,7 +42,7 @@ export default class NipService {
     }
 
     public async setHomePage(content: string) {
-        await cache.namespace(NipService.cacheNamespace).setForever('home', content)
+        await cache.namespace(NipService.cacheNamespace).set('home', content)
     }
 
     public async getHomePage() {
