@@ -9,6 +9,7 @@ import { MarkdownFile } from '@dimerapp/markdown'
 import { toHtml } from '@dimerapp/markdown/utils'
 import * as cheerio from 'cheerio'
 import Nip from '#models/nip'
+import { Shiki, codeblocks } from '@dimerapp/shiki'
 
 @inject()
 export default class UpdaterService {
@@ -110,6 +111,8 @@ export default class UpdaterService {
           const created = parsedBipDetails.find((t) => t[0] === 'Created')
           const createdValue = created ? created[1] : ''
 
+          const contentTextOnly = cheerio.load(htmlContent).text()
+
           const bip: Bip = {
             bip: bipNumber,
             title: titleValue,
@@ -118,7 +121,7 @@ export default class UpdaterService {
             type: typeValue,
             created: createdValue,
             content: htmlContent,
-            contentSource: content,
+            contentTextOnly,
             layer: layerValue,
             hash: file.sha,
             updated: new Date().toISOString(),
@@ -194,8 +197,14 @@ export default class UpdaterService {
 
           // Get BIP file content
           const content = await this.githubService.getFileContent('nostr-protocol', 'nips', file.path)
-
           const md = new MarkdownFile(content, { generateToc: true })
+
+          // Codeblock theme transformer
+          const shiki = new Shiki()
+          shiki.useTheme('one-dark-pro')
+          await shiki.boot()
+          md.transform(codeblocks, shiki)
+
           await md.process()
 
           const { contents, toc } = toHtml(md)
@@ -213,7 +222,7 @@ export default class UpdaterService {
             title: fullTitle,
             toc,
             content: htmlContent,
-            contentSource: content,
+            contentTextOnly: $.text(),
             hash: file.sha,
             updated: new Date().toISOString(),
           }

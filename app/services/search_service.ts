@@ -19,7 +19,7 @@ export default class SearchService {
     distance: 100000,
     maxPatternLength: 32,
     minMatchCharLength: 1,
-    keys: [{ name: 'title', weight: 2 }, 'authors', 'contentSource'],
+    keys: [{ name: 'title', weight: 2 }, 'authors', 'contentTextOnly'],
   }
 
   public async searchBips(terms: string): Promise<FuseResult<Bip>[]> {
@@ -29,7 +29,7 @@ export default class SearchService {
     return this.fuseBips.search(terms)
   }
 
-  public async searchNips(terms: string): Promise<FuseResult<Bip>[]> {
+  public async searchNips(terms: string): Promise<FuseResult<Nip>[]> {
     if (!this.fuseNips) {
       return []
     }

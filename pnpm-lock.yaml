@@ -20,6 +20,9 @@ dependencies:
   '@dimerapp/markdown':
     specifier: ^8.0.1
     version: 8.0.1
+  '@dimerapp/shiki':
+    specifier: ^5.0.0
+    version: 5.0.0(@dimerapp/markdown@8.0.1)
   '@octokit/rest':
     specifier: ^20.0.2
     version: 20.0.2
@@ -540,6 +543,17 @@ packages:
       vfile-message: 4.0.2
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /@dimerapp/shiki@5.0.0(@dimerapp/markdown@8.0.1):
+    resolution: {integrity: sha512-2jCr4/yH6uKHHVOaYAlw7xADIwHbHEkz6TM4yXLByAfF49updeq/7+f9Hsz7FSqsz6K+6Tgiot5HDZsL1puohg==}
+    engines: {node: '>=18.16.0'}
+    peerDependencies:
+      '@dimerapp/markdown': ^8.0.0
+    dependencies:
+      '@dimerapp/markdown': 8.0.1
+      shiki: 0.14.7
+      unist-util-map: 4.0.0
     dev: false
 
   /@esbuild/aix-ppc64@0.19.11:
@@ -1740,6 +1754,10 @@ packages:
   /ansi-regex@6.0.1:
     resolution: {integrity: sha512-n5M855fKb2SsfMIiFFoVrABHJC8QtHwVx+mHWP3QcEqBHYienj5dHSgjbxtC0WEZXYt4wcD6zrQElDPhFuZgfA==}
     engines: {node: '>=12'}
+
+  /ansi-sequence-parser@1.1.1:
+    resolution: {integrity: sha512-vJXt3yiaUL4UU546s3rPXlsry/RnM730G1+HkpKE012AN0sx1eOrxSu95oKDIonskeLTijMgqWZ3uDEe3NFvyg==}
+    dev: false
 
   /ansi-styles@3.2.1:
     resolution: {integrity: sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA==}
@@ -3486,6 +3504,10 @@ packages:
       semver: 7.5.4
     dev: true
 
+  /jsonc-parser@3.2.1:
+    resolution: {integrity: sha512-AilxAyFOAcK5wA1+LeaySVBrHsGQvUFCDWXKpZjzaL0PqW+xfBOttn8GNtWKFWqneyMZj41MWF9Kl6iPWLwgOA==}
+    dev: false
+
   /jsonschema@1.4.1:
     resolution: {integrity: sha512-S6cATIPVv1z0IlxdN+zUk5EPjkGCdnhN4wVSBlvoUO1tOLJootbo9CquNJmbIh4yikWHiUedhRYrNPn1arpEmQ==}
 
@@ -4954,6 +4976,15 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
+  /shiki@0.14.7:
+    resolution: {integrity: sha512-dNPAPrxSc87ua2sKJ3H5dQ/6ZaY8RNnaAqK+t0eG7p0Soi2ydiqbGOTaZCqaYvA/uZYfS1LJnemt3Q+mSfcPCg==}
+    dependencies:
+      ansi-sequence-parser: 1.1.1
+      jsonc-parser: 3.2.1
+      vscode-oniguruma: 1.7.0
+      vscode-textmate: 8.0.0
+    dev: false
+
   /side-channel@1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
     dependencies:
@@ -5390,6 +5421,12 @@ packages:
       '@types/unist': 3.0.2
     dev: false
 
+  /unist-util-map@4.0.0:
+    resolution: {integrity: sha512-HJs1tpkSmRJUzj6fskQrS5oYhBYlmtcvy4SepdDEEsL04FjBrgF0Mgggvxc1/qGBGgW7hRh9+UBK1aqTEnBpIA==}
+    dependencies:
+      '@types/unist': 3.0.2
+    dev: false
+
   /unist-util-position@4.0.4:
     resolution: {integrity: sha512-kUBE91efOWfIVBo8xzh/uZQ7p9ffYRtUbMRZBNFYwf0RK8koUMx6dGUfwylLOKmaT2cs4wSW96QoYUSXAyEtpg==}
     dependencies:
@@ -5568,6 +5605,14 @@ packages:
       sass: 1.70.0
     optionalDependencies:
       fsevents: 2.3.3
+
+  /vscode-oniguruma@1.7.0:
+    resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}
+    dev: false
+
+  /vscode-textmate@8.0.0:
+    resolution: {integrity: sha512-AFbieoL7a5LMqcnOF04ji+rpXadgOXnZsxQr//r83kLPr7biP7am3g9zbaZIaBGwBRWeSvoMD4mgPdX3e4NWBg==}
+    dev: false
 
   /wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}

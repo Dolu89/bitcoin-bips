@@ -57,6 +57,7 @@
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^2.0.2",
     "@dimerapp/markdown": "^8.0.1",
+    "@dimerapp/shiki": "^5.0.0",
     "@octokit/rest": "^20.0.2",
     "@vinejs/vine": "^1.7.0",
     "cheerio": "1.0.0-rc.12",

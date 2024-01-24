@@ -3,7 +3,7 @@ export default interface Nip {
   title: string
   toc?: string,
   content: string
-  contentSource: string
+  contentTextOnly: string
   hash: string
   updated: string
 }

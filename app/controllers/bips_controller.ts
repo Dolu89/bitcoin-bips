@@ -32,9 +32,9 @@ export default class BipsController {
   public async search({ request, response, view }: HttpContext) {
     const { q } = await searchBipsValidator.validate(request.all())
     const searchResult = (await this.searchService.searchBips(q)).map((s) => {
-      const contentTruncate = string.excerpt(s.item.contentSource, 1000)
+      const contentTruncate = string.excerpt(s.item.contentTextOnly, 1000)
       const { content, ...item } = s.item
-      item.contentSource = contentTruncate
+      item.contentTextOnly = contentTruncate
       return item
     })
 

@@ -1,2 +1,20 @@
 @import 'variables-bips.scss';
 @import 'app.scss';
+
+code,
+kbd,
+pre,
+samp {
+  background: $code-bg;
+  border: 1px solid $code-border;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: Consolas, monaco, 'Ubuntu Mono', 'Liberation Mono', 'Courier New', Courier,
+    monospace;
+}
