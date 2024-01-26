@@ -3,7 +3,7 @@ import { defineConfig, store, drivers } from '@adonisjs/cache'
 
 const cacheConfig = defineConfig({
   default: 'multitier',
-  ttl: '25h',
+  ttl: '72h',
   stores: {
     multitier: store()
       .useL1Layer(drivers.memory({ maxSize: 10 * 1024 * 1024 }))
