@@ -13,19 +13,19 @@ export default class BipService {
   }
 
   public async saveBips(bips: Bip[]) {
-    await cache.namespace('bips').set(
+    await cache.namespace('bips').setForever(
       'all',
       bips.sort((a: Bip, b: Bip) => Number.parseInt(a.bip) - Number.parseInt(b.bip))
     )
   }
 
   public async saveBip(bip: Bip) {
-    await cache.namespace('bips').set(bip.bip, bip)
+    await cache.namespace('bips').setForever(bip.bip, bip)
   }
 
   public async setLastUpdate() {
     const date = new Date()
-    await cache.namespace('bips').set(
+    await cache.namespace('bips').setForever(
       'lastUpdate',
       `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
     )
