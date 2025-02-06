@@ -5,9 +5,9 @@ import GithubFile from '#models/github_file'
 import env from '#start/env'
 
 export default class GithubService {
-  constructor() {}
+  constructor() { }
 
-  public async convertMediwikiToHtml(content: string) {
+  public async convertToHtml(content: string, format: 'mediawiki' | 'md' = 'mediawiki'): Promise<string | null> {
     const ghApiKey = env.get('GITHUB_API_KEY')
     if (!ghApiKey) throw new Error('Github API key not found')
 
@@ -17,7 +17,7 @@ export default class GithubService {
     })
 
     // Gist creation
-    const fileName = `tmp-bips.mediawiki`
+    const fileName = `tmp-bips.${format}`
     const gistCreationResult = await octokit.gists.create({
       public: false,
       files: { [fileName]: { content: content } },

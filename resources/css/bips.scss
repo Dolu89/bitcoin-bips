@@ -18,3 +18,15 @@ samp {
   font-family: Consolas, monaco, 'Ubuntu Mono', 'Liberation Mono', 'Courier New', Courier,
     monospace;
 }
+
+// Anchors order hack
+.markdown-heading {
+  display: flex;
+  align-items: baseline;
+  flex-direction: row;
+  gap: 12px;
+
+  .heading-element {
+    order: 2;
+  }
+}

@@ -27,8 +27,10 @@ export default class UpdaterService {
     const bips: Bip[] = []
     for (const file of files) {
       try {
-        if (file.path.match('^bip-([0-9]+).mediawiki$')) {
+        const bipMatch = file.path.match('^bip-([0-9]+).(mediawiki|md)$')
+        if (bipMatch) {
           const bipNumber = file.path.match('[0-9]+')![0].replace(/0+/, '')
+          const format = bipMatch[2] as 'mediawiki' | 'md'
 
           // Check if the current BIP needs update by checking hash file
           const savedBip = await this.bipService.getBip(bipNumber)
@@ -63,7 +65,7 @@ export default class UpdaterService {
 
           parsedBipDetails = [...new Set(parsedBipDetails)]
 
-          const htmlContentResult = await this.githubService.convertMediwikiToHtml(content)
+          const htmlContentResult = await this.githubService.convertToHtml(content, format)
 
           if (!htmlContentResult) {
             console.error('Error converting mediawiki to html')
