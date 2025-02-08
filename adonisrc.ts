@@ -10,7 +10,7 @@ export default defineConfig({
   | will be scanned automatically from the "./commands" directory.
   |
   */
-  commands: [() => import('@adonisjs/core/commands'), () => import('@adonisjs/cache/commands')],
+  commands: [() => import('@adonisjs/core/commands')],
 
   /*
   |--------------------------------------------------------------------------
@@ -28,12 +28,14 @@ export default defineConfig({
       file: () => import('@adonisjs/core/providers/repl_provider'),
       environment: ['repl', 'test'],
     },
-    () => import('@adonisjs/core/providers/edge_provider'),
-    () => import('@adonisjs/vite/vite_provider'),
     () => import('@adonisjs/core/providers/vinejs_provider'),
-    () => import('#providers/app_provider'),
+    () => import('@adonisjs/core/providers/edge_provider'),
+    () => import('@adonisjs/session/session_provider'),
+    () => import('@adonisjs/vite/vite_provider'),
+    () => import('@adonisjs/shield/shield_provider'),
     () => import('@adonisjs/static/static_provider'),
-    () => import('@adonisjs/cache/cache_provider')
+    () => import('@adonisjs/cors/cors_provider'),
+    () => import('@adonisjs/inertia/inertia_provider')
   ],
 
   /*
@@ -44,11 +46,7 @@ export default defineConfig({
   | List of modules to import before starting the application.
   |
   */
-  preloads: [
-    () => import('#start/routes'),
-    () => import('#start/kernel'),
-    () => import('#start/jobs'),
-  ],
+  preloads: [() => import('#start/routes'), () => import('#start/kernel')],
 
   /*
   |--------------------------------------------------------------------------
@@ -74,6 +72,16 @@ export default defineConfig({
     ],
     forceExit: false,
   },
+
+  /*
+  |--------------------------------------------------------------------------
+  | Metafiles
+  |--------------------------------------------------------------------------
+  |
+  | A collection of files you want to copy to the build folder when creating
+  | the production build.
+  |
+  */
   metaFiles: [
     {
       pattern: 'resources/views/**/*.edge',
@@ -84,4 +92,9 @@ export default defineConfig({
       reloadServer: false,
     },
   ],
+
+  assetsBundler: false,
+  hooks: {
+    onBuildStarting: [() => import('@adonisjs/vite/build_hook')],
+  },
 })

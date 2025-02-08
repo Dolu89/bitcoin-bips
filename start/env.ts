@@ -12,17 +12,16 @@
 import { Env } from '@adonisjs/core/env'
 
 export default await Env.create(new URL('../', import.meta.url), {
-  APP_URL: Env.schema.string(),
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
   PORT: Env.schema.number(),
   APP_KEY: Env.schema.string(),
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.string(),
-  CACHE_VIEWS: Env.schema.boolean(),
-  GITHUB_API_KEY: Env.schema.string.optional(),
-  CACHE_FOLDER: Env.schema.string(),
 
-  // Websites
-  BIPS_URL: Env.schema.string.optional(),
-  NIPS_URL: Env.schema.string.optional(),
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring session package
+  |----------------------------------------------------------
+  */
+  SESSION_DRIVER: Env.schema.enum(['cookie', 'memory'] as const),
 })
