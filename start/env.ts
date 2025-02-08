@@ -24,4 +24,30 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory'] as const),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring plugins
+  |----------------------------------------------------------
+  */
+  PLUGINS_ENABLED: (name, value) => {
+    if (!value) {
+      throw new Error(`Value for ${name} is required`)
+    }
+
+    if (typeof value !== 'string' || !value.split(',').every((item) => item.trim())) {
+      throw new Error(`Value for ${name} must be a valid string seperated by comma`)
+    }
+
+    return value.split(',').map((item) => item.trim())
+  },
+
+  /*
+  |----------------------------------------------------------
+  | Variables for Redis (used by BullMQ and Cache)
+  |----------------------------------------------------------
+  */
+  REDIS_HOST: Env.schema.string({ format: 'host' }),
+  REDIS_PORT: Env.schema.number(),
+  REDIS_PASSWORD: Env.schema.string.optional()
 })

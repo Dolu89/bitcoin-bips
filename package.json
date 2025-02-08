@@ -1,9 +1,9 @@
 {
   "name": "bitcoin-bips",
-  "version": "0.0.0",
+  "version": "4.0.0",
   "private": true,
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "start": "node bin/server.js",
     "build": "node ace build",
@@ -11,7 +11,8 @@
     "test": "node ace test",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "queue": "node ace queue:listen"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
@@ -23,6 +24,7 @@
     "#events/*": "./app/events/*.js",
     "#middleware/*": "./app/middleware/*.js",
     "#validators/*": "./app/validators/*.js",
+    "#plugins/*": "./app/plugins/*.js",
     "#providers/*": "./providers/*.js",
     "#policies/*": "./app/policies/*.js",
     "#abilities/*": "./app/abilities/*.js",
@@ -52,19 +54,23 @@
   },
   "dependencies": {
     "@adonisjs/auth": "^9.3.1",
+    "@adonisjs/cache": "^1.1.0",
     "@adonisjs/core": "^6.17.1",
     "@adonisjs/cors": "^2.2.1",
     "@adonisjs/inertia": "^3.1.0",
     "@adonisjs/lucid": "^21.6.0",
+    "@adonisjs/redis": "^9.2.0",
     "@adonisjs/session": "^7.5.1",
     "@adonisjs/shield": "^8.1.2",
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^4.0.0",
     "@inertiajs/vue3": "^2.0.3",
+    "@rlanz/bull-queue": "^3.1.0",
     "@vinejs/vine": "^3.0.0",
     "@vue/server-renderer": "^3.5.13",
     "edge.js": "^6.2.1",
     "reflect-metadata": "^0.2.2",
+    "undici": "^7.3.0",
     "vue": "^3.5.13"
   },
   "hotHook": {
