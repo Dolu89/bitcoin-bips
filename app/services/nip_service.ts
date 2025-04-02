@@ -20,7 +20,7 @@ export default class NipService {
     public async saveNips(nips: Nip[]) {
         await cache.namespace(NipService.cacheNamespace).setForever(
             NipService.cacheAll,
-            nips.sort((a: Nip, b: Nip) => Number.parseInt(a.nip) - Number.parseInt(b.nip))
+            nips.sort((a: Nip, b: Nip) => Number.parseInt(a.nip, 16) - Number.parseInt(b.nip, 16))
         )
     }
 

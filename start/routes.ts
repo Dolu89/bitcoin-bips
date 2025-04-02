@@ -30,10 +30,8 @@ if (nipsUrl) {
     router.group(() => {
         router.get('/', [NipsController, 'index'])
         router.get('/search', [NipsController, 'search']).as('search')
-        router.get('/:nip', [NipsController, 'show']).where('nip', '[0-9]').as('show')
+        router.get('/:nip', [NipsController, 'show']).where('nip', '[0-9a-fA-F]').as('show')
         router.get('/support', async ({ view }) => view.render('support'))
         router.get('/robots.txt', async ({ response }) => response.ok(`User-agent: *\nAllow: /`))
     }).domain(nipsUrl)
 }
-
-

@@ -161,7 +161,7 @@ export default class UpdaterService {
   private replaceNipsLinks(htmlContent: string) {
     // Replace 01.md url format by 1
     return htmlContent
-      .replace(/0*(\d{1,4}).md/g, (_, nipNumber) => nipNumber)
+      .replace(/0*([0-9a-fA-F]{1,4}).md/g, (_, nipNumber) => nipNumber)
   }
   public async updateNips() {
     const files = await this.githubService.getFilesFromRepo('nostr-protocol', 'nips')
@@ -185,8 +185,8 @@ export default class UpdaterService {
 
           await this.nipService.setHomePage(htmlContent)
         }
-        else if (file.path.match('^([0-9]+).md$')) {
-          const nipNumber = file.path.match('[0-9]+')![0].replace(/^0+/, '')
+        else if (file.path.match('^([0-9a-fA-F]+).md$')) {
+          const nipNumber = file.path.match('[0-9a-fA-F]+')![0].replace(/^0+/, '')
 
           // Check if the current BIP needs update by checking hash file
           const savedNip = await this.nipService.getNip(nipNumber)
