@@ -45,10 +45,18 @@ export default class UpdaterService {
           const content = await this.githubService.getFileContent('bitcoin', 'bips', file.path)
 
           // Getting head details
-          const bipDetails = content
-            .substring(content.indexOf('<pre>') + 5, content.indexOf('</pre>'))
-            .trim()
-            .split('\n')
+          let bipDetails: string[] = []
+          if (format === 'md') {
+            bipDetails = content
+              .substring(content.indexOf('```\n') + 3, content.indexOf('\n```\n'))
+              .trim()
+              .split('\n')
+          } else {
+            bipDetails = content
+              .substring(content.indexOf('<pre>') + 5, content.indexOf('</pre>'))
+              .trim()
+              .split('\n')
+          }
           let parsedBipDetails: string[][] = []
 
           for (let index = 0; index < bipDetails.length; index++) {

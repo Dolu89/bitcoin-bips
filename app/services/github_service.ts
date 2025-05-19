@@ -47,7 +47,7 @@ export default class GithubService {
     branch: string = 'master'
   ): Promise<{ path: string; sha: string }[]> {
     const { statusCode, body } = await request(
-      `https://ungh.cc/repos/${owner}/${repo}/files/${branch}`
+      `${env.get('UNGH_URL')}/repos/${owner}/${repo}/files/${branch}`
     )
 
     if (statusCode !== 200) {
@@ -69,7 +69,7 @@ export default class GithubService {
     branch: string = 'master'
   ): Promise<string> {
     const { statusCode, body } = await request(
-      `https://ungh.cc/repos/${owner}/${repo}/files/${branch}/${path}`
+      `${env.get('UNGH_URL')}/repos/${owner}/${repo}/files/${branch}/${path}`
     )
 
     if (statusCode !== 200) {

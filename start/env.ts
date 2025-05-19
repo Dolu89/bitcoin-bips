@@ -21,6 +21,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   CACHE_VIEWS: Env.schema.boolean(),
   GITHUB_API_KEY: Env.schema.string.optional(),
   CACHE_FOLDER: Env.schema.string(),
+  UNGH_URL: Env.schema.string(),
 
   // Websites
   BIPS_URL: Env.schema.string.optional(),
