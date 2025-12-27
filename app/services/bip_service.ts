@@ -2,7 +2,8 @@ import Bip from '#models/bip'
 import cache from '@adonisjs/cache/services/main'
 
 export default class BipService {
-  public async getBip(bipNumber: string) {
+  public async getBip(bipStr: string) {
+    const bipNumber = Number.parseInt(bipStr)
     const bip = await cache.namespace('bips').get<Bip>(bipNumber)
     return bip
   }
