@@ -5,18 +5,30 @@
  * Never deletes specs that vanished upstream (out of scope).
  */
 import { inject } from '@adonisjs/core'
+import { dirname } from 'node:path/posix'
 import { DateTime } from 'luxon'
 import Document from '#models/document'
 import ProjectMeta from '#models/project_meta'
 import SpecSourceService from '#services/spec_source_service'
-import { parsePreamble, extractReferences } from '#values/spec_parsing'
+import RenderingService from '#services/rendering_service'
+import { parsePreamble, extractReferences, extractBody } from '#values/spec_parsing'
 import { canonicalize } from '#values/document_number'
 import type { ProjectConfig } from '#types/project'
 import type { SyncSummary, SyncError } from '#types/ingestion'
 
+/** Raw-content base URL for a repo file's directory — relative images resolve against it. */
+function rawBaseUrl(repo: ProjectConfig['repo'], path: string): string {
+  const dir = dirname(path)
+  const prefix = dir === '.' ? '' : `${dir}/`
+  return `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${repo.branch ?? 'HEAD'}/${prefix}`
+}
+
 @inject()
 export default class IngestionService {
-  constructor(protected source: SpecSourceService) {}
+  constructor(
+    protected source: SpecSourceService,
+    protected rendering: RenderingService
+  ) {}
 
   async syncProject(project: ProjectConfig): Promise<SyncSummary> {
     const errors: SyncError[] = []
@@ -27,9 +39,12 @@ export default class IngestionService {
     // Existing catalog state for this project: number -> { id, hash } for the sha diff.
     const existingRows = await Document.query()
       .where('project', project.key)
-      .select('id', 'number', 'hash')
+      .select('id', 'number', 'hash', 'content_html')
     const existing = new Map(
-      existingRows.map((row) => [row.number, { id: row.id, hash: row.hash }])
+      existingRows.map((row) => [
+        row.number,
+        { id: row.id, hash: row.hash, contentHtml: row.contentHtml },
+      ])
     )
 
     const files = await this.source.listSpecFiles(project)
@@ -39,7 +54,9 @@ export default class IngestionService {
 
     for (const file of files) {
       const stored = existing.get(file.number)
-      if (stored && stored.hash === file.sha) {
+      // Skip only when both the blob is unchanged AND a render already exists — so enabling
+      // rendering backfills already-ingested specs without clearing their hashes.
+      if (stored && stored.hash === file.sha && stored.contentHtml !== null) {
         unchanged++
         continue
       }
@@ -47,6 +64,21 @@ export default class IngestionService {
       try {
         const raw = await this.source.fetchContent(project, file.sha)
         const { title, preamble } = parsePreamble(project.parser, raw)
+
+        // Render the changed spec; a per-spec render failure is recorded and leaves the
+        // display columns untouched (stale on update, null on insert) without aborting the sync.
+        let rendered = null
+        try {
+          rendered = await this.rendering.render({
+            raw: extractBody(project.parser, raw),
+            format: file.sourceFormat as 'mediawiki' | 'markdown',
+            parser: project.parser,
+            numberBase: project.numberBase,
+            imageBaseUrl: rawBaseUrl(project.repo, file.path),
+          })
+        } catch (error) {
+          errors.push({ number: file.number, message: `render: ${(error as Error).message}` })
+        }
 
         await Document.updateOrCreate(
           { project: project.key, number: file.number },
@@ -58,6 +90,13 @@ export default class IngestionService {
             sortOrder: file.sortOrder,
             rawContent: raw,
             hash: file.sha,
+            ...(rendered
+              ? {
+                  contentHtml: rendered.contentHtml,
+                  contentText: rendered.contentText,
+                  toc: rendered.toc,
+                }
+              : {}),
           }
         )
 
@@ -142,6 +181,20 @@ export default class IngestionService {
       return
     }
     const raw = await this.source.fetchContent(project, home.sha)
+
+    let rendered = null
+    try {
+      rendered = await this.rendering.render({
+        raw,
+        format: home.format as 'mediawiki' | 'markdown',
+        parser: project.parser,
+        numberBase: project.numberBase,
+        imageBaseUrl: rawBaseUrl(project.repo, project.repo.homeFile ?? ''),
+      })
+    } catch {
+      // Leave home_html unchanged on a render failure; the raw home is still captured.
+    }
+
     await ProjectMeta.updateOrCreate(
       { project: project.key },
       {
@@ -149,6 +202,7 @@ export default class IngestionService {
         homeFormat: home.format,
         homeSourceUrl: home.url,
         homeHash: home.sha,
+        ...(rendered ? { homeHtml: rendered.contentHtml } : {}),
       }
     )
   }

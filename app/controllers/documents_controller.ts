@@ -1,5 +1,4 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import string from '@adonisjs/core/helpers/string'
 import Document from '#models/document'
 import { canonicalize } from '#values/document_number'
 import type { Field, RelatedItem } from '#types/document_display'
@@ -43,6 +42,7 @@ export default class DocumentsController {
     const aboutFields: Field[] = []
     let authors: string[] = []
     let status: string | undefined
+    let tags: string[] = []
 
     for (const entry of project.display) {
       const value = preamble[entry.key]
@@ -60,6 +60,10 @@ export default class DocumentsController {
         status = Array.isArray(value) ? value[0] : value
         continue
       }
+      if (entry.kind === 'tags') {
+        tags = Array.isArray(value) ? value : [value]
+        continue
+      }
       const bucket = entry.placement === 'header' ? headerFields : aboutFields
       bucket.push({ label: entry.label, value })
     }
@@ -74,15 +78,13 @@ export default class DocumentsController {
       }
     })
 
-    const summary = string.excerpt(document.contentText ?? '', 240)
-
     return view.render('pages/documents/show', {
       document,
       status,
       authors,
+      tags,
       headerFields,
       aboutFields,
-      summary,
       related,
       historyCount: Number(document.$extras.commits_count ?? 0),
     })

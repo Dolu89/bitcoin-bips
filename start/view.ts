@@ -39,6 +39,10 @@ const STATUS_KIND: Record<string, string> = {
   Rejected: 'closed',
   Replaced: 'closed',
   Obsolete: 'closed',
+  // NIP classification statuses (lowercase, from the `` `draft` `` tag line).
+  draft: 'draft',
+  final: 'active',
+  deprecated: 'closed',
 }
 edge.global('statusKind', (status?: string) => (status && STATUS_KIND[status]) || 'closed')
 

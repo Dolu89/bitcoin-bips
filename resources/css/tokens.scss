@@ -205,7 +205,7 @@
   --radius-pill: 999px;
 
   --maxw-prose: 760px; /* reading column */
-  --maxw-page: 1240px; /* app shell */
+  --maxw-page: 1360px; /* app shell */
 }
 
 /* ============================================================
@@ -216,6 +216,15 @@
   font-size: var(--text-base);
   line-height: var(--leading-body);
   color: var(--fg);
+}
+/* Offset anchored headings below the sticky top header on TOC click / deep link. */
+.bips-prose :is(h1, h2, h3, h4, h5, h6)[id] {
+  scroll-margin-top: 90px;
+}
+/* The `#` anchor sits before the heading text. */
+.bips-prose .bips-anchor {
+  margin-right: 0.35em;
+  text-decoration: none;
 }
 .bips-prose h1,
 .bips-h1 {
@@ -245,6 +254,11 @@
   margin: 0 0 var(--space-4);
   text-wrap: pretty;
 }
+.bips-prose img,
+.bips-prose svg {
+  max-width: 100%;
+  height: auto;
+}
 .bips-prose a,
 .bips-link {
   color: var(--link);
@@ -264,6 +278,11 @@
   color: var(--code-fg);
   padding: 0.1em 0.4em;
   border-radius: var(--radius-sm);
+}
+/* Inline code (not Shiki blocks, which scroll) wraps so long unbroken tokens
+   — e.g. bech32 `nostr:...` strings in a list — don't overflow the column. */
+.bips-prose :not(pre) > code {
+  overflow-wrap: anywhere;
 }
 .bips-eyebrow {
   font-family: var(--font-display);

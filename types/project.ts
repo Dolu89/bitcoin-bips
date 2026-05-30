@@ -28,12 +28,13 @@ export type ProjectConfig = {
 
   /**
    * Preamble fields to surface, in order. `kind:'authors'` → clickable author
-   * chips; `kind:'status'` → colored badge; otherwise plain labeled text.
+   * chips; `kind:'status'` → colored badge; `kind:'tags'` → bare classification chips
+   * (e.g. NIP `mandatory`/`relay`); otherwise plain labeled text.
    */
   display: {
     key: string
     label: string
     placement: 'header' | 'about'
-    kind?: 'authors' | 'status'
+    kind?: 'authors' | 'status' | 'tags'
   }[]
 }

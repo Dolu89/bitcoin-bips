@@ -11,5 +11,8 @@
         {{ Array.isArray(field.value) ? field.value.join(', ') : field.value }}
       </span>
     @end
+    @each(tag in tags)
+      <span class="bip-tag">{{ tag }}</span>
+    @end
   </div>
 </header>

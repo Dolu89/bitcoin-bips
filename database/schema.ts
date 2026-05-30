@@ -109,6 +109,7 @@ export class ProjectMetaSchema extends BaseModel {
     'homeContent',
     'homeFormat',
     'homeHash',
+    'homeHtml',
     'homeSourceUrl',
     'lastUpdate',
     'project',
@@ -120,6 +121,8 @@ export class ProjectMetaSchema extends BaseModel {
   declare homeFormat: string | null
   @column()
   declare homeHash: string | null
+  @column()
+  declare homeHtml: string | null
   @column()
   declare homeSourceUrl: string | null
   @column.dateTime()

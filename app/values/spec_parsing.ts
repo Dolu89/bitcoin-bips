@@ -16,12 +16,28 @@ function cleanAuthor(raw: string): string {
 }
 
 /**
- * BIP preamble: a leading `<pre>` block of RFC-2822 `Key: value` lines, where a line
- * indented with whitespace continues the previous key's value (used for multiple authors).
+ * Locate a BIP's leading preamble block and the body after it. BIPs ship in two formats: the
+ * mediawiki form wraps the preamble in `<pre>…</pre>`, the markdown form in a leading ```` ``` ````
+ * fence. The inner `Key: value` structure is identical, so only the delimiter differs.
+ */
+function splitBipPreamble(raw: string): { block: string; body: string } {
+  const pre = raw.match(/<pre>([\s\S]*?)<\/pre>\s*/i)
+  if (pre) {
+    return { block: pre[1], body: raw.slice(pre.index! + pre[0].length) }
+  }
+  const fence = raw.match(/^\s*```[^\n]*\n([\s\S]*?)\n```[ \t]*\r?\n?/)
+  if (fence) {
+    return { block: fence[1], body: raw.slice(fence.index! + fence[0].length) }
+  }
+  return { block: '', body: raw }
+}
+
+/**
+ * BIP preamble: a leading block of RFC-2822 `Key: value` lines (in a `<pre>` or ```` ``` ````
+ * fence), where a line indented with whitespace continues the previous key's value (extra authors).
  */
 function parseBipPreamble(raw: string): { title: string; preamble: Preamble } {
-  const match = raw.match(/<pre>([\s\S]*?)<\/pre>/i)
-  const block = match ? match[1] : ''
+  const { block } = splitBipPreamble(raw)
   const lines = block.split(/\r?\n/)
 
   const fields: Record<string, string[]> = {}
@@ -46,7 +62,9 @@ function parseBipPreamble(raw: string): { title: string; preamble: Preamble } {
   const preamble: Preamble = {}
   for (const [key, values] of Object.entries(fields)) {
     if (key === 'Author' || key === 'Authors') {
-      preamble[key] = values
+      // Canonical key `Author` regardless of the source spelling (some BIPs use `Authors`),
+      // so the per-project display config resolves it.
+      preamble.Author = values
         .flatMap((v) => v.split(','))
         .map(cleanAuthor)
         .filter(Boolean)
@@ -59,12 +77,49 @@ function parseBipPreamble(raw: string): { title: string; preamble: Preamble } {
   return { title, preamble }
 }
 
-/** NIP preamble: title from the first `# H1`, dropping a leading `NIP-<n>:` label. */
+/** Ordered heading texts of a markdown doc, covering both ATX (`#`) and setext (`===`/`---`). */
+function nipHeadings(raw: string): string[] {
+  const found: { index: number; text: string }[] = []
+  for (const m of raw.matchAll(/^#{1,6}[ \t]+(.+?)[ \t]*$/gm)) {
+    found.push({ index: m.index ?? 0, text: m[1].trim() })
+  }
+  for (const m of raw.matchAll(/^[ \t]*(\S.*?)[ \t]*\r?\n[ \t]*([=-])\2*[ \t]*$/gm)) {
+    found.push({ index: m.index ?? 0, text: m[1].trim() })
+  }
+  return found.sort((a, b) => a.index - b.index).map((h) => h.text)
+}
+
+/** First line made only of backtick-wrapped tokens (the NIP classification tags), or `[]`. */
+function nipTags(raw: string): string[] {
+  const line = raw.match(/^[ \t]*((?:`[^`]+`[ \t]*)+)$/m)
+  return line ? [...line[1].matchAll(/`([^`]+)`/g)].map((m) => m[1]) : []
+}
+
+/**
+ * NIP preamble: NIPs have no `<pre>` block. The descriptive title is the first heading that
+ * isn't the `NIP-<n>` label (ATX or setext); the classification line (`` `draft` `mandatory` ``)
+ * becomes Status (first tag) + Tags (the rest).
+ */
 function parseNipPreamble(raw: string): { title: string; preamble: Preamble } {
-  const heading = raw.match(/^#\s+(.+)$/m)
-  const rawTitle = heading ? heading[1].trim() : ''
-  const title = rawTitle.replace(/^NIP-[0-9a-fA-F]+\s*:\s*/, '').trim()
-  return { title, preamble: {} }
+  let title = ''
+  for (const heading of nipHeadings(raw)) {
+    const stripped = heading.replace(/^NIP-[0-9a-fA-F]+\s*:?\s*/i, '').trim()
+    if (stripped) {
+      title = stripped
+      break
+    }
+  }
+
+  const preamble: Preamble = {}
+  const tags = nipTags(raw)
+  if (tags.length) {
+    preamble.Status = tags[0]
+    if (tags.length > 1) {
+      preamble.Tags = tags.slice(1)
+    }
+  }
+
+  return { title, preamble }
 }
 
 /** Dispatch preamble parsing on the project's parser strategy. */
@@ -102,4 +157,22 @@ export function extractReferences(parser: ParserKind, raw: string): string[] {
   }
 
   return found
+}
+
+/**
+ * The spec body to render — the preamble lives in metadata, not the content. For BIPs that drops
+ * the leading `<pre>` preamble block; for NIPs the leading `# H1` title (shown in the header).
+ */
+export function extractBody(parser: ParserKind, raw: string): string {
+  if (parser === 'bip') {
+    return splitBipPreamble(raw).body
+  }
+  // NIP front matter (shown in the header, not the body): the `NIP-<n>` label heading, the
+  // title heading (ATX or setext), and the classification tag line.
+  return raw
+    .replace(/^\s*NIP-[0-9a-fA-F]+[ \t]*\r?\n=+[ \t]*\r?\n/i, '')
+    .replace(/^\s*#\s*NIP-[0-9a-fA-F]+[ \t]*\r?\n/i, '')
+    .replace(/^\s*\S.*?[ \t]*\r?\n[=-]+[ \t]*\r?\n/, '')
+    .replace(/^\s*#{1,6}\s+.+\r?\n/, '')
+    .replace(/^\s*(?:`[^`]+`[ \t]*)+\r?\n/, '')
 }

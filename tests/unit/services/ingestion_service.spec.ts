@@ -7,6 +7,7 @@ import IngestionService from '#services/ingestion_service'
 import SpecSourceService from '#services/spec_source_service'
 import FakeSpecSourceService from '#services/fake_spec_source_service'
 import { DocumentFactory } from '#database/factories/document_factory'
+import { useFakePandoc } from '#tests/helpers'
 import { projects } from '#config/projects'
 
 const bips = projects.find((p) => p.key === 'bips')!
@@ -14,10 +15,11 @@ const bips = projects.find((p) => p.key === 'bips')!
 test.group('services/ingestion_service syncProject', (group) => {
   group.each.setup(() => testUtils.db().truncate())
 
-  test('inserts a new spec with raw content + metadata, rendered columns null', async ({
+  test('inserts a new spec with raw content + metadata and rendered columns', async ({
     assert,
     swap,
   }) => {
+    useFakePandoc()
     swap(
       SpecSourceService,
       new FakeSpecSourceService({
@@ -34,14 +36,15 @@ test.group('services/ingestion_service syncProject', (group) => {
     assert.equal(doc.rawContent, '<pre>\n  Title: HD Wallets\n</pre>')
     assert.equal(doc.hash, 's1')
     assert.equal(doc.sortOrder, 32)
-    assert.equal(doc.contentHtml, null)
-    assert.equal(doc.contentText, null)
-    assert.equal(doc.toc, null)
+    assert.isNotNull(doc.contentHtml)
+    assert.isNotNull(doc.contentText)
+    assert.isNotNull(doc.toc)
     assert.equal(summary.added, 1)
     assert.equal(summary.updated, 0)
   })
 
   test('updates a spec in place when the upstream blob sha differs', async ({ assert, swap }) => {
+    useFakePandoc()
     await DocumentFactory.merge({
       project: 'bips',
       number: '5',
@@ -73,6 +76,7 @@ test.group('services/ingestion_service syncProject', (group) => {
     assert,
     swap,
   }) => {
+    useFakePandoc()
     const fake = new FakeSpecSourceService({
       specs: { bips: [{ number: '1', sha: 's1', content: '<pre>\n  Title: One\n</pre>' }] },
     })
@@ -101,6 +105,7 @@ test.group('services/ingestion_service syncProject', (group) => {
     assert,
     swap,
   }) => {
+    useFakePandoc()
     swap(
       SpecSourceService,
       new FakeSpecSourceService({
@@ -128,6 +133,7 @@ test.group('services/ingestion_service syncProject', (group) => {
   })
 
   test('drops a reference to a number absent from the catalog', async ({ assert, swap }) => {
+    useFakePandoc()
     swap(
       SpecSourceService,
       new FakeSpecSourceService({
@@ -149,6 +155,7 @@ test.group('services/ingestion_service syncProject', (group) => {
   })
 
   test('captures the project home file into project_metas', async ({ assert, swap }) => {
+    useFakePandoc()
     swap(
       SpecSourceService,
       new FakeSpecSourceService({
@@ -173,6 +180,7 @@ test.group('services/ingestion_service syncProject', (group) => {
     assert,
     swap,
   }) => {
+    useFakePandoc()
     const fake = new FakeSpecSourceService({
       specs: { bips: [{ number: '1', sha: 's1', content: '<pre>\n  Title: One\n</pre>' }] },
       home: { bips: { sha: 'h1', content: '# Home' } },
@@ -196,6 +204,7 @@ test.group('services/ingestion_service syncProject', (group) => {
     assert,
     swap,
   }) => {
+    useFakePandoc()
     swap(
       SpecSourceService,
       new FakeSpecSourceService({
@@ -222,6 +231,7 @@ test.group('services/ingestion_service syncProject', (group) => {
   })
 
   test('stamps the project lastUpdate after a sync', async ({ assert, swap }) => {
+    useFakePandoc()
     swap(
       SpecSourceService,
       new FakeSpecSourceService({
@@ -234,5 +244,88 @@ test.group('services/ingestion_service syncProject', (group) => {
 
     const meta = await ProjectMeta.findOrFail('bips')
     assert.isNotNull(meta.lastUpdate)
+  })
+
+  test('a render failure is isolated and the sync continues', async ({ assert, swap }) => {
+    useFakePandoc({ shouldThrow: (raw) => raw.includes('BOOM') })
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [
+            { number: '1', sha: 'ok', content: '<pre>\n  Title: Healthy\n</pre>' },
+            {
+              number: '2',
+              sha: 'bad',
+              content: '<pre>\n  Title: Broken\n</pre>\nBOOM in the body.',
+            },
+          ],
+        },
+      })
+    )
+    const service = await app.container.make(IngestionService)
+
+    const summary = await service.syncProject(bips)
+
+    const healthy = await Document.query()
+      .where('project', 'bips')
+      .where('number', '1')
+      .firstOrFail()
+    const broken = await Document.query()
+      .where('project', 'bips')
+      .where('number', '2')
+      .firstOrFail()
+    assert.isNotNull(healthy.contentHtml)
+    assert.isNull(broken.contentHtml)
+    assert.isNull(broken.toc)
+    assert.lengthOf(summary.errors, 1)
+    assert.equal(summary.errors[0].number, '2')
+    assert.equal(summary.added, 2)
+  })
+
+  test('re-renders a previously-ingested spec whose contentHtml is null', async ({
+    assert,
+    swap,
+  }) => {
+    const pandoc = useFakePandoc()
+    await DocumentFactory.merge({
+      project: 'bips',
+      number: '9',
+      hash: 's9',
+      rawContent: '<pre>\n  Title: Nine\n</pre>',
+      contentHtml: null,
+    }).create()
+
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: { bips: [{ number: '9', sha: 's9', content: '<pre>\n  Title: Nine\n</pre>' }] },
+      })
+    )
+    const service = await app.container.make(IngestionService)
+
+    const summary = await service.syncProject(bips)
+
+    const doc = await Document.query().where('project', 'bips').where('number', '9').firstOrFail()
+    assert.isNotNull(doc.contentHtml)
+    assert.equal(summary.unchanged, 0)
+    assert.lengthOf(pandoc.calls, 1)
+  })
+
+  test('renders the curated home into home_html', async ({ assert, swap }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: { bips: [{ number: '1', sha: 's1', content: '<pre>\n  Title: One\n</pre>' }] },
+        home: { bips: { sha: 'h1', content: '# Home\n\nText.', format: 'markdown' } },
+      })
+    )
+    const service = await app.container.make(IngestionService)
+
+    await service.syncProject(bips)
+
+    const meta = await ProjectMeta.findOrFail('bips')
+    assert.isNotNull(meta.homeHtml)
   })
 })

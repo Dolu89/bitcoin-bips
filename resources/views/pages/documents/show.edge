@@ -8,9 +8,7 @@
         All proposals
       </a>
       @include('partials/documents/show/header')
-      @if(summary)
-        <p class="bip-detail__summary">{{ summary }}</p>
-      @end
+      @include('partials/documents/show/preamble')
       @include('partials/documents/show/content')
     </article>
 

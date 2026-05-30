@@ -29,6 +29,79 @@
   color: var(--brand);
 }
 
+/* Shiki code blocks — give the block a surface, padding and a border (Shiki's inline
+   background is page-white in light mode), and switch to the dark token set under [data-theme='dark']. */
+.bips-prose .shiki {
+  margin: 0 0 var(--space-4);
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  font-size: 0.85em;
+  line-height: 1.5;
+  background-color: var(--surface-code) !important;
+}
+.bips-prose .shiki code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+[data-theme='dark'] .bips-prose .shiki,
+[data-theme='dark'] .bips-prose .shiki span {
+  color: var(--shiki-dark) !important;
+}
+
+/* collapsible source preamble (closed by default) */
+.bip-preamble {
+  margin: 0 0 var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-code);
+}
+.bip-preamble > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--fg-muted);
+  list-style: none;
+}
+.bip-preamble > summary::-webkit-details-marker {
+  display: none;
+}
+.bip-preamble__chevron {
+  display: inline-flex;
+  transition: transform 0.15s ease;
+}
+.bip-preamble[open] > summary .bip-preamble__chevron {
+  transform: rotate(90deg);
+}
+.bip-preamble[open] > summary {
+  border-bottom: 1px solid var(--border);
+}
+.bip-preamble__dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 12px 14px;
+  font-size: var(--text-sm);
+}
+.bip-preamble__dl dt {
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+.bip-preamble__dl dd {
+  margin: 0;
+  word-break: break-word;
+}
+
 /* center header — replaces the gray preamble box */
 .bip-head {
   margin-bottom: 22px;

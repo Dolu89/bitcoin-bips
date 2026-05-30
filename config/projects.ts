@@ -27,6 +27,7 @@ export const projects: ProjectConfig[] = [
       { key: 'Layer', label: 'Layer', placement: 'header' },
       { key: 'Author', label: 'Authors', placement: 'about', kind: 'authors' },
       { key: 'Created', label: 'Created', placement: 'about' },
+      { key: 'Assigned', label: 'Created', placement: 'about' },
     ],
   },
   {
@@ -47,7 +48,10 @@ export const projects: ProjectConfig[] = [
     },
     numberBase: 16,
     parser: 'nip',
-    display: [],
+    display: [
+      { key: 'Status', label: 'Status', placement: 'header', kind: 'status' },
+      { key: 'Tags', label: 'Tags', placement: 'header', kind: 'tags' },
+    ],
   },
 ]
 
