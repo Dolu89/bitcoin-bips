@@ -1,0 +1,48 @@
+<footer class="bips-footer">
+  <div class="bips-footer__inner">
+    @if(project)
+      <div class="bips-footer__brand">
+        <img src="{{ project.logo }}" width="22" height="22" alt="" />
+        <span>
+          This site is a mirror of the
+          <a
+            class="bips-link"
+            href="https://github.com/{{ project.repo.owner }}/{{ project.repo.repo }}"
+            target="_blank"
+            rel="noreferrer"
+          >
+            official
+            {{ project.name }}
+            repository
+          </a>.
+        </span>
+      </div>
+
+      <div class="bips-footer__actions">
+        <a class="donate-btn" href="/support">
+          @svg('lucide:zap', { width: 16, height: 16 })
+          Donate
+        </a>
+        <a
+          class="footer-link"
+          href="https://github.com/Dolu89/bitcoin-bips"
+          target="_blank"
+          rel="noreferrer"
+        >
+          @svg('lucide:github', { width: 16, height: 16 })
+          Source code
+        </a>
+      </div>
+
+      <div class="bips-footer__meta">
+        @if(lastUpdate)
+          Last update:
+          <strong>{{ lastUpdate.toFormat('yyyy-MM-dd') }}</strong>
+        @else
+          Last update:
+          <strong>—</strong>
+        @end
+      </div>
+    @end
+  </div>
+</footer>

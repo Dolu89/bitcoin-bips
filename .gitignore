@@ -24,3 +24,7 @@ yarn-error.log
 
 # Platform specific
 .DS_Store
+# Flow / design tooling — never commit (local-only)
+.flow/
+design-system/
+.claude/skills/flow-*

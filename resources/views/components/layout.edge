@@ -1,17 +1,36 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AdonisJS - A fully featured web framework for Node.js</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <title>{{ title ?? (project ? project.name : 'Specs') }}</title>
+    @if(description)
+      <meta name="description" content="{{ description }}" />
+    @end
+
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="preconnect" href="https://api.fonts.coollabs.io" />
+    @vite(['resources/css/app.scss', 'resources/js/app.js'])
     @stack('dumper')
   </head>
   <body>
-    @include('partials/header')
-    <main>
-      @include('partials/flash_alerts')
-      {{{ await $slots.main() }}}
-    </main>
+    <div class="bips-app" style="{{ brandStyle(project) }}">
+      @include('partials/header')
+      <main>
+        @if(flashMessages)
+          @include('partials/flash_alerts')
+        @end
+        {{{ await $slots.main() }}}
+      </main>
+      @include('partials/footer')
+    </div>
   </body>
 </html>

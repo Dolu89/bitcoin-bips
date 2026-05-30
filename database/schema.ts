@@ -7,6 +7,109 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class DocumentCommitSchema extends BaseModel {
+  static $columns = [
+    'additions',
+    'author',
+    'committedAt',
+    'createdAt',
+    'deletions',
+    'documentId',
+    'hash',
+    'id',
+    'message',
+  ] as const
+  $columns = DocumentCommitSchema.$columns
+  @column()
+  declare additions: number
+  @column()
+  declare author: string
+  @column.dateTime()
+  declare committedAt: DateTime
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare deletions: number
+  @column()
+  declare documentId: number
+  @column()
+  declare hash: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare message: string
+}
+
+export class DocumentLinkSchema extends BaseModel {
+  static $columns = ['createdAt', 'fromDocumentId', 'id', 'toDocumentId'] as const
+  $columns = DocumentLinkSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare fromDocumentId: number
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare toDocumentId: number
+}
+
+export class DocumentSchema extends BaseModel {
+  static $columns = [
+    'contentHtml',
+    'contentText',
+    'createdAt',
+    'hash',
+    'id',
+    'number',
+    'preamble',
+    'project',
+    'sortOrder',
+    'sourceFormat',
+    'sourceUrl',
+    'title',
+    'toc',
+    'updatedAt',
+  ] as const
+  $columns = DocumentSchema.$columns
+  @column()
+  declare contentHtml: string
+  @column()
+  declare contentText: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare hash: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare number: string
+  @column()
+  declare preamble: string
+  @column()
+  declare project: string
+  @column()
+  declare sortOrder: number
+  @column()
+  declare sourceFormat: string
+  @column()
+  declare sourceUrl: string
+  @column()
+  declare title: string
+  @column()
+  declare toc: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class ProjectMetaSchema extends BaseModel {
+  static $columns = ['lastUpdate', 'project'] as const
+  $columns = ProjectMetaSchema.$columns
+  @column.dateTime()
+  declare lastUpdate: DateTime | null
+  @column({ isPrimary: true })
+  declare project: string
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns

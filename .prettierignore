@@ -1,3 +1,6 @@
 .adonisjs
 node_modules
 build
+.flow/
+design-system/
+.claude/skills/flow-*

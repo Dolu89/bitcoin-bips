@@ -1,0 +1,30 @@
+{{-- Bare drawer body, injected client-side. --}}
+@if(commits.length)
+  <ol class="commits">
+    @each((commit, index) in commits)
+      <li class="commit {{ index === 0 ? 'is-latest' : '' }}">
+        <span class="commit__node">
+          @svg('lucide:git-commit-horizontal', { width: 16, height: 16 })
+        </span>
+        <div class="commit__body">
+          <div class="commit__msg">{{ commit.message }}</div>
+          <div class="commit__meta">
+            <code class="commit__hash">{{ commit.hash }}</code>
+            <span class="commit__author">{{ commit.author }}</span>
+            <span class="commit__date">{{ commit.committedAt.toFormat('yyyy-MM-dd') }}</span>
+            @if(index === 0)
+              <span class="commit__tag">latest</span>
+            @end
+          </div>
+          <div class="commit__diff">
+            <span class="commit__add">+{{ commit.additions }}</span>
+            <span class="commit__del">−{{ commit.deletions }}</span>
+            <span class="diffbar">{{{ diffBar(commit.additions, commit.deletions) }}}</span>
+          </div>
+        </div>
+      </li>
+    @end
+  </ol>
+@else
+  <p class="commits-empty">No change history available yet for this {{ project.specLabel }}.</p>
+@end

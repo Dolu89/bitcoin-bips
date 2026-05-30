@@ -1,6 +1,11 @@
-<h1>404 - Page not found</h1>
-<p>
-  This template is rendered by the
-  <a href="http://docs.adonisjs.com/guides/exception-handling#status-pages">status pages feature</a>
-  of the global exception handler.
-</p>
+@layout({ title: '404' })
+  <div class="bips-notfound">
+    <p class="bips-notfound__code">404</p>
+    @if(project)
+      <p class="bips-notfound__msg">This page doesn't exist on {{ project.name }}.</p>
+      <a class="bips-link" href="/">← Back to all proposals</a>
+    @else
+      <p class="bips-notfound__msg">No specs project is configured for this address.</p>
+    @end
+  </div>
+@end

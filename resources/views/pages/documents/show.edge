@@ -1,0 +1,23 @@
+@layout({ title: project.specLabel + ' ' + document.number + ' - ' + document.title })
+  <div class="bip-layout">
+    @include('partials/documents/show/toc')
+
+    <article class="bip-detail bips-prose">
+      <a class="bips-back" href="/">
+        @svg('lucide:arrow-left', { width: 16, height: 16 })
+        All proposals
+      </a>
+      @include('partials/documents/show/header')
+      @if(summary)
+        <p class="bip-detail__summary">{{ summary }}</p>
+      @end
+      @include('partials/documents/show/content')
+    </article>
+
+    <aside class="bip-meta-rail">
+      @include('partials/documents/show/about')
+      @include('partials/documents/show/related')
+      @include('partials/documents/show/history_button')
+    </aside>
+  </div>
+@end

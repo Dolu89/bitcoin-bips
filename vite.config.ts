@@ -8,7 +8,7 @@ export default defineConfig({
        * Entrypoints of your application. Each entrypoint will
        * result in a separate bundle.
        */
-      entrypoints: ['resources/css/app.css', 'resources/js/app.js'],
+      entrypoints: ['resources/css/app.scss', 'resources/js/app.js'],
 
       /**
        * Paths to watch and reload the browser on file change
@@ -18,6 +18,12 @@ export default defineConfig({
   ],
 
   server: {
+    /**
+     * The app is served per project domain (bips.xyz, nips.nostr.com, local
+     * aliases like *.frise.io). Allow any host on the Vite dev server so those
+     * domains reach the app in development. Dev-only — Vite is not used in prod.
+     */
+    allowedHosts: true,
     watch: {
       ignored: ['**/storage/**', '**/tmp/**'],
     },

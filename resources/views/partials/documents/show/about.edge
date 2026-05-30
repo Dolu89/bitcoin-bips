@@ -1,0 +1,24 @@
+<section class="rail-card">
+  <div class="rail-label">About this {{ project.specLabel }}</div>
+  <dl class="meta-dl">
+    @if(authors.length)
+      <dt>Authors</dt>
+      <dd class="meta-authors">
+        @each(author in authors)
+          <a class="author-chip" href="/search?q={{ encodeURIComponent(author) }}">{{ author }}</a>
+        @end
+      </dd>
+    @end
+    @each(field in aboutFields)
+      <dt>{{ field.label }}</dt>
+      <dd>{{ Array.isArray(field.value) ? field.value.join(', ') : field.value }}</dd>
+    @end
+
+    <dt>Source</dt>
+    <dd>
+      <a class="bips-link" href="{{ document.sourceUrl }}" target="_blank" rel="noreferrer">
+        View on GitHub →
+      </a>
+    </dd>
+  </dl>
+</section>

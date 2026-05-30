@@ -1,0 +1,15 @@
+<header class="bip-head">
+  <div class="bip-head__eyebrow">{{ project.specLabel }}&nbsp;{{ document.number }}</div>
+  <h1 class="bip-head__title">{{ document.title }}</h1>
+  <div class="bip-head__tags">
+    @if(status)
+      @!statusBadge({ status: status })
+    @end
+    @each(field in headerFields)
+      <span class="bip-tag">
+        <span class="bip-tag__k">{{ field.label }}</span>
+        {{ Array.isArray(field.value) ? field.value.join(', ') : field.value }}
+      </span>
+    @end
+  </div>
+</header>

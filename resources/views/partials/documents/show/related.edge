@@ -1,0 +1,19 @@
+@if(related.length)
+  <section class="rail-card">
+    <div class="rail-label">Related <span class="rail-count">{{ related.length }}</span></div>
+    <ul class="related-list">
+      @each(item in related)
+        <li>
+          <a class="related-item" href="{{ urlFor('documents.show', [item.number]) }}">
+            <span class="related-item__n">{{ project.specLabel }} {{ item.number }}</span>
+            <span class="related-item__title">{{ item.title }}</span>
+            <span class="related-item__foot">
+              @!statusBadge({ status: item.status, dot: false })
+              @svg('lucide:chevron-right', { width: 15, height: 15 })
+            </span>
+          </a>
+        </li>
+      @end
+    </ul>
+  </section>
+@end

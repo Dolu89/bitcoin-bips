@@ -11,20 +11,16 @@ import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
 import router from '@adonisjs/core/services/router'
 
-router.on('/').render('pages/home').as('home')
+/**
+ * Broad spec-number matcher (decimal digits are a subset of hex). Strict
+ * per-base validation lives in `canonicalize`, not here.
+ */
+router.where('number', { match: /^[0-9a-fA-F]+$/ })
 
+// Every public page lives under the host's project. Register static routes before `/:number`.
 router
   .group(() => {
-    router.get('signup', [controllers.NewAccount, 'create'])
-    router.post('signup', [controllers.NewAccount, 'store'])
-
-    router.get('login', [controllers.Session, 'create'])
-    router.post('login', [controllers.Session, 'store'])
+    router.get('/:number/history', [controllers.Documents, 'history'])
+    router.get('/:number', [controllers.Documents, 'show'])
   })
-  .use(middleware.guest())
-
-router
-  .group(() => {
-    router.post('logout', [controllers.Session, 'destroy'])
-  })
-  .use(middleware.auth())
+  .use(middleware.requireProject())

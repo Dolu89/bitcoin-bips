@@ -24,4 +24,8 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Session
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
+
+  // Projects — optional per-project domain override (defaults live in config/projects.ts).
+  BIPS_DOMAIN: Env.schema.string.optional(),
+  NIPS_DOMAIN: Env.schema.string.optional(),
 })
