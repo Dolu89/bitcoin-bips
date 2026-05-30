@@ -20,6 +20,8 @@ router.where('number', { match: /^[0-9a-fA-F]+$/ })
 // Every public page lives under the host's project. Register static routes before `/:number`.
 router
   .group(() => {
+    router.get('/', [controllers.Index, 'show']).as('home')
+    router.get('/robots.txt', [controllers.Robots, 'show'])
     router.get('/:number/history', [controllers.Documents, 'history'])
     router.get('/:number', [controllers.Documents, 'show'])
   })

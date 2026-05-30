@@ -89,4 +89,34 @@ Alpine.data('historyDrawer', (url) => ({
   },
 }))
 
+// Index page: status filter chips toggle table row visibility.
+;(function () {
+  const filters = document.querySelector('.bips-filters')
+  if (!filters) return
+
+  const chips = filters.querySelectorAll('.bips-chip[data-filter]')
+  const countEl = filters.querySelector('.bips-filters__count')
+  const tbody = document.querySelector('.bips-table tbody')
+  if (!chips.length || !tbody) return
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const value = chip.dataset.filter
+      chips.forEach((c) => c.classList.remove('is-active'))
+      chip.classList.add('is-active')
+
+      let visible = 0
+      tbody.querySelectorAll('tr').forEach((row) => {
+        const match = value === 'all' || row.dataset.status === value
+        row.style.display = match ? '' : 'none'
+        if (match) visible++
+      })
+
+      if (countEl) {
+        countEl.textContent = `${visible} proposal${visible === 1 ? '' : 's'}`
+      }
+    })
+  })
+})()
+
 Alpine.start()

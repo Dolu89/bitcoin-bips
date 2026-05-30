@@ -1,0 +1,33 @@
+<div class="bips-table-wrap">
+  <table class="bips-table">
+    <thead>
+      <tr>
+        <th class="col-n">#</th>
+        <th>Title</th>
+        @each(col in tableColumns)
+          <th class="col-{{ col.label.toLowerCase() }}">{{ col.label }}</th>
+        @end
+      </tr>
+    </thead>
+    <tbody>
+      @each(row in rows)
+        <tr
+          data-status="{{ row.status ?? '' }}"
+          onclick="location='{{ urlFor('documents.show', { number: row.number }) }}'"
+        >
+          <td class="col-n">{{ row.number }}</td>
+          <td><span class="bips-table__link">{{ row.title }}</span></td>
+          @each(cell in row.cells)
+            @if(cell.kind === 'status')
+              <td class="col-status">
+                @!statusBadge({ status: cell.value })
+              </td>
+            @else
+              <td class="col-{{ cell.label.toLowerCase() }}">{{ cell.value ?? '—' }}</td>
+            @end
+          @end
+        </tr>
+      @end
+    </tbody>
+  </table>
+</div>

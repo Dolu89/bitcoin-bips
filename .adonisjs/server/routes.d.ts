@@ -4,14 +4,20 @@ type ParamValue = string | number | bigint | boolean
 
 export type ScannedRoutes = {
   ALL: {
+    'home': { paramsTuple?: []; params?: {} }
+    'robots.show': { paramsTuple?: []; params?: {} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
   }
   GET: {
+    'home': { paramsTuple?: []; params?: {} }
+    'robots.show': { paramsTuple?: []; params?: {} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
   }
   HEAD: {
+    'home': { paramsTuple?: []; params?: {} }
+    'robots.show': { paramsTuple?: []; params?: {} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
   }

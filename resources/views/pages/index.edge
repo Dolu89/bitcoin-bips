@@ -1,0 +1,27 @@
+@layout()
+  <div class="bips-page">
+    <h1 class="bips-title">{{ project.name }}</h1>
+    <div class="bips-intro bips-prose">
+      @if(project.key === 'bips')
+        <p>
+          People wishing to submit BIPs first should propose their idea or document to the
+          <a class="bips-link" href="https://groups.google.com/g/bitcoindev" target="_blank" rel="noreferrer">bitcoin-dev mailing list</a>.
+          After discussion, please open a PR. After copy-editing and acceptance, it will be published here.
+        </p>
+        <p>
+          Having a BIP here does not make it a formally accepted standard until its status becomes
+          <strong>Final</strong> or <strong>Active</strong>.
+        </p>
+      @else
+        <p>{{ project.tagline }}</p>
+      @end
+    </div>
+
+    @if(total === 0)
+      @include('partials/index/empty_catalog')
+    @else
+      @include('partials/index/filters')
+      @include('partials/index/table')
+    @end
+  </div>
+@end
