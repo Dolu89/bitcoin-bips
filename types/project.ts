@@ -10,10 +10,21 @@ export type ProjectConfig = {
   logo: string
   specLabel: string
 
-  repo: { owner: string; repo: string; branch?: string }
+  repo: {
+    owner: string
+    repo: string
+    branch?: string
+    /** Anchored regex source matching a spec file; capture group 1 = raw spec number. */
+    filePattern: string
+    /** Curated home file in the repo (e.g. 'README.md'). Absent = home derived from the catalog. */
+    homeFile?: string
+  }
 
   /** 10 = decimal spec numbers (BIPs), 16 = hex (NIPs). */
   numberBase: 10 | 16
+
+  /** Preamble extraction strategy: 'bip' (mediawiki <pre> RFC-2822) | 'nip' (markdown H1). */
+  parser: 'bip' | 'nip'
 
   /**
    * Preamble fields to surface, in order. `kind:'authors'` → clickable author

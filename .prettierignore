@@ -4,3 +4,6 @@ build
 .flow/
 design-system/
 .claude/skills/flow-*
+
+# Edge templates — prettier has no Edge parser and mangles them (inserts stray blank lines).
+*.edge

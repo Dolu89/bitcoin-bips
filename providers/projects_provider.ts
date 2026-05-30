@@ -19,6 +19,20 @@ export default class ProjectsProvider {
           throw new Error(`config/projects: project "${project.key || '?'}" is missing "${field}"`)
         }
       }
+      // Ingestion source: owner/repo/filePattern required, and the pattern must compile.
+      for (const field of ['owner', 'repo', 'filePattern'] as const) {
+        if (!project.repo?.[field]) {
+          throw new Error(`config/projects: project "${project.key}" is missing "repo.${field}"`)
+        }
+      }
+      try {
+        new RegExp(project.repo.filePattern)
+      } catch {
+        throw new Error(
+          `config/projects: project "${project.key}" has an invalid "repo.filePattern"`
+        )
+      }
+
       if (keys.has(project.key)) {
         throw new Error(`config/projects: duplicate key "${project.key}"`)
       }

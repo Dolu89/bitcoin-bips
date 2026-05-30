@@ -74,7 +74,7 @@ export default class DocumentsController {
       }
     })
 
-    const summary = string.excerpt(document.contentText, 240)
+    const summary = string.excerpt(document.contentText ?? '', 240)
 
     return view.render('pages/documents/show', {
       document,

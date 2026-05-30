@@ -12,8 +12,15 @@ export const projects: ProjectConfig[] = [
     color: '#FF9500',
     logo: '/logos/bitcoin-coin.svg',
     specLabel: 'BIP',
-    repo: { owner: 'bitcoin', repo: 'bips' },
+    repo: {
+      owner: 'bitcoin',
+      repo: 'bips',
+      branch: 'master',
+      filePattern: '^bip-(\\d+)\\.(mediawiki|md)$',
+      homeFile: 'README.mediawiki',
+    },
     numberBase: 10,
+    parser: 'bip',
     display: [
       { key: 'Status', label: 'Status', placement: 'header', kind: 'status' },
       { key: 'Type', label: 'Type', placement: 'header' },
@@ -31,8 +38,15 @@ export const projects: ProjectConfig[] = [
     color: '#8E44AD',
     logo: '/logos/nostr.svg',
     specLabel: 'NIP',
-    repo: { owner: 'nostr-protocol', repo: 'nips' },
+    repo: {
+      owner: 'nostr-protocol',
+      repo: 'nips',
+      branch: 'master',
+      filePattern: '^([0-9a-fA-F]+)\\.md$',
+      homeFile: 'README.md',
+    },
     numberBase: 16,
+    parser: 'nip',
     display: [],
   },
 ]

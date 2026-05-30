@@ -18,6 +18,7 @@
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
+    "#commands/*": "./commands/*.js",
     "#exceptions/*": "./app/exceptions/*.js",
     "#models/*": "./app/models/*.js",
     "#mails/*": "./app/mails/*.js",
@@ -74,6 +75,7 @@
     "edge-iconify": "^2.0.2",
     "edge.js": "^6.5.1",
     "luxon": "^3.7.2",
+    "octokit": "^5.0.5",
     "reflect-metadata": "^0.2.2"
   },
   "hotHook": {

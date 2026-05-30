@@ -63,6 +63,7 @@ export class DocumentSchema extends BaseModel {
     'number',
     'preamble',
     'project',
+    'rawContent',
     'sortOrder',
     'sourceFormat',
     'sourceUrl',
@@ -72,9 +73,9 @@ export class DocumentSchema extends BaseModel {
   ] as const
   $columns = DocumentSchema.$columns
   @column()
-  declare contentHtml: string
+  declare contentHtml: string | null
   @column()
-  declare contentText: string
+  declare contentText: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column()
@@ -87,6 +88,8 @@ export class DocumentSchema extends BaseModel {
   declare preamble: string
   @column()
   declare project: string
+  @column()
+  declare rawContent: string | null
   @column()
   declare sortOrder: number
   @column()
@@ -102,8 +105,23 @@ export class DocumentSchema extends BaseModel {
 }
 
 export class ProjectMetaSchema extends BaseModel {
-  static $columns = ['lastUpdate', 'project'] as const
+  static $columns = [
+    'homeContent',
+    'homeFormat',
+    'homeHash',
+    'homeSourceUrl',
+    'lastUpdate',
+    'project',
+  ] as const
   $columns = ProjectMetaSchema.$columns
+  @column()
+  declare homeContent: string | null
+  @column()
+  declare homeFormat: string | null
+  @column()
+  declare homeHash: string | null
+  @column()
+  declare homeSourceUrl: string | null
   @column.dateTime()
   declare lastUpdate: DateTime | null
   @column({ isPrimary: true })
