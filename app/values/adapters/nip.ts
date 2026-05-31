@@ -134,15 +134,21 @@ export const nipAdapter: ProjectAdapter = {
 
   /**
    * Drop the NIP front matter (shown in the header, not the body): the `NIP-<n>` label heading,
-   * the title heading (ATX or setext), and the classification tag line.
+   * the title heading (ATX or setext), and the classification tag line. A leading blockquote
+   * admonition (e.g. `> __Warning__ …` that some NIPs put above the title) is peeled off first and
+   * re-prepended, so the warning survives while the front matter beneath it is still stripped.
    */
   extractBody(raw: string): string {
-    return raw
+    const blockquote = raw.match(/^(?:[ \t]*>.*\r?\n?)+\r?\n*/)
+    const prefix = blockquote ? blockquote[0] : ''
+    const body = raw
+      .slice(prefix.length)
       .replace(/^\s*NIP-[0-9a-fA-F]+[ \t]*\r?\n=+[ \t]*\r?\n/i, '')
       .replace(/^\s*#\s*NIP-[0-9a-fA-F]+[ \t]*\r?\n/i, '')
       .replace(/^\s*\S.*?[ \t]*\r?\n[=-]+[ \t]*\r?\n/, '')
       .replace(/^\s*#{1,6}\s+.+\r?\n/, '')
       .replace(/^\s*(?:`[^`]+`[ \t]*)+\r?\n/, '')
+    return prefix + body
   },
 
   extractReferences(raw: string): string[] {

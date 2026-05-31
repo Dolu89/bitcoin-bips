@@ -42,6 +42,11 @@ export type FakeSource = {
   commits?: Record<string, Record<string, FakeCommit[]>>
   /** Total commit count per project key, then per file path; defaults to the served commits' length. */
   commitTotals?: Record<string, Record<string, number>>
+  /**
+   * First (oldest) commit ISO date per project key, then per file path. Absent → null (no API call,
+   * unlike the real service which would hit GitHub). Lets tests assert the captured `firstCommitAt`.
+   */
+  firstCommitDates?: Record<string, Record<string, string>>
   /** File paths whose listSpecCommits should throw (commit-capture error path). */
   failingCommitPaths?: string[]
   /** Project keys whose listSpecFiles should throw (whole-project upstream failure). */
@@ -72,6 +77,10 @@ export default class FakeSpecSourceService extends SpecSourceService {
       return explicit
     }
     return this.fixture.commits?.[project.key]?.[path]?.length ?? 0
+  }
+
+  async firstCommitDate(project: ProjectConfig, path: string): Promise<string | null> {
+    return this.fixture.firstCommitDates?.[project.key]?.[path] ?? null
   }
 
   async listSpecFiles(project: ProjectConfig): Promise<SpecFileRef[]> {
