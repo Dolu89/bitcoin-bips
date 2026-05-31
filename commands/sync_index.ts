@@ -6,8 +6,8 @@ import type { CommandOptions } from '@adonisjs/core/types/ace'
  * database. With no argument, reindexes every enabled project; with a project key, that one.
  * Independent of a sync — useful after a fresh Meilisearch instance.
  */
-export default class SearchReindex extends BaseCommand {
-  static commandName = 'search:reindex'
+export default class SyncIndex extends BaseCommand {
+  static commandName = 'sync:index'
   static description = 'Rebuild the search index from the catalog in the database'
 
   static options: CommandOptions = { startApp: true }

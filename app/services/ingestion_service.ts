@@ -17,7 +17,13 @@ import SearchService from '#services/search_service'
 import { parsePreamble, extractReferences, extractBody } from '#values/spec_parsing'
 import { canonicalize } from '#values/document_number'
 import type { ProjectConfig } from '#types/project'
-import type { SyncSummary, SyncError, SpecFileRef } from '#types/ingestion'
+import type {
+  SyncSummary,
+  SyncError,
+  SpecFileRef,
+  ReindexOutcome,
+  FullSyncReport,
+} from '#types/ingestion'
 
 /** Most recent commits captured per spec — the "recent window" cap (revisable). */
 const RECENT_COMMIT_LIMIT = 5
@@ -165,9 +171,45 @@ export default class IngestionService {
     const { projects } = await import('#config/projects')
     const summaries: SyncSummary[] = []
     for (const project of projects.filter((p) => p.enabled)) {
-      summaries.push(await this.syncProject(project))
+      // A whole-project failure (e.g. the upstream listing throws) is captured as an error
+      // summary so one broken project never aborts the sync of the others.
+      try {
+        summaries.push(await this.syncProject(project))
+      } catch (error) {
+        summaries.push({
+          project: project.key,
+          added: 0,
+          updated: 0,
+          unchanged: 0,
+          links: 0,
+          errors: [{ number: '*', message: (error as Error).message }],
+        })
+      }
     }
     return summaries
+  }
+
+  /**
+   * Full ordered sync for an external scheduler: ingest every enabled project, then — and only
+   * once all ingests have completed — rebuild the search index for each. A whole-project ingest
+   * failure (captured by syncAll) and a reindex failure are both recorded in the report rather
+   * than aborting; the caller (the command) turns the report into an exit code.
+   */
+  async syncEverything(): Promise<FullSyncReport> {
+    const { projects } = await import('#config/projects')
+    const ingest = await this.syncAll()
+    const reindex: ReindexOutcome[] = []
+    for (const project of projects.filter((p) => p.enabled)) {
+      // A reindex failure is captured (not swallowed like the per-project hook) so the command
+      // can surface it and fail its exit code.
+      try {
+        const count = await this.search.reindexProject(project)
+        reindex.push({ project: project.key, count })
+      } catch (error) {
+        reindex.push({ project: project.key, count: 0, error: (error as Error).message })
+      }
+    }
+    return { ingest, reindex }
   }
 
   /**

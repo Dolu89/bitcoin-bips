@@ -52,3 +52,17 @@ export type SyncSummary = {
   links: number
   errors: SyncError[]
 }
+
+/** Outcome of rebuilding the search index for one project during a full sync. */
+export type ReindexOutcome = {
+  project: string
+  count: number
+  /** Set when the reindex failed; captured (not thrown) so the run continues. */
+  error?: string
+}
+
+/** Aggregate report of a full ordered sync: every project ingest, then every reindex. */
+export type FullSyncReport = {
+  ingest: SyncSummary[]
+  reindex: ReindexOutcome[]
+}

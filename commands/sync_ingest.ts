@@ -6,8 +6,8 @@ import type { CommandOptions } from '@adonisjs/core/types/ace'
  * argument, syncs every enabled project; with a project key, syncs that one. Decoupled from
  * the HTTP server — the site keeps serving while this runs.
  */
-export default class IngestRun extends BaseCommand {
-  static commandName = 'ingest:run'
+export default class SyncIngest extends BaseCommand {
+  static commandName = 'sync:ingest'
   static description = 'Sync specs from the upstream source into the catalog'
 
   static options: CommandOptions = { startApp: true }

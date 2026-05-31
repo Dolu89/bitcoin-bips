@@ -1,22 +1,22 @@
 import { test } from '@japa/runner'
 import ace from '@adonisjs/core/services/ace'
 import testUtils from '@adonisjs/core/services/test_utils'
-import SearchReindex from '#commands/search_reindex'
+import SyncIndex from '#commands/sync_index'
 import { DocumentFactory } from '#database/factories/document_factory'
 import { useFakeSearch } from '#tests/helpers'
 
-test.group('commands/search_reindex', (group) => {
+test.group('commands/sync_index', (group) => {
   group.each.setup(() => testUtils.db().truncate())
   group.each.setup(() => {
     ace.ui.switchMode('raw')
     return () => ace.ui.switchMode('normal')
   })
 
-  test('search:reindex builds the index for one project and logs the count', async () => {
+  test('sync:index builds the index for one project and logs the count', async () => {
     const fake = useFakeSearch()
     await DocumentFactory.merge({ project: 'bips' }).createMany(3)
 
-    const command = await ace.create(SearchReindex, ['bips'])
+    const command = await ace.create(SyncIndex, ['bips'])
     await command.exec()
 
     command.assertSucceeded()
@@ -27,10 +27,10 @@ test.group('commands/search_reindex', (group) => {
     }
   })
 
-  test('search:reindex exits with code 1 for an unknown project', async ({ assert }) => {
+  test('sync:index exits with code 1 for an unknown project', async ({ assert }) => {
     const fake = useFakeSearch()
 
-    const command = await ace.create(SearchReindex, ['ghost'])
+    const command = await ace.create(SyncIndex, ['ghost'])
     await command.exec()
 
     command.assertFailed()

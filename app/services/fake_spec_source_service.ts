@@ -44,6 +44,8 @@ export type FakeSource = {
   commitTotals?: Record<string, Record<string, number>>
   /** File paths whose listSpecCommits should throw (commit-capture error path). */
   failingCommitPaths?: string[]
+  /** Project keys whose listSpecFiles should throw (whole-project upstream failure). */
+  failingListProjects?: string[]
 }
 
 export default class FakeSpecSourceService extends SpecSourceService {
@@ -73,6 +75,9 @@ export default class FakeSpecSourceService extends SpecSourceService {
   }
 
   async listSpecFiles(project: ProjectConfig): Promise<SpecFileRef[]> {
+    if (this.fixture.failingListProjects?.includes(project.key)) {
+      throw new Error(`Simulated listing failure for project ${project.key}`)
+    }
     const specs = this.fixture.specs?.[project.key] ?? []
     return specs.map((spec) => ({
       path: `${spec.number}`,

@@ -637,3 +637,154 @@ test.group('services/ingestion_service reindex hook', (group) => {
     assert.isNotNull(doc)
   })
 })
+
+test.group('services/ingestion_service syncAll', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+
+  test('a project whose listing fails yields an error summary and the others still sync', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [{ number: '1', sha: 'b1', content: '<pre>\n  Title: One\n</pre>' }],
+          nips: [{ number: '1', sha: 'n1', content: '# NIP-1: Basic protocol' }],
+        },
+        failingListProjects: ['bips'],
+      })
+    )
+    useFakeSearch()
+    const service = await app.container.make(IngestionService)
+
+    const summaries = await service.syncAll()
+
+    const bipsSummary = summaries.find((s) => s.project === 'bips')!
+    const nipsSummary = summaries.find((s) => s.project === 'nips')!
+    assert.isAtLeast(bipsSummary.errors.length, 1)
+    assert.equal(bipsSummary.errors[0].number, '*')
+    assert.equal(bipsSummary.added, 0)
+    assert.isAtLeast(nipsSummary.added, 1)
+
+    const bipsDocs = await Document.query().where('project', 'bips')
+    const nipsDocs = await Document.query().where('project', 'nips')
+    assert.lengthOf(bipsDocs, 0)
+    assert.isAbove(nipsDocs.length, 0)
+  })
+})
+
+test.group('services/ingestion_service syncEverything', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+
+  test('syncs every enabled project, then reindexes each only after all ingests complete', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [{ number: '1', sha: 'b1', content: '<pre>\n  Title: One\n</pre>' }],
+          nips: [{ number: '1', sha: 'n1', content: '# NIP-1: Basic protocol' }],
+        },
+      })
+    )
+    const search = useFakeSearch()
+    const service = await app.container.make(IngestionService)
+
+    const report = await service.syncEverything()
+
+    const bipsIngest = report.ingest.find((s) => s.project === 'bips')!
+    const nipsIngest = report.ingest.find((s) => s.project === 'nips')!
+    assert.isAtLeast(bipsIngest.added, 1)
+    assert.isAtLeast(nipsIngest.added, 1)
+    assert.includeMembers(
+      report.reindex.map((r) => r.project),
+      ['bips', 'nips']
+    )
+
+    // report.reindex carries only the final ordered loop (the kept per-project inline hook does
+    // not push to it), so its project order is the loop's order.
+    assert.deepEqual(
+      report.reindex.map((r) => r.project),
+      ['bips', 'nips']
+    )
+
+    // The final reindex loop is the last pass over the projects; its tail in reindexCalls runs
+    // after every project's ingest has persisted, so its first call already sees the whole
+    // catalog — proof the loop followed all ingests rather than interleaving with them.
+    const counted = await Document.query().count('* as total')
+    const totalDocs = Number(counted[0].$extras.total)
+    const finalLoop = search.reindexCalls.slice(-2)
+    assert.deepEqual(
+      finalLoop.map((c) => c.project),
+      ['bips', 'nips']
+    )
+    assert.equal(finalLoop[0].catalogTotal, totalDocs)
+  })
+
+  test('a failing reindex is captured in the report and does not throw', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [{ number: '1', sha: 'b1', content: '<pre>\n  Title: One\n</pre>' }],
+          nips: [{ number: '1', sha: 'n1', content: '# NIP-1: Basic protocol' }],
+        },
+      })
+    )
+    useFakeSearch({ throwOnReindex: true })
+    const service = await app.container.make(IngestionService)
+
+    const report = await service.syncEverything()
+
+    assert.isNotEmpty(report.reindex)
+    for (const outcome of report.reindex) {
+      assert.isDefined(outcome.error)
+    }
+    for (const summary of report.ingest) {
+      assert.lengthOf(summary.errors, 0)
+    }
+    const docs = await Document.query()
+    assert.isAbove(docs.length, 0)
+  })
+
+  test('a failed project ingest does not stop the final search refresh', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [{ number: '1', sha: 'b1', content: '<pre>\n  Title: One\n</pre>' }],
+          nips: [{ number: '1', sha: 'n1', content: '# NIP-1: Basic protocol' }],
+        },
+        failingListProjects: ['bips'],
+      })
+    )
+    const search = useFakeSearch()
+    const service = await app.container.make(IngestionService)
+
+    const report = await service.syncEverything()
+
+    const bipsIngest = report.ingest.find((s) => s.project === 'bips')!
+    const nipsIngest = report.ingest.find((s) => s.project === 'nips')!
+    assert.isAtLeast(bipsIngest.errors.length, 1)
+    assert.isAtLeast(nipsIngest.added, 1)
+    assert.include(
+      search.reindexCalls.map((c) => c.project),
+      'nips'
+    )
+    const nipsDocs = await Document.query().where('project', 'nips')
+    assert.isAbove(nipsDocs.length, 0)
+  })
+})

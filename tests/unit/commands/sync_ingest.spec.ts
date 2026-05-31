@@ -2,7 +2,7 @@ import { test } from '@japa/runner'
 import ace from '@adonisjs/core/services/ace'
 import testUtils from '@adonisjs/core/services/test_utils'
 import Document from '#models/document'
-import IngestRun from '#commands/ingest_run'
+import SyncIngest from '#commands/sync_ingest'
 import SpecSourceService from '#services/spec_source_service'
 import FakeSpecSourceService from '#services/fake_spec_source_service'
 import type { FakeSource } from '#services/fake_spec_source_service'
@@ -14,17 +14,17 @@ const FIXTURE: FakeSource = {
   },
 }
 
-test.group('commands/ingest_run', (group) => {
+test.group('commands/sync_ingest', (group) => {
   group.each.setup(() => testUtils.db().truncate())
   group.each.setup(() => {
     ace.ui.switchMode('raw')
     return () => ace.ui.switchMode('normal')
   })
 
-  test('ingest:run bips syncs that project and succeeds', async ({ assert, swap }) => {
+  test('sync:ingest bips syncs that project and succeeds', async ({ assert, swap }) => {
     swap(SpecSourceService, new FakeSpecSourceService(FIXTURE))
 
-    const command = await ace.create(IngestRun, ['bips'])
+    const command = await ace.create(SyncIngest, ['bips'])
     await command.exec()
 
     command.assertSucceeded()
@@ -33,10 +33,10 @@ test.group('commands/ingest_run', (group) => {
     command.assertLogMatches(/bips/)
   })
 
-  test('ingest:run with no argument syncs every enabled project', async ({ assert, swap }) => {
+  test('sync:ingest with no argument syncs every enabled project', async ({ assert, swap }) => {
     swap(SpecSourceService, new FakeSpecSourceService(FIXTURE))
 
-    const command = await ace.create(IngestRun, [])
+    const command = await ace.create(SyncIngest, [])
     await command.exec()
 
     command.assertSucceeded()
@@ -46,10 +46,10 @@ test.group('commands/ingest_run', (group) => {
     assert.isNotNull(nipsDoc)
   })
 
-  test('ingest:run <unknown> fails with exit code 1', async ({ assert, swap }) => {
+  test('sync:ingest <unknown> fails with exit code 1', async ({ assert, swap }) => {
     swap(SpecSourceService, new FakeSpecSourceService(FIXTURE))
 
-    const command = await ace.create(IngestRun, ['ghost'])
+    const command = await ace.create(SyncIngest, ['ghost'])
     await command.exec()
 
     command.assertFailed()

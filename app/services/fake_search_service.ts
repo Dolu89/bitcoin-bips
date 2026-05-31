@@ -35,7 +35,7 @@ export type FakeSearchOptions = {
 export default class FakeSearchService extends SearchService {
   #store: FakeSearchRecord[]
   #throwOnReindex: boolean
-  reindexCalls: { project: string; count: number }[] = []
+  reindexCalls: { project: string; count: number; catalogTotal: number }[] = []
 
   constructor(options: FakeSearchOptions = {}) {
     super()
@@ -48,9 +48,13 @@ export default class FakeSearchService extends SearchService {
   }
 
   async reindexProject(project: ProjectConfig): Promise<number> {
+    // Snapshot the whole catalog size at call time so callers can prove the reindex ran after
+    // every project's ingest completed (cross-project ordering), not just this project's.
+    const counted = await Document.query().count('* as total')
+    const catalogTotal = Number(counted[0].$extras.total)
     if (this.#throwOnReindex) {
       // Record the attempt before failing so callers can prove the hook invoked reindex.
-      this.reindexCalls.push({ project: project.key, count: 0 })
+      this.reindexCalls.push({ project: project.key, count: 0, catalogTotal })
       throw new Error('search index unreachable (fake)')
     }
     const documents = await Document.query().where('project', project.key)
@@ -67,7 +71,7 @@ export default class FakeSearchService extends SearchService {
         layer: record.layer,
       })
     }
-    this.reindexCalls.push({ project: project.key, count: documents.length })
+    this.reindexCalls.push({ project: project.key, count: documents.length, catalogTotal })
     return documents.length
   }
 
