@@ -74,35 +74,6 @@ export function assignAnchorsAndBuildToc($: CheerioAPI): string {
   return items.length === 0 ? '' : buildTocHtml(items)
 }
 
-const SPEC_LINK: Record<ParserKind, RegExp> = {
-  bip: /^bip-0*([0-9]+)\.(?:mediawiki|md)(#.*)?$/i,
-  nip: /^0*([0-9a-f]+)\.md(#.*)?$/i,
-}
-
-/**
- * Rewrite links to a spec file of the same project to the on-site URL (`/<number>`), preserving a
- * fragment. Leaves absolute (`http(s):`, `//`), `mailto:`, and bare `#` anchors untouched.
- */
-export function rewriteInternalLinks($: CheerioAPI, parser: ParserKind, numberBase: 10 | 16): void {
-  const pattern = SPEC_LINK[parser]
-  $('a[href]').each((_, el) => {
-    const $el = $(el)
-    const href = $el.attr('href') ?? ''
-    if (/^(https?:|mailto:|\/\/|#)/i.test(href)) {
-      return
-    }
-    const match = href.match(pattern)
-    if (!match) {
-      return
-    }
-    const canonical = canonicalize(match[1], numberBase)
-    if (canonical === null) {
-      return
-    }
-    $el.attr('href', `/${canonical}${match[2] ?? ''}`)
-  })
-}
-
 /** Rewrite relative image sources onto the repo's raw base; absolute and data URIs untouched. */
 export function rewriteImages($: CheerioAPI, imageBaseUrl: string): void {
   $('img[src]').each((_, el) => {

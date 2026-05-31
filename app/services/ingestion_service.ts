@@ -14,7 +14,7 @@ import ProjectMeta from '#models/project_meta'
 import SpecSourceService from '#services/spec_source_service'
 import RenderingService from '#services/rendering_service'
 import SearchService from '#services/search_service'
-import { parsePreamble, extractReferences, extractBody } from '#values/spec_parsing'
+import { adapterFor } from '#values/adapters'
 import { canonicalize } from '#values/document_number'
 import type { ProjectConfig } from '#types/project'
 import type {
@@ -44,6 +44,7 @@ export default class IngestionService {
   ) {}
 
   async syncProject(project: ProjectConfig): Promise<SyncSummary> {
+    const adapter = adapterFor(project.parser)
     const errors: SyncError[] = []
     let added = 0
     let updated = 0
@@ -94,16 +95,16 @@ export default class IngestionService {
         let doc: Document
         if (needsContent) {
           const raw = await this.source.fetchContent(project, file.sha)
-          const { title, preamble } = parsePreamble(project.parser, raw)
+          const { title, preamble } = adapter.parsePreamble(raw)
 
           // Render the changed spec; a per-spec render failure is recorded and leaves the
           // display columns untouched (stale on update, null on insert) without aborting the sync.
           let rendered = null
           try {
             rendered = await this.rendering.render({
-              raw: extractBody(project.parser, raw),
+              raw: adapter.extractBody(raw),
               format: file.sourceFormat as 'mediawiki' | 'markdown',
-              parser: project.parser,
+              adapter,
               numberBase: project.numberBase,
               imageBaseUrl: rawBaseUrl(project.repo, file.path),
             })
@@ -131,7 +132,7 @@ export default class IngestionService {
             }
           )
 
-          refsByNumber.set(file.number, extractReferences(project.parser, raw))
+          refsByNumber.set(file.number, adapter.extractReferences(raw))
           if (stored) {
             updated++
           } else {
@@ -308,7 +309,7 @@ export default class IngestionService {
       rendered = await this.rendering.render({
         raw,
         format: home.format as 'mediawiki' | 'markdown',
-        parser: project.parser,
+        adapter: adapterFor(project.parser),
         numberBase: project.numberBase,
         imageBaseUrl: rawBaseUrl(project.repo, project.repo.homeFile ?? ''),
       })

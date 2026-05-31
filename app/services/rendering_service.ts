@@ -9,18 +9,14 @@ import * as cheerio from 'cheerio'
 import type { CheerioAPI } from 'cheerio'
 import { codeToHtml } from 'shiki'
 import PandocService from '#services/pandoc_service'
-import {
-  assignAnchorsAndBuildToc,
-  rewriteInternalLinks,
-  rewriteImages,
-  extractText,
-} from '#values/html_postprocess'
-import type { ParserKind } from '#values/spec_parsing'
+import { assignAnchorsAndBuildToc, rewriteImages, extractText } from '#values/html_postprocess'
+import type { ProjectAdapter } from '#types/project_adapter'
 
 export type RenderInput = {
   raw: string
   format: 'mediawiki' | 'markdown'
-  parser: ParserKind
+  /** The project's adapter — supplies project-specific internal-link rewriting. */
+  adapter: ProjectAdapter
   numberBase: 10 | 16
   imageBaseUrl: string
 }
@@ -41,7 +37,7 @@ export default class RenderingService {
     const html = await this.pandoc.toHtml(input.raw, input.format)
     const $ = cheerio.load(html, null, false)
 
-    rewriteInternalLinks($, input.parser, input.numberBase)
+    input.adapter.rewriteInternalLinks($, input.numberBase)
     rewriteImages($, input.imageBaseUrl)
 
     // Plain text before anchor links are appended, so the `#` markers stay out of the projection.
