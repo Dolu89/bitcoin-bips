@@ -8,4 +8,5 @@ export const controllers = {
   Index: () => import('#controllers/index_controller'),
   Robots: () => import('#controllers/robots_controller'),
   Search: () => import('#controllers/search_controller'),
+  Sitemap: () => import('#controllers/sitemap_controller'),
 }

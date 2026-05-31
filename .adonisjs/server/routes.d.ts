@@ -6,6 +6,7 @@ export type ScannedRoutes = {
   ALL: {
     'home': { paramsTuple?: []; params?: {} }
     'robots.show': { paramsTuple?: []; params?: {} }
+    'sitemap.show': { paramsTuple?: []; params?: {} }
     'search.show': { paramsTuple?: []; params?: {} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
@@ -13,6 +14,7 @@ export type ScannedRoutes = {
   GET: {
     'home': { paramsTuple?: []; params?: {} }
     'robots.show': { paramsTuple?: []; params?: {} }
+    'sitemap.show': { paramsTuple?: []; params?: {} }
     'search.show': { paramsTuple?: []; params?: {} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
@@ -20,6 +22,7 @@ export type ScannedRoutes = {
   HEAD: {
     'home': { paramsTuple?: []; params?: {} }
     'robots.show': { paramsTuple?: []; params?: {} }
+    'sitemap.show': { paramsTuple?: []; params?: {} }
     'search.show': { paramsTuple?: []; params?: {} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }

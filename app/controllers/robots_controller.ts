@@ -12,8 +12,9 @@ export default class RobotsController {
     return [
       'User-agent: *',
       'Allow: /',
+      'Disallow: /search',
       '',
-      `# Sitemap: https://${project.domain}/sitemap.xml`,
+      `Sitemap: https://${project.domain}/sitemap.xml`,
     ].join('\n')
   }
 }
