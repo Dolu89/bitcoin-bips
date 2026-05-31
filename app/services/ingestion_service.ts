@@ -269,6 +269,14 @@ export default class IngestionService {
     try {
       const commits = await this.source.listSpecCommits(project, file.path, RECENT_COMMIT_LIMIT)
       const total = await this.source.countSpecCommits(project, file.path)
+      // first commit is immutable → fetch only when not yet captured (the network call stays out of
+      // the transaction). last commit moves with each change → refreshed from the newest of the
+      // newest-first window every sync.
+      const firstCommitAt =
+        doc.firstCommitAt ??
+        (await this.source
+          .firstCommitDate(project, file.path)
+          .then((iso) => (iso ? DateTime.fromISO(iso) : null)))
       await db.transaction(async (trx) => {
         doc.useTransaction(trx)
         await doc.related('commits').query().delete()
@@ -285,6 +293,10 @@ export default class IngestionService {
           )
         }
         doc.commitCount = total
+        doc.firstCommitAt = firstCommitAt
+        if (commits.length > 0) {
+          doc.lastCommitAt = DateTime.fromISO(commits[0].committedAt)
+        }
         await doc.save()
       })
     } catch (error) {

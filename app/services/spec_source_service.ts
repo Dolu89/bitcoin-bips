@@ -117,6 +117,38 @@ export default class SpecSourceService {
     return last ? Number(last[1]) : res.data.length
   }
 
+  /**
+   * Author date of a spec file's FIRST (oldest) commit, or null when it has none. Same Link-header
+   * trick as countSpecCommits: page with per_page=1, read the `rel="last"` page index (the oldest
+   * commit), then fetch exactly that one commit. No `rel="last"` → a single page, so the head commit
+   * is also the first.
+   */
+  async firstCommitDate(project: ProjectConfig, path: string): Promise<string | null> {
+    const { owner, repo, branch } = project.repo
+    const head = await this.client.rest.repos.listCommits({
+      owner,
+      repo,
+      sha: branch ?? 'HEAD',
+      path,
+      per_page: 1,
+    })
+    if (head.data.length === 0) {
+      return null
+    }
+    const last = head.headers.link?.match(/[?&]page=(\d+)>;\s*rel="last"/)
+    const oldest = last
+      ? await this.client.rest.repos.listCommits({
+          owner,
+          repo,
+          sha: branch ?? 'HEAD',
+          path,
+          per_page: 1,
+          page: Number(last[1]),
+        })
+      : head
+    return oldest.data[0]?.commit.author?.date ?? null
+  }
+
   /** Fetch a blob's UTF-8 content by its git sha (100 MB limit vs 1 MB for getContent). */
   async fetchContent(project: ProjectConfig, fileSha: string): Promise<string> {
     const { owner, repo } = project.repo
