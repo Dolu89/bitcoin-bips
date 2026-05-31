@@ -110,6 +110,16 @@ test.group('values/spec_parsing extractBody', () => {
     assert.notInclude(body, '`draft`')
     assert.include(body, 'This NIP defines the basic protocol.')
   })
+
+  test('strips the front matter but keeps a warning blockquote that precedes it', ({ assert }) => {
+    const raw = `> __Warning__  \`unrecommended\`: vulnerable to one specific attack\n\n${NIP_SETEXT}`
+    const body = extractBody('nip', raw)
+    assert.include(body, '__Warning__')
+    assert.notInclude(body, 'NIP-01\n======')
+    assert.notInclude(body, 'Basic protocol flow description')
+    assert.notInclude(body, '`draft`')
+    assert.include(body, 'This NIP defines the basic protocol.')
+  })
 })
 
 const NIP_SETEXT = `NIP-01

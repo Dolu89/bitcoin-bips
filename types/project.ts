@@ -26,6 +26,12 @@ export type ProjectConfig = {
   /** 10 = decimal spec numbers (BIPs), 16 = hex (NIPs). */
   numberBase: 10 | 16
 
+  /**
+   * Show the collapsible full-source preamble below the header. False for projects (e.g. NIPs)
+   * whose every preamble field is already surfaced in the header, leaving the section redundant.
+   */
+  showPreamble: boolean
+
   /** Preamble extraction strategy: 'bip' (mediawiki <pre> RFC-2822) | 'nip' (markdown H1). */
   parser: 'bip' | 'nip'
 

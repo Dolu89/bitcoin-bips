@@ -22,6 +22,7 @@ export const projects: ProjectConfig[] = [
     },
     numberBase: 10,
     parser: 'bip',
+    showPreamble: true,
     display: [
       { key: 'Status', label: 'Status', placement: 'header', kind: 'status' },
       { key: 'Type', label: 'Type', placement: 'header' },
@@ -50,6 +51,7 @@ export const projects: ProjectConfig[] = [
     },
     numberBase: 16,
     parser: 'nip',
+    showPreamble: false,
     display: [
       { key: 'Status', label: 'Status', placement: 'header', kind: 'status' },
       { key: 'Tags', label: 'Tags', placement: 'header', kind: 'tags' },

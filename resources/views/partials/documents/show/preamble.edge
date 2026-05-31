@@ -1,5 +1,6 @@
-{{-- Full source preamble, collapsed by default — the metadata that isn't surfaced elsewhere. --}}
-@if(Object.keys(document.preambleData).length)
+{{-- Full source preamble, collapsed by default — the metadata that isn't surfaced elsewhere.
+     Skipped for projects whose preamble is fully shown in the header (see project.showPreamble). --}}
+@if(project.showPreamble && Object.keys(document.preambleData).length)
   <details class="bip-preamble">
     <summary>
       <span class="bip-preamble__chevron">

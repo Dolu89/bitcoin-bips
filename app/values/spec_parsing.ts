@@ -168,11 +168,19 @@ export function extractBody(parser: ParserKind, raw: string): string {
     return splitBipPreamble(raw).body
   }
   // NIP front matter (shown in the header, not the body): the `NIP-<n>` label heading, the
-  // title heading (ATX or setext), and the classification tag line.
-  return raw
+  // title heading (ATX or setext), and the classification tag line. Some NIPs precede this block
+  // with a warning blockquote (genuine content), so anchor the strip at the `NIP-<n>` label
+  // heading rather than the document start — everything before it is kept verbatim.
+  const label = raw.match(
+    /^[ \t]*(?:#+[ \t]*NIP-[0-9a-fA-F]+[ \t]*$|NIP-[0-9a-fA-F]+[ \t]*\r?\n[ \t]*=+[ \t]*$)/im
+  )
+  const start = label?.index ?? 0
+  const body = raw
+    .slice(start)
     .replace(/^\s*NIP-[0-9a-fA-F]+[ \t]*\r?\n=+[ \t]*\r?\n/i, '')
     .replace(/^\s*#\s*NIP-[0-9a-fA-F]+[ \t]*\r?\n/i, '')
     .replace(/^\s*\S.*?[ \t]*\r?\n[=-]+[ \t]*\r?\n/, '')
     .replace(/^\s*#{1,6}\s+.+\r?\n/, '')
     .replace(/^\s*(?:`[^`]+`[ \t]*)+\r?\n/, '')
+  return raw.slice(0, start) + body
 }
