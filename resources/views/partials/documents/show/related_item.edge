@@ -1,0 +1,10 @@
+{{-- One related-spec row; `spec` is a RelatedSpec from the enclosing @each. --}}
+<li>
+  <a class="related-item" href="{{ urlFor('documents.show', { number: spec.number }) }}">
+    <span class="related-item__n">{{ spec.eyebrow }}</span>
+    @each(badge in spec.badges)
+      @!badge({ badge })
+    @end
+    <span class="related-item__title">{{ spec.title }}</span>
+  </a>
+</li>

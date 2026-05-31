@@ -156,6 +156,13 @@
   letter-spacing: 0.06em;
   color: var(--fg-faint);
 }
+
+/* Classification tag chips inside the About rail's <dd>. */
+.meta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .bip-detail__summary {
   font-size: var(--text-md);
   line-height: 1.6;

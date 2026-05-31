@@ -1,18 +1,17 @@
 <header class="bip-head">
-  <div class="bip-head__eyebrow">{{ project.specLabel }}&nbsp;{{ document.number }}</div>
-  <h1 class="bip-head__title">{{ document.title }}</h1>
+  <div class="bip-head__eyebrow">{{ view.eyebrow }}</div>
+  <h1 class="bip-head__title">{{ view.title }}</h1>
   <div class="bip-head__tags">
-    @if(status)
-      @!statusBadge({ status: status })
+    @each(badge in view.badges)
+      @!badge({ badge })
     @end
-    @each(field in headerFields)
+    @each(chip in view.headerChips)
       <span class="bip-tag">
-        <span class="bip-tag__k">{{ field.label }}</span>
-        {{ Array.isArray(field.value) ? field.value.join(', ') : field.value }}
+        @if(chip.label)
+          <span class="bip-tag__k">{{ chip.label }}</span>
+        @end
+        {{ chip.value }}
       </span>
-    @end
-    @each(tag in tags)
-      <span class="bip-tag">{{ tag }}</span>
     @end
   </div>
 </header>

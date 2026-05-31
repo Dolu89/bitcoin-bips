@@ -39,26 +39,6 @@ edge.global('analyticsTag', (project?: ProjectConfig) =>
   umamiTag(project, { enabled: app.inProduction, scriptUrl: env.get('UMAMI_SCRIPT_URL') ?? null })
 )
 
-// Maps a status word to a badge color kind; unknown → neutral.
-const STATUS_KIND: Record<string, string> = {
-  Active: 'active',
-  Final: 'active',
-  Deployed: 'deploy',
-  Complete: 'deploy',
-  Draft: 'draft',
-  Proposed: 'draft',
-  Closed: 'closed',
-  Withdrawn: 'closed',
-  Rejected: 'closed',
-  Replaced: 'closed',
-  Obsolete: 'closed',
-  // NIP classification statuses (lowercase, from the `` `draft` `` tag line).
-  draft: 'draft',
-  final: 'active',
-  deprecated: 'closed',
-}
-edge.global('statusKind', (status?: string) => (status && STATUS_KIND[status]) || 'closed')
-
 // Builds the segmented additions/deletions diff bar (5 cells) for a commit.
 edge.global('diffBar', (additions: number, deletions: number) => {
   const total = Math.max(additions + deletions, 1)

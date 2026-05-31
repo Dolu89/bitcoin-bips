@@ -1,12 +1,11 @@
 /**
- * Pure post-processing of Pandoc's HTML output, run at sync by RenderingService. Operates on a
- * loaded Cheerio document in place (anchors, link/image rewrites) and derives the navigable TOC
- * and the plain-text projection. Anchor ids and TOC links come from one `slugify` so deep links
- * and the spec-reading scroll-spy stay aligned; transforms are deterministic for the hash cache.
+ * Pure, project-agnostic post-processing of Pandoc's HTML output, run at sync by RenderingService.
+ * Operates on a loaded Cheerio document in place (anchors, image rewrites) and derives the
+ * navigable TOC and the plain-text projection. Internal-link rewriting is project-specific and
+ * lives in each adapter (`rewriteInternalLinks`). Anchor ids and TOC links come from one `slugify`
+ * so deep links and the scroll-spy stay aligned; transforms are deterministic for the hash cache.
  */
 import type { CheerioAPI } from 'cheerio'
-import type { ParserKind } from '#values/spec_parsing'
-import { canonicalize } from '#values/document_number'
 
 /** Stable, lowercase anchor slug — the single source shared by headings and the TOC. */
 export function slugify(text: string): string {

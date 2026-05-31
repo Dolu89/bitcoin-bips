@@ -9,9 +9,9 @@
  */
 import SearchService from '#services/search_service'
 import Document from '#models/document'
-import { searchRecord } from '#values/search_record'
+import { adapterFor } from '#values/adapters'
 import type { ProjectConfig } from '#types/project'
-import type { SearchHit } from '#types/search'
+import type { SearchHitView } from '#types/view_models'
 
 /** A searchable record held in the fake's store. `excerpt` stands in for content_text. */
 export type FakeSearchRecord = {
@@ -48,6 +48,7 @@ export default class FakeSearchService extends SearchService {
   }
 
   async reindexProject(project: ProjectConfig): Promise<number> {
+    const adapter = adapterFor(project.adapter)
     // Snapshot the whole catalog size at call time so callers can prove the reindex ran after
     // every project's ingest completed (cross-project ordering), not just this project's.
     const counted = await Document.query().count('* as total')
@@ -59,7 +60,7 @@ export default class FakeSearchService extends SearchService {
     }
     const documents = await Document.query().where('project', project.key)
     for (const doc of documents) {
-      const record = searchRecord(project, doc)
+      const record = adapter.buildSearchRecord(project, doc)
       this.#store.push({
         project: record.project,
         number: record.number,
@@ -75,10 +76,10 @@ export default class FakeSearchService extends SearchService {
     return documents.length
   }
 
-  async search(projectKey: string, query: string): Promise<SearchHit[]> {
+  async search(project: ProjectConfig, query: string): Promise<SearchHitView[]> {
     const needle = query.trim().toLowerCase()
     return this.#store
-      .filter((record) => record.project === projectKey)
+      .filter((record) => record.project === project.key)
       .filter((record) => {
         const haystack = [record.title, record.authors.join(' '), record.excerpt ?? '']
           .join(' ')
@@ -87,11 +88,11 @@ export default class FakeSearchService extends SearchService {
       })
       .map((record) => ({
         number: record.number,
+        eyebrow: `${project.specLabel} ${record.number}`,
         titleHtml: record.title,
         excerptHtml: record.excerpt ?? '',
-        status: record.status,
-        type: record.type,
-        layer: record.layer,
+        badges: record.status ? [{ label: record.status }] : [],
+        meta: [record.type, record.layer].filter(Boolean).join(' · ') || undefined,
         authors: record.authors.map((name) => ({ name, html: name })),
       }))
   }

@@ -8,7 +8,17 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
 export class DocumentCommitSchema extends BaseModel {
-  static $columns = ['additions', 'author', 'committedAt', 'createdAt', 'deletions', 'documentId', 'hash', 'id', 'message'] as const
+  static $columns = [
+    'additions',
+    'author',
+    'committedAt',
+    'createdAt',
+    'deletions',
+    'documentId',
+    'hash',
+    'id',
+    'message',
+  ] as const
   $columns = DocumentCommitSchema.$columns
   @column()
   declare additions: number
@@ -44,7 +54,26 @@ export class DocumentLinkSchema extends BaseModel {
 }
 
 export class DocumentSchema extends BaseModel {
-  static $columns = ['commitCount', 'contentHtml', 'contentText', 'createdAt', 'firstCommitAt', 'hash', 'id', 'lastCommitAt', 'number', 'preamble', 'project', 'rawContent', 'sortOrder', 'sourceFormat', 'sourceUrl', 'title', 'toc', 'updatedAt'] as const
+  static $columns = [
+    'commitCount',
+    'contentHtml',
+    'contentText',
+    'createdAt',
+    'firstCommitAt',
+    'hash',
+    'id',
+    'lastCommitAt',
+    'number',
+    'preamble',
+    'project',
+    'rawContent',
+    'sortOrder',
+    'sourceFormat',
+    'sourceUrl',
+    'title',
+    'toc',
+    'updatedAt',
+  ] as const
   $columns = DocumentSchema.$columns
   @column()
   declare commitCount: number | null
@@ -85,7 +114,15 @@ export class DocumentSchema extends BaseModel {
 }
 
 export class ProjectMetaSchema extends BaseModel {
-  static $columns = ['homeContent', 'homeFormat', 'homeHash', 'homeHtml', 'homeSourceUrl', 'lastUpdate', 'project'] as const
+  static $columns = [
+    'homeContent',
+    'homeFormat',
+    'homeHash',
+    'homeHtml',
+    'homeSourceUrl',
+    'lastUpdate',
+    'project',
+  ] as const
   $columns = ProjectMetaSchema.$columns
   @column()
   declare homeContent: string | null

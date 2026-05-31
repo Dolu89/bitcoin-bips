@@ -1,24 +1,33 @@
 <section class="rail-card">
   <div class="rail-label">About this {{ project.specLabel }}</div>
   <dl class="meta-dl">
-    @if(authors.length)
-      <dt>Authors</dt>
-      <dd class="meta-authors">
-        @each(author in authors)
-          <a class="author-chip" href="/search?q={{ encodeURIComponent(author) }}">{{ author }}</a>
-        @end
-      </dd>
+    @each(slot in view.aboutSlots)
+      <dt>{{ slot.label }}</dt>
+      @if(slot.type === 'authors')
+        <dd class="meta-authors">
+          @each(author in slot.authors)
+            <a class="author-chip" href="/search?q={{ encodeURIComponent(author) }}">{{ author }}</a>
+          @end
+        </dd>
+      @elseif(slot.type === 'badges')
+        <dd class="meta-tags">
+          @each(badge in slot.badges)
+            @!badge({ badge })
+          @end
+        </dd>
+      @elseif(slot.type === 'date')
+        <dd>{{ slot.display }}</dd>
+      @elseif(slot.type === 'link')
+        <dd>
+          @if(slot.external)
+            <a class="bips-link" href="{{ slot.href }}" target="_blank" rel="noreferrer">{{ slot.text }}</a>
+          @else
+            <a class="bips-link" href="{{ slot.href }}">{{ slot.text }}</a>
+          @end
+        </dd>
+      @else
+        <dd>{{ slot.value }}</dd>
+      @end
     @end
-    @each(field in aboutFields)
-      <dt>{{ field.label }}</dt>
-      <dd>{{ Array.isArray(field.value) ? field.value.join(', ') : field.value }}</dd>
-    @end
-
-    <dt>Source</dt>
-    <dd>
-      <a class="bips-link" href="{{ document.sourceUrl }}" target="_blank" rel="noreferrer">
-        View on GitHub →
-      </a>
-    </dd>
   </dl>
 </section>

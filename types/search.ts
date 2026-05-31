@@ -1,6 +1,8 @@
 /**
- * The shape of one spec as projected into the Meilisearch `documents` index. Derived from a
- * Document's `preamble` via the project's display config — see `app/values/search_record.ts`.
+ * The wire shape of one spec as stored in the Meilisearch `documents` index. Built per project by
+ * each adapter's `buildSearchRecord` (see `app/values/adapters/<id>.ts`); the index settings in
+ * `SearchService.configureIndex` make `project`/`status`/`type`/`layer` filterable. The view-facing
+ * result shape is `SearchHitView` in `#types/view_models`, produced by `buildSearchHit`.
  */
 export type SearchRecord = {
   /** Document primary key — the Meilisearch document id. */
@@ -11,27 +13,8 @@ export type SearchRecord = {
   authors: string[]
   /** Plain-text body for full-text search + excerpts (empty string when unrendered). */
   content_text: string
+  /** Opaque facet columns an adapter may fill (kept for the fixed filterable index settings). */
   status?: string
   type?: string
   layer?: string
-}
-
-/** One author within a search hit: the plain name (for re-search) + its highlighted markup. */
-export type SearchHitAuthor = {
-  name: string
-  html: string
-}
-
-/**
- * A search result shaped for the results view. `titleHtml` / `excerptHtml` carry Meilisearch
- * highlight `<mark>` markup over otherwise-escaped plain text.
- */
-export type SearchHit = {
-  number: string
-  titleHtml: string
-  excerptHtml: string
-  status?: string
-  type?: string
-  layer?: string
-  authors: SearchHitAuthor[]
 }

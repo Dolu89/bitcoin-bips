@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Document from '#models/document'
 import ProjectMeta from '#models/project_meta'
-import { catalogView } from '#values/catalog'
+import { adapterFor } from '#values/adapters'
 
 export default class IndexController {
   async show({ view, response, request, project }: HttpContext) {
@@ -32,6 +32,9 @@ export default class IndexController {
       .select('number', 'title', 'preamble', 'sortOrder')
       .orderBy('sort_order', 'asc')
 
-    return view.render('pages/index', catalogView(project, documents))
+    return view.render(
+      'pages/index',
+      adapterFor(project.adapter).buildCatalogView(project, documents)
+    )
   }
 }

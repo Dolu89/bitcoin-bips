@@ -44,7 +44,7 @@ export default class IngestionService {
   ) {}
 
   async syncProject(project: ProjectConfig): Promise<SyncSummary> {
-    const adapter = adapterFor(project.parser)
+    const adapter = adapterFor(project.adapter)
     const errors: SyncError[] = []
     let added = 0
     let updated = 0
@@ -321,7 +321,7 @@ export default class IngestionService {
       rendered = await this.rendering.render({
         raw,
         format: home.format as 'mediawiki' | 'markdown',
-        adapter: adapterFor(project.parser),
+        adapter: adapterFor(project.adapter),
         numberBase: project.numberBase,
         imageBaseUrl: rawBaseUrl(project.repo, project.repo.homeFile ?? ''),
       })

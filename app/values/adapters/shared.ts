@@ -15,6 +15,25 @@ export function cleanAuthor(raw: string): string {
     .trim()
 }
 
+/** First scalar of a preamble value that may be a string or string[] (undefined → undefined). */
+export function scalar(value: string | string[] | undefined): string | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+  return Array.isArray(value) ? value[0] : value
+}
+
+/** Normalize a preamble author value (string or list) into a clean list of names, emails stripped. */
+export function toAuthorList(value: string | string[] | undefined): string[] {
+  if (value === undefined) {
+    return []
+  }
+  return (Array.isArray(value) ? value : [value])
+    .flatMap((entry) => entry.split(','))
+    .map((author) => author.replace(/<[^>]*>/g, '').trim())
+    .filter(Boolean)
+}
+
 /** Ordered heading texts of a markdown doc, covering both ATX (`#`) and setext (`===`/`---`). */
 export function markdownHeadings(raw: string): string[] {
   const found: { index: number; text: string }[] = []

@@ -3,7 +3,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Document from '#models/document'
 import ProjectMeta from '#models/project_meta'
 import SearchService from '#services/search_service'
-import { catalogView } from '#values/catalog'
+import { adapterFor } from '#values/adapters'
 
 /** Minimum query length before a search runs; below it, the overlay prompts to keep typing. */
 const MIN_QUERY = 3
@@ -23,7 +23,7 @@ export default class SearchController {
       if (query.length < MIN_QUERY) {
         return view.render('partials/search/results', { query, tooShort: true })
       }
-      const results = await search.search(project.key, query)
+      const results = await search.search(project, query)
       return view.render('partials/search/results', { query, results })
     }
 
@@ -39,6 +39,9 @@ export default class SearchController {
       .select('number', 'title', 'preamble', 'sortOrder')
       .orderBy('sort_order', 'asc')
 
-    return view.render('pages/index', catalogView(project, documents))
+    return view.render(
+      'pages/index',
+      adapterFor(project.adapter).buildCatalogView(project, documents)
+    )
   }
 }

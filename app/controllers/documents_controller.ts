@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Document from '#models/document'
 import { canonicalize } from '#values/document_number'
 import { githubCommitLinks } from '#values/github_links'
-import type { Field, RelatedItem } from '#types/document_display'
+import { adapterFor } from '#values/adapters'
 
 export default class DocumentsController {
   async show({ params, view, response, request, project }: HttpContext) {
@@ -26,66 +26,32 @@ export default class DocumentsController {
       .preload('relatedOut', (q) =>
         q.select('id', 'number', 'title', 'preamble').orderBy('sort_order', 'asc')
       )
+      .preload('relatedIn', (q) =>
+        q.select('id', 'number', 'title', 'preamble').orderBy('sort_order', 'asc')
+      )
       .firstOrFail()
 
-    // Conditional GET — content changes only on sync (hash = source blob sha).
+    // Conditional GET — content changes only on sync (hash = source blob sha). The git-sourced
+    // dates are backfilled without touching the hash, so fold them into the ETag too.
+    const etag = `${document.hash}-${document.firstCommitAt?.toMillis() ?? 0}-${document.lastCommitAt?.toMillis() ?? 0}`
     response.header('Cache-Control', 'public, no-cache')
-    response.header('ETag', document.hash)
-    if (request.header('if-none-match') === document.hash) {
+    response.header('ETag', etag)
+    if (request.header('if-none-match') === etag) {
       response.status(304)
       return
     }
 
-    // Derive display props by walking the project's preamble display config.
-    const preamble = document.preambleData
-    const headerFields: Field[] = []
-    const aboutFields: Field[] = []
-    let authors: string[] = []
-    let status: string | undefined
-    let tags: string[] = []
-
-    for (const entry of project.display) {
-      const value = preamble[entry.key]
-      if (value === undefined) {
-        continue
-      }
-      if (entry.kind === 'authors') {
-        authors = (Array.isArray(value) ? value : [value])
-          .flatMap((v) => v.split(','))
-          .map((author) => author.replace(/<[^>]*>/g, '').trim())
-          .filter(Boolean)
-        continue
-      }
-      if (entry.kind === 'status') {
-        status = Array.isArray(value) ? value[0] : value
-        continue
-      }
-      if (entry.kind === 'tags') {
-        tags = Array.isArray(value) ? value : [value]
-        continue
-      }
-      const bucket = entry.placement === 'header' ? headerFields : aboutFields
-      bucket.push({ label: entry.label, value })
-    }
-
-    const statusKey = project.display.find((entry) => entry.kind === 'status')?.key
-    const related: RelatedItem[] = document.relatedOut.map((spec) => {
-      const raw = statusKey ? spec.preambleData[statusKey] : undefined
-      return {
-        number: spec.number,
-        title: spec.title,
-        status: Array.isArray(raw) ? raw[0] : raw,
-      }
-    })
+    // The project's adapter owns the whole view-model; the controller stays project-agnostic.
+    const documentView = adapterFor(project.adapter).buildDocumentView(
+      document,
+      project,
+      document.relatedOut,
+      document.relatedIn
+    )
 
     return view.render('pages/documents/show', {
       document,
-      status,
-      authors,
-      tags,
-      headerFields,
-      aboutFields,
-      related,
+      view: documentView,
       historyCount: Number(document.commitCount ?? 0),
     })
   }

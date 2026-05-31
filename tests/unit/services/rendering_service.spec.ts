@@ -3,6 +3,7 @@ import app from '@adonisjs/core/services/app'
 import PandocService from '#services/pandoc_service'
 import FakePandocService from '#services/fake_pandoc_service'
 import RenderingService from '#services/rendering_service'
+import { bipAdapter } from '#values/adapters/bip'
 
 const BASE = 'https://raw.githubusercontent.com/bitcoin/bips/master/'
 
@@ -10,7 +11,7 @@ function input(extra = {}) {
   return {
     raw: 'src',
     format: 'mediawiki' as const,
-    parser: 'bip' as const,
+    adapter: bipAdapter,
     numberBase: 10 as const,
     imageBaseUrl: BASE,
     ...extra,
@@ -89,5 +90,15 @@ test.group('services/rendering_service render', () => {
     assert.include(r.contentText, 'Abstract')
     assert.include(r.contentText, 'Hello world.')
     assert.notInclude(r.contentText, '<')
+  })
+
+  test('rewrites a NIP-style markdown link with a hex number', async ({ assert, swap }) => {
+    const { nipAdapter } = await import('#values/adapters/nip')
+    swap(PandocService, new FakePandocService({ render: () => '<a href="01.md">NIP-01</a>' }))
+    const svc = await app.container.make(RenderingService)
+
+    const r = await svc.render(input({ adapter: nipAdapter, numberBase: 16 as const }))
+
+    assert.include(r.contentHtml, 'href="/1"')
   })
 })

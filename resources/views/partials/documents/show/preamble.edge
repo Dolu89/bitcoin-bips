@@ -1,6 +1,7 @@
 {{-- Full source preamble, collapsed by default — the metadata that isn't surfaced elsewhere.
-     Skipped for projects whose preamble is fully shown in the header (see project.showPreamble). --}}
-@if(project.showPreamble && Object.keys(document.preambleData).length)
+     The adapter sets `view.preamble.show` to false for projects whose preamble is fully shown
+     in the header (e.g. NIPs), leaving this section redundant. --}}
+@if(view.preamble.show && view.preamble.rows.length)
   <details class="bip-preamble">
     <summary>
       <span class="bip-preamble__chevron">
@@ -10,9 +11,9 @@
       Preamble
     </summary>
     <dl class="bip-preamble__dl">
-      @each((value, key) in document.preambleData)
-        <dt>{{ key }}</dt>
-        <dd>{{ Array.isArray(value) ? value.join(', ') : value }}</dd>
+      @each(row in view.preamble.rows)
+        <dt>{{ row.label }}</dt>
+        <dd>{{ row.value }}</dd>
       @end
     </dl>
   </details>

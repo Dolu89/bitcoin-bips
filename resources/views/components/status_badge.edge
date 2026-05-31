@@ -1,9 +1,0 @@
-{{-- Colored status pill; pass `dot: false` to hide the dot. --}}
-@if(status)
-  <span class="bip-badge" data-kind="{{ statusKind(status) }}">
-    @if(dot !== false)
-      <span class="bip-badge__dot"></span>
-    @end
-    {{ status }}
-  </span>
-@end

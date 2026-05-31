@@ -3,8 +3,8 @@
     @svg('lucide:filter', { width: 15, height: 15 })
   </span>
   <button class="bips-chip is-active" data-filter="all">All</button>
-  @each(s in statuses)
-    <button class="bips-chip" data-filter="{{ s }}">{{ s }}</button>
+  @each(f in filters)
+    <button class="bips-chip" data-filter="{{ f.key }}">{{ f.label }}</button>
   @end
   <span class="bips-filters__count">{{ total }} proposal{{ total === 1 ? '' : 's' }}</span>
 </div>

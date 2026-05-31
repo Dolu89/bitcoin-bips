@@ -1,5 +1,6 @@
 import type { ApplicationService } from '@adonisjs/core/types'
 import { projects } from '#config/projects'
+import { registeredAdapters } from '#values/adapters'
 
 /** Validates `config/projects.ts` at boot: unique keys/domains, required fields, at least one enabled. */
 export default class ProjectsProvider {
@@ -30,6 +31,14 @@ export default class ProjectsProvider {
       } catch {
         throw new Error(
           `config/projects: project "${project.key}" has an invalid "repo.filePattern"`
+        )
+      }
+
+      // The adapter id must resolve to a registered adapter (app/values/adapters/index.ts).
+      if (!registeredAdapters.includes(project.adapter)) {
+        throw new Error(
+          `config/projects: project "${project.key}" has an unknown adapter "${project.adapter}" ` +
+            `(registered: ${registeredAdapters.join(', ')})`
         )
       }
 

@@ -21,16 +21,7 @@ export const projects: ProjectConfig[] = [
       homeFile: 'README.mediawiki',
     },
     numberBase: 10,
-    parser: 'bip',
-    showPreamble: true,
-    display: [
-      { key: 'Status', label: 'Status', placement: 'header', kind: 'status' },
-      { key: 'Type', label: 'Type', placement: 'header' },
-      { key: 'Layer', label: 'Layer', placement: 'header' },
-      { key: 'Author', label: 'Authors', placement: 'about', kind: 'authors' },
-      { key: 'Created', label: 'Created', placement: 'about' },
-      { key: 'Assigned', label: 'Created', placement: 'about' },
-    ],
+    adapter: 'bip',
   },
   {
     key: 'nips',
@@ -50,12 +41,7 @@ export const projects: ProjectConfig[] = [
       homeFile: 'README.md',
     },
     numberBase: 16,
-    parser: 'nip',
-    showPreamble: false,
-    display: [
-      { key: 'Status', label: 'Status', placement: 'header', kind: 'status' },
-      { key: 'Tags', label: 'Tags', placement: 'header', kind: 'tags' },
-    ],
+    adapter: 'nip',
   },
 ]
 

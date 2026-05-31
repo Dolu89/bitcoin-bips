@@ -8,12 +8,12 @@
     data-href="{{ urlFor('documents.show', [hit.number]) }}"
   >
     <div class="result__top">
-      <span class="result__n">{{ project.specLabel }} {{ hit.number }}</span>
-      @if(hit.status)
-        @!statusBadge({ status: hit.status })
+      <span class="result__n">{{ hit.eyebrow }}</span>
+      @each(badge in hit.badges)
+        @!badge({ badge })
       @end
-      @if(hit.type)
-        <span class="result__type">{{ hit.type }}{{ hit.layer ? ' · ' + hit.layer : '' }}</span>
+      @if(hit.meta)
+        <span class="result__type">{{ hit.meta }}</span>
       @end
       <span class="result__arrow">
         @svg('lucide:arrow-right', { width: 16, height: 16 })

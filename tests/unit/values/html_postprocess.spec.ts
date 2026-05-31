@@ -3,7 +3,6 @@ import * as cheerio from 'cheerio'
 import {
   slugify,
   assignAnchorsAndBuildToc,
-  rewriteInternalLinks,
   rewriteImages,
   extractText,
 } from '#values/html_postprocess'
@@ -59,30 +58,6 @@ test.group('values/html_postprocess assignAnchorsAndBuildToc', () => {
   test('no headings yields an empty TOC', ({ assert }) => {
     const $ = cheerio.load('<p>Body only.</p>', null, false)
     assert.equal(assignAnchorsAndBuildToc($), '')
-  })
-})
-
-test.group('values/html_postprocess rewriteInternalLinks', () => {
-  test('internal BIP link "{href}" → "{expected}"')
-    .with([
-      { href: 'bip-0001.mediawiki', expected: '/1' },
-      { href: 'bip-0032.mediawiki#abstract', expected: '/32#abstract' },
-      { href: 'bip-141.md', expected: '/141' },
-      { href: 'https://example.com', expected: 'https://example.com' },
-      { href: '#section', expected: '#section' },
-      { href: 'mailto:a@b.c', expected: 'mailto:a@b.c' },
-    ])
-    .run(({ assert }, { href, expected }) => {
-      const $ = cheerio.load(`<a href="${href}">x</a>`, null, false)
-      rewriteInternalLinks($, 'bip', 10)
-      assert.equal($('a').attr('href'), expected)
-    })
-
-  test('internal NIP links rewritten in hex', ({ assert }) => {
-    const $ = cheerio.load('<a href="01.md">x</a><a href="0a.md">y</a>', null, false)
-    rewriteInternalLinks($, 'nip', 16)
-    assert.equal($('a').eq(0).attr('href'), '/1')
-    assert.equal($('a').eq(1).attr('href'), '/a')
   })
 })
 

@@ -7,9 +7,10 @@ import { Meilisearch } from 'meilisearch'
 import type { Hit } from 'meilisearch'
 import env from '#start/env'
 import Document from '#models/document'
-import { searchRecord } from '#values/search_record'
+import { adapterFor } from '#values/adapters'
 import type { ProjectConfig } from '#types/project'
-import type { SearchHit, SearchRecord } from '#types/search'
+import type { SearchRecord } from '#types/search'
+import type { SearchHitView } from '#types/view_models'
 
 const INDEX = 'documents'
 
@@ -39,8 +40,9 @@ export default class SearchService {
   /** Project every spec of `project` into the index. Returns the number of records pushed. */
   async reindexProject(project: ProjectConfig): Promise<number> {
     await this.configureIndex()
+    const adapter = adapterFor(project.adapter)
     const documents = await Document.query().where('project', project.key)
-    const records = documents.map((doc) => searchRecord(project, doc))
+    const records = documents.map((doc) => adapter.buildSearchRecord(project, doc))
     if (records.length) {
       await this.client.index(INDEX).addDocuments(records, { primaryKey: 'id' })
     }
@@ -48,11 +50,12 @@ export default class SearchService {
   }
 
   /** Full-text search scoped to one project. Returns [] when the index is missing/unreachable. */
-  async search(projectKey: string, query: string): Promise<SearchHit[]> {
+  async search(project: ProjectConfig, query: string): Promise<SearchHitView[]> {
+    const adapter = adapterFor(project.adapter)
     let hits: Hit<SearchRecord>[]
     try {
       const response = await this.client.index(INDEX).search<SearchRecord>(query, {
-        filter: `project = "${projectKey}"`,
+        filter: `project = "${project.key}"`,
         attributesToHighlight: ['title', 'authors', 'content_text'],
         attributesToCrop: ['content_text'],
         cropLength: 40,
@@ -63,26 +66,6 @@ export default class SearchService {
     } catch {
       return []
     }
-    return hits.map((hit) => this.toHit(hit))
-  }
-
-  /**
-   * Map a raw hit to the view model. `_formatted` carries `<mark>` highlight markup; the source
-   * fields (title/content_text/authors) are plain text from ingestion, so the markup is safe to
-   * render trusted.
-   */
-  private toHit(hit: Hit<SearchRecord>): SearchHit {
-    const formatted = hit._formatted
-    const authors = hit.authors ?? []
-    const authorsHtml = (formatted?.authors as string[] | undefined) ?? authors
-    return {
-      number: hit.number,
-      titleHtml: formatted?.title ?? hit.title,
-      excerptHtml: (formatted?.content_text as string | undefined) ?? '',
-      status: hit.status,
-      type: hit.type,
-      layer: hit.layer,
-      authors: authors.map((name, index) => ({ name, html: authorsHtml[index] ?? name })),
-    }
+    return hits.map((hit) => adapter.buildSearchHit(project, hit, hit._formatted))
   }
 }
