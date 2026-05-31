@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import { DateTime } from 'luxon'
 import app from '@adonisjs/core/services/app'
 import testUtils from '@adonisjs/core/services/test_utils'
 import Document from '#models/document'
@@ -327,5 +328,263 @@ test.group('services/ingestion_service syncProject', (group) => {
 
     const meta = await ProjectMeta.findOrFail('bips')
     assert.isNotNull(meta.homeHtml)
+  })
+
+  test('captures a changed spec commits into document_commits', async ({ assert, swap }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: { bips: [{ number: '32', sha: 's1', content: '<pre>\n  Title: HD\n</pre>' }] },
+        commits: {
+          bips: {
+            '32': [
+              {
+                hash: 'aaaaaaa',
+                message: 'Add HD wallets',
+                author: 'Alice',
+                committedAt: '2023-06-12T00:00:00Z',
+                additions: 12,
+                deletions: 3,
+              },
+              {
+                hash: 'bbbbbbb',
+                message: 'Draft',
+                author: 'Bob',
+                committedAt: '2019-03-04T00:00:00Z',
+                additions: 40,
+                deletions: 1,
+              },
+            ],
+          },
+        },
+      })
+    )
+    const service = await app.container.make(IngestionService)
+
+    const summary = await service.syncProject(bips)
+
+    const doc = await Document.query().where('project', 'bips').where('number', '32').firstOrFail()
+    const commits = await doc.related('commits').query()
+    assert.lengthOf(commits, 2)
+    const top = commits.find((c) => c.hash === 'aaaaaaa')!
+    assert.equal(top.message, 'Add HD wallets')
+    assert.equal(top.author, 'Alice')
+    assert.equal(top.additions, 12)
+    assert.equal(top.deletions, 3)
+    assert.equal(top.committedAt.toISODate(), '2023-06-12')
+    assert.equal(summary.added, 1)
+    assert.lengthOf(summary.errors, 0)
+  })
+
+  test('backfills commits for an already-ingested spec with none', async ({ assert, swap }) => {
+    useFakePandoc()
+    await DocumentFactory.merge({
+      project: 'bips',
+      number: '9',
+      hash: 's9',
+      rawContent: '<pre>\n  Title: Nine\n</pre>',
+      contentHtml: '<p>done</p>',
+    }).create()
+
+    const fake = new FakeSpecSourceService({
+      specs: { bips: [{ number: '9', sha: 's9', content: '<pre>\n  Title: Nine\n</pre>' }] },
+      commits: {
+        bips: {
+          '9': [
+            {
+              hash: 'ccccccc',
+              message: 'Edit nine',
+              author: 'Carol',
+              committedAt: '2020-01-02T00:00:00Z',
+              additions: 5,
+              deletions: 2,
+            },
+          ],
+        },
+      },
+    })
+    swap(SpecSourceService, fake)
+    const service = await app.container.make(IngestionService)
+
+    const summary = await service.syncProject(bips)
+
+    const doc = await Document.query().where('project', 'bips').where('number', '9').firstOrFail()
+    const commits = await doc.related('commits').query()
+    assert.lengthOf(commits, 1)
+    assert.equal(commits[0].hash, 'ccccccc')
+    assert.equal(summary.unchanged, 1)
+    assert.equal(summary.updated, 0)
+    assert.equal(fake.specFetchCount, 0)
+  })
+
+  test('does not re-interrogate an unchanged spec that already has commits', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    const fake = new FakeSpecSourceService({
+      specs: { bips: [{ number: '1', sha: 's1', content: '<pre>\n  Title: One\n</pre>' }] },
+      commits: {
+        bips: {
+          '1': [
+            {
+              hash: 'ddddddd',
+              message: 'One',
+              author: 'Dan',
+              committedAt: '2018-05-05T00:00:00Z',
+              additions: 3,
+              deletions: 0,
+            },
+          ],
+        },
+      },
+    })
+    swap(SpecSourceService, fake)
+    const service = await app.container.make(IngestionService)
+
+    await service.syncProject(bips)
+    const commitFetchesAfterFirst = fake.commitFetchCount
+    const doc = await Document.query().where('project', 'bips').where('number', '1').firstOrFail()
+    const commitsAfterFirst = await doc.related('commits').query()
+
+    const summary = await service.syncProject(bips)
+    const commitsAfterSecond = await doc.related('commits').query()
+
+    assert.equal(fake.commitFetchCount, commitFetchesAfterFirst)
+    assert.lengthOf(commitsAfterSecond, commitsAfterFirst.length)
+    assert.equal(summary.unchanged, 1)
+  })
+
+  test('isolates a commit-capture failure and continues the sync', async ({ assert, swap }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [
+            { number: '1', sha: 'ok', content: '<pre>\n  Title: Healthy\n</pre>' },
+            { number: '2', sha: 'ok2', content: '<pre>\n  Title: Two\n</pre>' },
+          ],
+        },
+        commits: {
+          bips: {
+            '1': [
+              {
+                hash: 'eeeeeee',
+                message: 'One',
+                author: 'Eve',
+                committedAt: '2021-07-07T00:00:00Z',
+                additions: 1,
+                deletions: 1,
+              },
+            ],
+          },
+        },
+        failingCommitPaths: ['2'],
+      })
+    )
+    const service = await app.container.make(IngestionService)
+
+    const summary = await service.syncProject(bips)
+
+    const one = await Document.query().where('project', 'bips').where('number', '1').firstOrFail()
+    const two = await Document.query().where('project', 'bips').where('number', '2').firstOrFail()
+    const oneCommits = await one.related('commits').query()
+    const twoCommits = await two.related('commits').query()
+    assert.isNotNull(one.contentHtml)
+    assert.lengthOf(oneCommits, 1)
+    assert.isNotNull(two.contentHtml)
+    assert.lengthOf(twoCommits, 0)
+    assert.lengthOf(summary.errors, 1)
+    assert.equal(summary.errors[0].number, '2')
+    assert.match(summary.errors[0].message, /^commits:/)
+    assert.equal(summary.added, 2)
+  })
+
+  test('stores the total commit count while keeping only the recent window', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: { bips: [{ number: '7', sha: 's7', content: '<pre>\n  Title: Seven\n</pre>' }] },
+        commits: {
+          bips: {
+            '7': [
+              {
+                hash: 'fffffff',
+                message: 'Latest',
+                author: 'Ann',
+                committedAt: '2022-02-02T00:00:00Z',
+                additions: 1,
+                deletions: 0,
+              },
+            ],
+          },
+        },
+        commitTotals: { bips: { '7': 42 } },
+      })
+    )
+    const service = await app.container.make(IngestionService)
+
+    await service.syncProject(bips)
+
+    const doc = await Document.query().where('project', 'bips').where('number', '7').firstOrFail()
+    const commits = await doc.related('commits').query()
+    assert.equal(doc.commitCount, 42)
+    assert.lengthOf(commits, 1)
+  })
+
+  test('backfills the total for a spec that has commits but no stored total', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    const seeded = await DocumentFactory.merge({
+      project: 'bips',
+      number: '8',
+      hash: 's8',
+      rawContent: '<pre>\n  Title: Eight\n</pre>',
+      contentHtml: '<p>done</p>',
+      commitCount: null,
+    }).create()
+    await seeded.related('commits').create({
+      hash: 'old1234',
+      message: 'old',
+      author: 'A',
+      committedAt: DateTime.fromISO('2020-01-01T00:00:00Z'),
+      additions: 1,
+      deletions: 1,
+    })
+
+    const fake = new FakeSpecSourceService({
+      specs: { bips: [{ number: '8', sha: 's8', content: '<pre>\n  Title: Eight\n</pre>' }] },
+      commits: {
+        bips: {
+          '8': [
+            {
+              hash: 'new1234',
+              message: 'new',
+              author: 'B',
+              committedAt: '2021-01-01T00:00:00Z',
+              additions: 2,
+              deletions: 0,
+            },
+          ],
+        },
+      },
+      commitTotals: { bips: { '8': 17 } },
+    })
+    swap(SpecSourceService, fake)
+    const service = await app.container.make(IngestionService)
+
+    await service.syncProject(bips)
+
+    const doc = await Document.query().where('project', 'bips').where('number', '8').firstOrFail()
+    assert.equal(doc.commitCount, 17)
+    assert.equal(fake.specFetchCount, 0)
   })
 })

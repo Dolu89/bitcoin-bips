@@ -9,7 +9,15 @@
         <div class="commit__body">
           <div class="commit__msg">{{ commit.message }}</div>
           <div class="commit__meta">
-            <code class="commit__hash">{{ commit.hash }}</code>
+            <a
+              class="commit__link"
+              href="{{ links.commitBaseUrl }}{{ commit.hash }}{{ links.diffAnchor }}"
+              target="_blank"
+              rel="noopener"
+              title="View this commit's changes on GitHub"
+            >
+              <code class="commit__hash">{{ commit.hash }}</code>
+            </a>
             <span class="commit__author">{{ commit.author }}</span>
             <span class="commit__date">{{ commit.committedAt.toFormat('yyyy-MM-dd') }}</span>
             @if(index === 0)
@@ -25,6 +33,12 @@
       </li>
     @end
   </ol>
+  <div class="commits-foot">
+    <a class="commits-viewall" href="{{ links.historyUrl }}" target="_blank" rel="noopener">
+      @svg('lucide:external-link', { width: 14, height: 14 })
+      {{ total ? 'View all ' + total + ' commits' : 'View all commits' }} on GitHub
+    </a>
+  </div>
 @else
   <p class="commits-empty">No change history available yet for this {{ project.specLabel }}.</p>
 @end

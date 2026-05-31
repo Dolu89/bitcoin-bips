@@ -186,6 +186,13 @@
   padding: 1px 7px;
   border-radius: var(--radius-sm);
 }
+.commit__link {
+  display: inline-flex;
+  text-decoration: none;
+}
+.commit__link:hover .commit__hash {
+  text-decoration: underline;
+}
 .commit__author {
   font-size: 12.5px;
   color: var(--fg);
@@ -247,4 +254,23 @@
   color: var(--fg-muted);
   text-align: center;
   padding: 24px 0;
+}
+
+.commits-foot {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.commits-viewall {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-ink);
+  text-decoration: none;
+}
+.commits-viewall:hover {
+  text-decoration: underline;
 }

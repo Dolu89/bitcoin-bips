@@ -7,6 +7,7 @@
 import { inject } from '@adonisjs/core'
 import { dirname } from 'node:path/posix'
 import { DateTime } from 'luxon'
+import db from '@adonisjs/lucid/services/db'
 import Document from '#models/document'
 import ProjectMeta from '#models/project_meta'
 import SpecSourceService from '#services/spec_source_service'
@@ -14,7 +15,10 @@ import RenderingService from '#services/rendering_service'
 import { parsePreamble, extractReferences, extractBody } from '#values/spec_parsing'
 import { canonicalize } from '#values/document_number'
 import type { ProjectConfig } from '#types/project'
-import type { SyncSummary, SyncError } from '#types/ingestion'
+import type { SyncSummary, SyncError, SpecFileRef } from '#types/ingestion'
+
+/** Most recent commits captured per spec — the "recent window" cap (revisable). */
+const RECENT_COMMIT_LIMIT = 5
 
 /** Raw-content base URL for a repo file's directory — relative images resolve against it. */
 function rawBaseUrl(repo: ProjectConfig['repo'], path: string): string {
@@ -36,14 +40,23 @@ export default class IngestionService {
     let updated = 0
     let unchanged = 0
 
-    // Existing catalog state for this project: number -> { id, hash } for the sha diff.
+    // Existing catalog state for this project: number -> { id, hash, contentHtml, commitsCount }.
+    // The blob sha drives the content diff; contentHtml and commitsCount let an unrendered or
+    // commit-less spec be backfilled when activating those capabilities.
     const existingRows = await Document.query()
       .where('project', project.key)
-      .select('id', 'number', 'hash', 'content_html')
+      .select('id', 'number', 'hash', 'content_html', 'commit_count')
+      .withCount('commits')
     const existing = new Map(
       existingRows.map((row) => [
         row.number,
-        { id: row.id, hash: row.hash, contentHtml: row.contentHtml },
+        {
+          id: row.id,
+          hash: row.hash,
+          contentHtml: row.contentHtml,
+          commitsCount: Number(row.$extras.commits_count ?? 0),
+          commitCount: row.commitCount,
+        },
       ])
     )
 
@@ -54,57 +67,75 @@ export default class IngestionService {
 
     for (const file of files) {
       const stored = existing.get(file.number)
-      // Skip only when both the blob is unchanged AND a render already exists — so enabling
-      // rendering backfills already-ingested specs without clearing their hashes.
-      if (stored && stored.hash === file.sha && stored.contentHtml !== null) {
+      // Process the content when the blob changed or no render exists yet; capture commits when
+      // the blob changed or none are stored yet (so enabling either capability backfills the
+      // already-ingested catalog without clearing hashes). Skip only when neither is needed.
+      const needsContent = !stored || stored.hash !== file.sha || stored.contentHtml === null
+      const needsCommits =
+        !stored ||
+        stored.hash !== file.sha ||
+        stored.commitsCount === 0 ||
+        stored.commitCount === null
+      if (!needsContent && !needsCommits) {
         unchanged++
         continue
       }
 
       try {
-        const raw = await this.source.fetchContent(project, file.sha)
-        const { title, preamble } = parsePreamble(project.parser, raw)
+        let doc: Document
+        if (needsContent) {
+          const raw = await this.source.fetchContent(project, file.sha)
+          const { title, preamble } = parsePreamble(project.parser, raw)
 
-        // Render the changed spec; a per-spec render failure is recorded and leaves the
-        // display columns untouched (stale on update, null on insert) without aborting the sync.
-        let rendered = null
-        try {
-          rendered = await this.rendering.render({
-            raw: extractBody(project.parser, raw),
-            format: file.sourceFormat as 'mediawiki' | 'markdown',
-            parser: project.parser,
-            numberBase: project.numberBase,
-            imageBaseUrl: rawBaseUrl(project.repo, file.path),
-          })
-        } catch (error) {
-          errors.push({ number: file.number, message: `render: ${(error as Error).message}` })
+          // Render the changed spec; a per-spec render failure is recorded and leaves the
+          // display columns untouched (stale on update, null on insert) without aborting the sync.
+          let rendered = null
+          try {
+            rendered = await this.rendering.render({
+              raw: extractBody(project.parser, raw),
+              format: file.sourceFormat as 'mediawiki' | 'markdown',
+              parser: project.parser,
+              numberBase: project.numberBase,
+              imageBaseUrl: rawBaseUrl(project.repo, file.path),
+            })
+          } catch (error) {
+            errors.push({ number: file.number, message: `render: ${(error as Error).message}` })
+          }
+
+          doc = await Document.updateOrCreate(
+            { project: project.key, number: file.number },
+            {
+              title,
+              preamble: JSON.stringify(preamble),
+              sourceFormat: file.sourceFormat,
+              sourceUrl: file.sourceUrl,
+              sortOrder: file.sortOrder,
+              rawContent: raw,
+              hash: file.sha,
+              ...(rendered
+                ? {
+                    contentHtml: rendered.contentHtml,
+                    contentText: rendered.contentText,
+                    toc: rendered.toc,
+                  }
+                : {}),
+            }
+          )
+
+          refsByNumber.set(file.number, extractReferences(project.parser, raw))
+          if (stored) {
+            updated++
+          } else {
+            added++
+          }
+        } else {
+          // Commit-only backfill: content is unchanged and already rendered.
+          doc = await Document.findOrFail(stored!.id)
+          unchanged++
         }
 
-        await Document.updateOrCreate(
-          { project: project.key, number: file.number },
-          {
-            title,
-            preamble: JSON.stringify(preamble),
-            sourceFormat: file.sourceFormat,
-            sourceUrl: file.sourceUrl,
-            sortOrder: file.sortOrder,
-            rawContent: raw,
-            hash: file.sha,
-            ...(rendered
-              ? {
-                  contentHtml: rendered.contentHtml,
-                  contentText: rendered.contentText,
-                  toc: rendered.toc,
-                }
-              : {}),
-          }
-        )
-
-        refsByNumber.set(file.number, extractReferences(project.parser, raw))
-        if (stored) {
-          updated++
-        } else {
-          added++
+        if (needsCommits) {
+          await this.captureCommits(project, file, doc, errors)
         }
       } catch (error) {
         errors.push({ number: file.number, message: (error as Error).message })
@@ -168,6 +199,43 @@ export default class IngestionService {
     }
 
     return links
+  }
+
+  /**
+   * Replace a spec's stored commit history with the recent window fetched from the source.
+   * Best-effort: the network fetch runs outside the transaction (no slow I/O inside it), and any
+   * failure is recorded for this spec while the previously-captured history is left intact.
+   */
+  private async captureCommits(
+    project: ProjectConfig,
+    file: SpecFileRef,
+    doc: Document,
+    errors: SyncError[]
+  ): Promise<void> {
+    try {
+      const commits = await this.source.listSpecCommits(project, file.path, RECENT_COMMIT_LIMIT)
+      const total = await this.source.countSpecCommits(project, file.path)
+      await db.transaction(async (trx) => {
+        doc.useTransaction(trx)
+        await doc.related('commits').query().delete()
+        if (commits.length > 0) {
+          await doc.related('commits').createMany(
+            commits.map((commit) => ({
+              hash: commit.hash,
+              message: commit.message,
+              author: commit.author,
+              committedAt: DateTime.fromISO(commit.committedAt),
+              additions: commit.additions,
+              deletions: commit.deletions,
+            }))
+          )
+        }
+        doc.commitCount = total
+        await doc.save()
+      })
+    } catch (error) {
+      errors.push({ number: file.number, message: `commits: ${(error as Error).message}` })
+    }
   }
 
   /** Capture the project's curated home file, skipping the download when the sha is unchanged. */

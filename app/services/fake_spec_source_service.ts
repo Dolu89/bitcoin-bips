@@ -9,7 +9,10 @@
  */
 import SpecSourceService from '#services/spec_source_service'
 import type { ProjectConfig } from '#types/project'
-import type { SpecFileRef, HomeFileRef } from '#types/ingestion'
+import type { SpecFileRef, HomeFileRef, CommitRef } from '#types/ingestion'
+
+/** A canned commit served per project + file path; same shape as a persisted CommitRef. */
+export type FakeCommit = CommitRef
 
 export type FakeSpec = {
   /** Pre-canonicalized spec number. */
@@ -35,14 +38,38 @@ export type FakeSource = {
   home?: Record<string, FakeHome>
   /** Blob shas whose fetchContent should throw (per-spec error path). */
   failingShas?: string[]
+  /** Commits served per project key, then per file path (the spec's `path`). */
+  commits?: Record<string, Record<string, FakeCommit[]>>
+  /** Total commit count per project key, then per file path; defaults to the served commits' length. */
+  commitTotals?: Record<string, Record<string, number>>
+  /** File paths whose listSpecCommits should throw (commit-capture error path). */
+  failingCommitPaths?: string[]
 }
 
 export default class FakeSpecSourceService extends SpecSourceService {
   specFetchCount = 0
   homeFetchCount = 0
+  commitFetchCount = 0
 
   constructor(private fixture: FakeSource = {}) {
     super()
+  }
+
+  async listSpecCommits(project: ProjectConfig, path: string, limit: number): Promise<CommitRef[]> {
+    if (this.fixture.failingCommitPaths?.includes(path)) {
+      throw new Error(`Simulated commit failure for path ${path}`)
+    }
+    this.commitFetchCount += 1
+    const commits = this.fixture.commits?.[project.key]?.[path] ?? []
+    return commits.slice(0, limit)
+  }
+
+  async countSpecCommits(project: ProjectConfig, path: string): Promise<number> {
+    const explicit = this.fixture.commitTotals?.[project.key]?.[path]
+    if (explicit !== undefined) {
+      return explicit
+    }
+    return this.fixture.commits?.[project.key]?.[path]?.length ?? 0
   }
 
   async listSpecFiles(project: ProjectConfig): Promise<SpecFileRef[]> {

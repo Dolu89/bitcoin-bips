@@ -21,6 +21,22 @@ export type HomeFileRef = {
   url: string
 }
 
+/** A commit that touched a spec's source file, captured during sync and ready to persist. */
+export type CommitRef = {
+  /** Short commit identifier (first 7 chars). */
+  hash: string
+  /** First line of the commit message. */
+  message: string
+  /** Commit author display name (falls back to login, then 'unknown'). */
+  author: string
+  /** ISO-8601 author date; the caller stores it as `committed_at`. */
+  committedAt: string
+  /** Lines added to the spec's file in this commit. */
+  additions: number
+  /** Lines removed from the spec's file in this commit. */
+  deletions: number
+}
+
 /** Per-spec failure collected during a sync, so one bad file does not fail the run. */
 export type SyncError = {
   number: string

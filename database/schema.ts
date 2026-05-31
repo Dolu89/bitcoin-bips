@@ -55,6 +55,7 @@ export class DocumentLinkSchema extends BaseModel {
 
 export class DocumentSchema extends BaseModel {
   static $columns = [
+    'commitCount',
     'contentHtml',
     'contentText',
     'createdAt',
@@ -72,6 +73,8 @@ export class DocumentSchema extends BaseModel {
     'updatedAt',
   ] as const
   $columns = DocumentSchema.$columns
+  @column()
+  declare commitCount: number | null
   @column()
   declare contentHtml: string | null
   @column()

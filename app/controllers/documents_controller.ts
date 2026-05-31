@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Document from '#models/document'
 import { canonicalize } from '#values/document_number'
+import { githubCommitLinks } from '#values/github_links'
 import type { Field, RelatedItem } from '#types/document_display'
 
 export default class DocumentsController {
@@ -22,7 +23,6 @@ export default class DocumentsController {
     const document = await Document.query()
       .where('project', project.key)
       .where('number', number)
-      .withCount('commits')
       .preload('relatedOut', (q) =>
         q.select('id', 'number', 'title', 'preamble').orderBy('sort_order', 'asc')
       )
@@ -86,7 +86,7 @@ export default class DocumentsController {
       headerFields,
       aboutFields,
       related,
-      historyCount: Number(document.$extras.commits_count ?? 0),
+      historyCount: Number(document.commitCount ?? 0),
     })
   }
 
@@ -103,13 +103,17 @@ export default class DocumentsController {
     const document = await Document.query()
       .where('project', project.key)
       .where('number', number)
-      .preload('commits')
+      // Show at most the 5 most recent (newest-first via the relation's onQuery), regardless of
+      // how many rows are stored — `total` still reflects the real count.
+      .preload('commits', (q) => q.limit(5))
       .firstOrFail()
 
     // Bare drawer body — injected client-side into the history drawer.
     return view.render('partials/documents/history', {
       document,
       commits: document.commits,
+      total: document.commitCount,
+      links: githubCommitLinks(document.sourceUrl),
     })
   }
 }
