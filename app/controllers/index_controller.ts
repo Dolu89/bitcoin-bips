@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Document from '#models/document'
 import ProjectMeta from '#models/project_meta'
+import { catalogView } from '#values/catalog'
 
 export default class IndexController {
   async show({ view, response, request, project }: HttpContext) {
@@ -31,36 +32,6 @@ export default class IndexController {
       .select('number', 'title', 'preamble', 'sortOrder')
       .orderBy('sort_order', 'asc')
 
-    const tableColumns = project.display.filter((e) => e.placement === 'header')
-    const statusKey = project.display.find((e) => e.kind === 'status')?.key
-
-    const rows = documents.map((doc) => {
-      const p = doc.preambleData
-      const statusRaw = statusKey ? p[statusKey] : undefined
-      const status = Array.isArray(statusRaw) ? statusRaw[0] : statusRaw
-      const cells = tableColumns.map((col) => {
-        const value = p[col.key]
-        return { label: col.label, value, kind: col.kind }
-      })
-      return { number: doc.number, title: doc.title, status, cells }
-    })
-
-    const statuses = statusKey
-      ? [
-          ...new Set(
-            documents
-              .map((d) => d.preambleData[statusKey])
-              .filter(Boolean)
-              .map((v) => (Array.isArray(v) ? v[0] : v))
-          ),
-        ]
-      : []
-
-    return view.render('pages/index', {
-      rows,
-      tableColumns,
-      statuses,
-      total: documents.length,
-    })
+    return view.render('pages/index', catalogView(project, documents))
   }
 }

@@ -8,10 +8,12 @@ import { inject } from '@adonisjs/core'
 import { dirname } from 'node:path/posix'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
+import logger from '@adonisjs/core/services/logger'
 import Document from '#models/document'
 import ProjectMeta from '#models/project_meta'
 import SpecSourceService from '#services/spec_source_service'
 import RenderingService from '#services/rendering_service'
+import SearchService from '#services/search_service'
 import { parsePreamble, extractReferences, extractBody } from '#values/spec_parsing'
 import { canonicalize } from '#values/document_number'
 import type { ProjectConfig } from '#types/project'
@@ -31,7 +33,8 @@ function rawBaseUrl(repo: ProjectConfig['repo'], path: string): string {
 export default class IngestionService {
   constructor(
     protected source: SpecSourceService,
-    protected rendering: RenderingService
+    protected rendering: RenderingService,
+    protected search: SearchService
   ) {}
 
   async syncProject(project: ProjectConfig): Promise<SyncSummary> {
@@ -146,6 +149,14 @@ export default class IngestionService {
     await this.captureHome(project)
 
     await ProjectMeta.updateOrCreate({ project: project.key }, { lastUpdate: DateTime.now() })
+
+    // Refresh the search index best-effort — a down/missing Meilisearch must not fail the sync.
+    // Logged and swallowed, never added to `errors` (reserved for per-spec ingestion failures).
+    try {
+      await this.search.reindexProject(project)
+    } catch (error) {
+      logger.warn(`[${project.key}] search reindex failed: ${(error as Error).message}`)
+    }
 
     return { project: project.key, added, updated, unchanged, links, errors }
   }

@@ -7,14 +7,16 @@
         <span class="bips-brand__name">{{ project.name }}</span>
         <span class="bips-brand__tag">{{ project.tagline }}</span>
       </a>
-      {{-- Hardcoded until the search route exists. --}}
-      <form class="bips-search" method="GET" action="/search">
+      {{-- Live overlay search (Alpine). The GET action is the no-JS progressive fallback. --}}
+      <form class="bips-search" method="GET" action="{{ urlFor('search.show') }}" x-on:submit.prevent="run()">
         <input
           class="bips-search__input"
           type="text"
           name="q"
           placeholder="search by title, authors, keyword"
           minlength="3"
+          x-model="query"
+          x-on:input.debounce.250ms="run()"
         />
         <button type="submit" class="bips-search__btn" aria-label="Search">
           @svg('lucide:search', { width: 20, height: 20 })

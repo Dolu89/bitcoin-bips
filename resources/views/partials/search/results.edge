@@ -1,0 +1,35 @@
+{{-- Bare search-results body, injected client-side into the overlay. Clear / "Back to all
+     proposals" / author / card clicks are handled by event delegation (data-* attrs). --}}
+@if(tooShort)
+  <div class="search-empty">
+    @svg('lucide:search', { width: 28, height: 28 })
+    <p>Type at least 3 characters to search.</p>
+  </div>
+@else
+  <div class="search-head">
+    <div>
+      <div class="bips-eyebrow">Search</div>
+      <h1 class="bips-title">
+        {{ results ? results.length : 0 }} result{{ results && results.length === 1 ? '' : 's' }} for “{{ query }}”
+      </h1>
+    </div>
+    <button type="button" class="bips-btn bips-btn--ghost" data-action="clear">
+      @svg('lucide:x', { width: 16, height: 16 })
+      Clear
+    </button>
+  </div>
+
+  @if(!results || results.length === 0)
+    <div class="search-empty">
+      @svg('lucide:search', { width: 28, height: 28 })
+      <p>No proposals match <strong>“{{ query }}”</strong>.</p>
+      <button type="button" class="bips-link" data-action="clear">Back to all proposals</button>
+    </div>
+  @else
+    <ul class="result-list">
+      @each(hit in results)
+        @!search.result({ hit })
+      @end
+    </ul>
+  @end
+@end

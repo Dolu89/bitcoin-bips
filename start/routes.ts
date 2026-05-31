@@ -22,6 +22,7 @@ router
   .group(() => {
     router.get('/', [controllers.Index, 'show']).as('home')
     router.get('/robots.txt', [controllers.Robots, 'show'])
+    router.get('/search', [controllers.Search, 'show'])
     router.get('/:number/history', [controllers.Documents, 'history'])
     router.get('/:number', [controllers.Documents, 'show'])
   })

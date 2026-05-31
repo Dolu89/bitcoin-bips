@@ -7,4 +7,5 @@ export const controllers = {
   Documents: () => import('#controllers/documents_controller'),
   Index: () => import('#controllers/index_controller'),
   Robots: () => import('#controllers/robots_controller'),
+  Search: () => import('#controllers/search_controller'),
 }

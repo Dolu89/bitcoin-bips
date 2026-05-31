@@ -119,4 +119,65 @@ Alpine.data('historyDrawer', (url) => ({
   })
 })()
 
+// Live search overlay: as-you-type results fetched as a bare fragment and injected, with the
+// shareable address kept in sync. Seeds itself open when landing on the /search URL with a query.
+Alpine.data('searchOverlay', (url) => ({
+  url,
+  query: '',
+  isOpen: false,
+  content: '',
+  originUrl: '/',
+  init() {
+    const params = new URLSearchParams(window.location.search)
+    const seeded = window.location.pathname === url ? params.get('q') : null
+    this.originUrl = seeded ? '/' : window.location.pathname + window.location.search
+    if (seeded) {
+      this.query = seeded
+      this.open()
+      this.run()
+    }
+  },
+  async run() {
+    this.open()
+    const q = this.query.trim()
+    const target = q ? `${this.url}?q=${encodeURIComponent(this.query)}` : this.url
+    window.history.replaceState(null, '', target)
+    try {
+      const res = await fetch(target, { headers: { 'X-Requested-With': 'fetch' } })
+      if (res.ok) this.content = await res.text()
+    } catch (e) {
+      /* keep the prior content */
+    }
+  },
+  open() {
+    // Pin the overlay just below the sticky header (recomputed on open for responsive headers).
+    const header = document.querySelector('.bips-header')
+    if (header) {
+      document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`)
+    }
+    this.isOpen = true
+    // Lock the page behind so there is a single scrollbar (the overlay's own).
+    document.documentElement.style.overflow = 'hidden'
+  },
+  close() {
+    this.isOpen = false
+    document.documentElement.style.overflow = ''
+    window.history.replaceState(null, '', this.originUrl)
+  },
+  onOverlayClick(event) {
+    const author = event.target.closest('[data-author]')
+    if (author) {
+      this.query = author.getAttribute('data-author')
+      this.run()
+      return
+    }
+    if (event.target.closest('[data-action="clear"]')) {
+      this.close()
+      return
+    }
+    const card = event.target.closest('[data-href]')
+    if (card) window.location.href = card.getAttribute('data-href')
+  },
+}))
+
 Alpine.start()

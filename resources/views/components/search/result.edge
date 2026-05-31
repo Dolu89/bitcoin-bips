@@ -1,0 +1,41 @@
+{{-- One search result. The whole card navigates (data-href); author buttons re-run the search
+     (data-author) — both via event delegation on the overlay body. --}}
+<li>
+  <div
+    class="result"
+    role="button"
+    tabindex="0"
+    data-href="{{ urlFor('documents.show', [hit.number]) }}"
+  >
+    <div class="result__top">
+      <span class="result__n">{{ project.specLabel }} {{ hit.number }}</span>
+      @if(hit.status)
+        @!statusBadge({ status: hit.status })
+      @end
+      @if(hit.type)
+        <span class="result__type">{{ hit.type }}{{ hit.layer ? ' · ' + hit.layer : '' }}</span>
+      @end
+      <span class="result__arrow">
+        @svg('lucide:arrow-right', { width: 16, height: 16 })
+      </span>
+    </div>
+
+    <div class="result__title">{{{ hit.titleHtml }}}</div>
+
+    @if(hit.excerptHtml)
+      <p class="result__summary">{{{ hit.excerptHtml }}}</p>
+    @end
+
+    @if(hit.authors.length)
+      <div class="result__authors">
+        @svg('lucide:user', { width: 13, height: 13 })
+        @each((author, i) in hit.authors)
+          @if(i > 0)
+            <span class="result__sep">·</span>
+          @end
+          <button type="button" class="author-link" data-author="{{ author.name }}">{{{ author.html }}}</button>
+        @end
+      </div>
+    @end
+  </div>
+</li>

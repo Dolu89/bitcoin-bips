@@ -35,4 +35,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   // GitHub — authenticated ingestion reads (~5000 req/h). Optional: boot never blocks;
   // a sync errors only when invoked without it. Tests fake the source and need no value.
   GITHUB_API_KEY: Env.schema.string.optional(),
+
+  // Meilisearch — search index host + key. Optional: boot never blocks; search/reindex errors
+  // only at call time when the host is unset. Tests fake the service and need no value.
+  MEILISEARCH_HOST: Env.schema.string.optional(),
+  MEILISEARCH_API_KEY: Env.schema.string.optional(),
 })

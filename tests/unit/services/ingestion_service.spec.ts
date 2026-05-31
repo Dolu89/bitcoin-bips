@@ -8,7 +8,7 @@ import IngestionService from '#services/ingestion_service'
 import SpecSourceService from '#services/spec_source_service'
 import FakeSpecSourceService from '#services/fake_spec_source_service'
 import { DocumentFactory } from '#database/factories/document_factory'
-import { useFakePandoc } from '#tests/helpers'
+import { useFakePandoc, useFakeSearch } from '#tests/helpers'
 import { projects } from '#config/projects'
 
 const bips = projects.find((p) => p.key === 'bips')!
@@ -586,5 +586,54 @@ test.group('services/ingestion_service syncProject', (group) => {
     const doc = await Document.query().where('project', 'bips').where('number', '8').firstOrFail()
     assert.equal(doc.commitCount, 17)
     assert.equal(fake.specFetchCount, 0)
+  })
+})
+
+test.group('services/ingestion_service reindex hook', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+
+  test('reindexes the synced specs into search', async ({ assert, swap }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [{ number: '32', sha: 's1', content: '<pre>\n  Title: HD Wallets\n</pre>' }],
+        },
+      })
+    )
+    const search = useFakeSearch()
+    const service = await app.container.make(IngestionService)
+
+    const summary = await service.syncProject(bips)
+
+    assert.equal(summary.added, 1)
+    const calls = search.reindexCalls.filter((c) => c.project === 'bips')
+    assert.lengthOf(calls, 1)
+  })
+
+  test('a reindex failure leaves the sync green and out of summary.errors', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [{ number: '32', sha: 's1', content: '<pre>\n  Title: HD Wallets\n</pre>' }],
+        },
+      })
+    )
+    const search = useFakeSearch({ throwOnReindex: true })
+    const service = await app.container.make(IngestionService)
+
+    const summary = await service.syncProject(bips)
+
+    assert.equal(summary.added, 1)
+    assert.lengthOf(summary.errors, 0)
+    assert.lengthOf(search.reindexCalls, 1)
+    const doc = await Document.query().where('project', 'bips').where('number', '32').first()
+    assert.isNotNull(doc)
   })
 })

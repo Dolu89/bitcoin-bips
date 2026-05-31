@@ -22,7 +22,7 @@
     @stack('dumper')
   </head>
   <body>
-    <div class="bips-app" style="{{ brandStyle(project) }}">
+    <div class="bips-app" style="{{ brandStyle(project) }}" x-data="searchOverlay('{{ urlFor('search.show') }}')">
       @include('partials/header')
       <main>
         @if(flashMessages)
@@ -31,6 +31,7 @@
         {{{ await $slots.main() }}}
       </main>
       @include('partials/footer')
+      @include('partials/search/overlay')
     </div>
   </body>
 </html>
