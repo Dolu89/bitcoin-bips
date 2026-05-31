@@ -29,6 +29,12 @@ export default await Env.create(new URL('../', import.meta.url), {
   BIPS_DOMAIN: Env.schema.string.optional(),
   NIPS_DOMAIN: Env.schema.string.optional(),
 
+  // Analytics — optional Umami instrumentation. Boot never blocks; absent values = no tag rendered.
+  // UMAMI_SCRIPT_URL is the shared instance's script URL; *_ANALYTICS_ID is the per-project website id.
+  UMAMI_SCRIPT_URL: Env.schema.string.optional(),
+  BIPS_ANALYTICS_ID: Env.schema.string.optional(),
+  NIPS_ANALYTICS_ID: Env.schema.string.optional(),
+
   // Database — sqlite filename under tmp/ (overridden in .env.test for an isolated test DB).
   DB_DATABASE: Env.schema.string.optional(),
 

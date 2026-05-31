@@ -10,6 +10,9 @@ export type ProjectConfig = {
   logo: string
   specLabel: string
 
+  /** Umami `data-website-id` for this project. Absent = no analytics tag (see `app/values/analytics.ts`). */
+  analyticsId?: string
+
   repo: {
     owner: string
     repo: string
