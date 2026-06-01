@@ -53,6 +53,8 @@
   --amber-50: #fbf1dc;
   --gray-status: #8a8892; /* Closed / Withdrawn / Rejected */
   --gray-50: #f0eff2;
+  --red-500: #d64545; /* danger tone — unrecommended / deprecated */
+  --red-50: #fbe9e9;
 }
 
 /* ============================================================
@@ -98,6 +100,10 @@
   --status-draft-bg: var(--amber-50);
   --status-closed-fg: var(--gray-status);
   --status-closed-bg: var(--gray-50);
+  --status-danger-fg: var(--red-500);
+  --status-danger-bg: var(--red-50);
+  --status-info-fg: var(--blue-500);
+  --status-info-bg: var(--blue-50);
 
   /* Elevation (soft, warm-tinted) */
   --shadow-sm: 0 1px 2px rgba(43, 42, 48, 0.06);
@@ -148,6 +154,10 @@
   --status-draft-bg: rgba(217, 148, 19, 0.16);
   --status-closed-fg: #a8a4ae;
   --status-closed-bg: rgba(138, 136, 146, 0.16);
+  --status-danger-fg: #e87070;
+  --status-danger-bg: rgba(214, 69, 69, 0.16);
+  --status-info-fg: #5c9fea;
+  --status-info-bg: rgba(47, 123, 214, 0.16);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);

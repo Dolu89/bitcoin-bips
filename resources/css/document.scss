@@ -384,21 +384,31 @@
   border-radius: 50%;
   background: currentColor;
 }
-.bip-badge[data-kind='active'] {
+/* Tone → design-system colour. The adapter chooses a tone (#types/view_models BadgeTone);
+   the badge component renders it as data-tone. Keep in sync with BadgeTone's members. */
+.bip-badge[data-tone='positive'] {
   color: var(--status-active-fg);
   background: var(--status-active-bg);
 }
-.bip-badge[data-kind='deploy'] {
+.bip-badge[data-tone='accent'] {
   color: var(--status-deploy-fg);
   background: var(--status-deploy-bg);
 }
-.bip-badge[data-kind='draft'] {
+.bip-badge[data-tone='caution'] {
   color: var(--status-draft-fg);
   background: var(--status-draft-bg);
 }
-.bip-badge[data-kind='closed'] {
+.bip-badge[data-tone='neutral'] {
   color: var(--status-closed-fg);
   background: var(--status-closed-bg);
+}
+.bip-badge[data-tone='danger'] {
+  color: var(--status-danger-fg);
+  background: var(--status-danger-bg);
+}
+.bip-badge[data-tone='info'] {
+  color: var(--status-info-fg);
+  background: var(--status-info-bg);
 }
 
 /* responsive */
