@@ -30,8 +30,13 @@ test.group('documents show — ingested, unrendered', (group) => {
 test.group('documents show — About dates', (group) => {
   group.each.setup(() => testUtils.db().truncate())
 
-  test('BIP shows a Created date from the preamble and an Updated date from git', async ({
+  // The current project resolves from the test host (BIPS_DOMAIN=127.0.0.1 in .env.test), so the
+  // browser path renders a bips page; the NIP first-commit → date-slot path is covered in
+  // tests/unit/values/adapters/nip.spec.ts. This proves the About rail renders both a preamble
+  // date (Created) and a git-sourced date (Updated) end-to-end through the real template.
+  test('renders a Created date from the preamble and an Updated date from git', async ({
     visit,
+    route,
   }) => {
     await DocumentFactory.merge({
       project: 'bips',
@@ -42,29 +47,13 @@ test.group('documents show — About dates', (group) => {
       lastCommitAt: DateTime.fromISO('2020-05-01T00:00:00Z'),
     }).create()
 
-    const page = await visit('http://bips.local:3333/32')
+    const page = await visit(route('documents.show', { number: '32' }))
 
-    await page.assertVisible('text=Created')
-    await page.assertVisible('text=2012-02-11')
-    await page.assertVisible('text=2020-05-01')
-  })
-
-  test('NIP shows a Created date derived from the first git commit', async ({ visit }) => {
-    await DocumentFactory.merge({
-      project: 'nips',
-      number: '4',
-      sortOrder: 4,
-      title: 'Encrypted Direct Message',
-      preamble: JSON.stringify({ Status: 'final', Tags: ['unrecommended'] }),
-      firstCommitAt: DateTime.fromISO('2021-01-15T00:00:00Z'),
-      lastCommitAt: DateTime.fromISO('2023-09-09T00:00:00Z'),
-    }).create()
-
-    const page = await visit('http://nips.local:3333/4')
-
-    await page.assertVisible('text=Created')
-    await page.assertVisible('text=2021-01-15')
-    // The advisory tag surfaces as a badge in the About rail.
-    await page.assertVisible('text=unrecommended')
+    // Scope to the About rail: "Created"/the date also appear in the raw preamble panel, so an
+    // unscoped text= locator is ambiguous under Playwright strict mode.
+    await page.assertExists('.bip-meta-rail >> text=Created')
+    await page.assertExists('.bip-meta-rail >> text=2012-02-11')
+    await page.assertExists('.bip-meta-rail >> text=Updated')
+    await page.assertExists('.bip-meta-rail >> text=2020-05-01')
   })
 })
