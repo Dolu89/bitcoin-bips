@@ -109,6 +109,20 @@ test.group('services/rendering_service render', () => {
     assert.include(r.contentHtml, 'rel="noreferrer"')
   })
 
+  test('opens an absolute external content link in a new tab', async ({ assert, swap }) => {
+    swap(
+      PandocService,
+      new FakePandocService({ render: () => '<a href="https://utxos.org">utxos</a>' })
+    )
+    const svc = await app.container.make(RenderingService)
+
+    const r = await svc.render(input())
+
+    assert.include(r.contentHtml, 'href="https://utxos.org"')
+    assert.include(r.contentHtml, 'target="_blank"')
+    assert.include(r.contentHtml, 'rel="noreferrer"')
+  })
+
   test('linkifies a repo-root-relative mediawiki link before Pandoc sees it', async ({
     assert,
     swap,

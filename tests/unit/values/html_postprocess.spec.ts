@@ -5,6 +5,7 @@ import {
   assignAnchorsAndBuildToc,
   rewriteImages,
   rewriteRelativeLinks,
+  openExternalLinksInNewTab,
   extractText,
 } from '#values/html_postprocess'
 
@@ -80,7 +81,7 @@ test.group('values/html_postprocess rewriteImages', () => {
 })
 
 test.group('values/html_postprocess rewriteRelativeLinks', () => {
-  test('externalizes relative non-spec links; leaves on-site, absolute, and anchors', ({
+  test('rewrites relative non-spec links to the repo; leaves on-site, absolute, and anchors', ({
     assert,
   }) => {
     const blob = 'https://github.com/bitcoin/bips/blob/master/'
@@ -96,12 +97,34 @@ test.group('values/html_postprocess rewriteRelativeLinks', () => {
     rewriteRelativeLinks($, blob)
 
     assert.equal($('a').eq(0).attr('href'), `${blob}README.mediawiki`)
-    assert.equal($('a').eq(0).attr('target'), '_blank')
-    assert.equal($('a').eq(0).attr('rel'), 'noreferrer')
     assert.equal($('a').eq(1).attr('href'), '/32')
-    assert.isUndefined($('a').eq(1).attr('target'))
     assert.equal($('a').eq(2).attr('href'), 'https://x.test/y')
     assert.equal($('a').eq(3).attr('href'), '#sec')
+  })
+})
+
+test.group('values/html_postprocess openExternalLinksInNewTab', () => {
+  test('marks absolute/protocol-relative links new-tab; leaves on-site, anchor, mail', ({
+    assert,
+  }) => {
+    const $ = cheerio.load(
+      '<a href="https://x.test/y">a</a>' +
+        '<a href="//cdn.test/z">b</a>' +
+        '<a href="/32">c</a>' +
+        '<a href="#sec">d</a>' +
+        '<a href="mailto:x@y.z">e</a>',
+      null,
+      false
+    )
+
+    openExternalLinksInNewTab($)
+
+    assert.equal($('a').eq(0).attr('target'), '_blank')
+    assert.equal($('a').eq(0).attr('rel'), 'noreferrer')
+    assert.equal($('a').eq(1).attr('target'), '_blank')
+    assert.isUndefined($('a').eq(2).attr('target'))
+    assert.isUndefined($('a').eq(3).attr('target'))
+    assert.isUndefined($('a').eq(4).attr('target'))
   })
 })
 

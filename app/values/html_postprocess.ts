@@ -86,10 +86,11 @@ export function rewriteImages($: CheerioAPI, imageBaseUrl: string): void {
 }
 
 /**
- * Point any still-relative `<a href>` at the source repo (GitHub blob) and mark it external. Runs
- * after the adapter rewrote sibling-spec links to on-site `/N` URLs, so what remains are links to
- * non-spec repo files (e.g. `README.mediawiki`) — which would otherwise resolve against the current
- * page and 404. Absolute, protocol-relative, on-site (`/…`), anchor and mail/tel links are left.
+ * Point any still-relative `<a href>` at the source repo (GitHub blob). Runs after the adapter
+ * rewrote sibling-spec links to on-site `/N` URLs, so what remains are links to non-spec repo files
+ * (e.g. `README.mediawiki`) — which would otherwise resolve against the current page and 404. The
+ * result is an absolute URL; `openExternalLinksInNewTab` then marks it (and every other external
+ * link) target=_blank. Absolute, protocol-relative, on-site (`/…`), anchor and mail/tel links left.
  */
 export function rewriteRelativeLinks($: CheerioAPI, linkBaseUrl: string): void {
   $('a[href]').each((_, el) => {
@@ -100,11 +101,25 @@ export function rewriteRelativeLinks($: CheerioAPI, linkBaseUrl: string): void {
     }
     try {
       $el.attr('href', new URL(href, linkBaseUrl).toString())
-      $el.attr('target', '_blank')
-      $el.attr('rel', 'noreferrer')
     } catch {
       // Leave an unresolvable href untouched.
     }
+  })
+}
+
+/**
+ * Open every external link (absolute `http(s):` or protocol-relative `//`) in a new tab. Runs after
+ * relative repo links have been made absolute, so those are covered too. On-site (`/N`), anchor
+ * (`#…`) and mail/tel links keep the current tab.
+ */
+export function openExternalLinksInNewTab($: CheerioAPI): void {
+  $('a[href]').each((_, el) => {
+    const $el = $(el)
+    if (!/^(https?:|\/\/)/i.test($el.attr('href') ?? '')) {
+      return
+    }
+    $el.attr('target', '_blank')
+    $el.attr('rel', 'noreferrer')
   })
 }
 

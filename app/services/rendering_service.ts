@@ -14,6 +14,7 @@ import {
   assignAnchorsAndBuildToc,
   rewriteImages,
   rewriteRelativeLinks,
+  openExternalLinksInNewTab,
   extractText,
 } from '#values/html_postprocess'
 import type { ProjectAdapter } from '#types/project_adapter'
@@ -55,6 +56,7 @@ export default class RenderingService {
 
     input.adapter.rewriteInternalLinks($, input.numberBase)
     rewriteRelativeLinks($, input.linkBaseUrl)
+    openExternalLinksInNewTab($)
     rewriteImages($, input.imageBaseUrl)
 
     // Plain text before anchor links are appended, so the `#` markers stay out of the projection.
