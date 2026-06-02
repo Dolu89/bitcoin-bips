@@ -71,11 +71,20 @@ export default class IngestionService {
     )
 
     const files = await this.source.listSpecFiles(project)
+    logger.info(`[${project.key}] ${files.length} spec files found; syncing changed ones…`)
 
     // Specs whose body we parsed this run, so we can resolve their references afterwards.
     const refsByNumber = new Map<string, string[]>()
 
+    let seen = 0
     for (const file of files) {
+      seen++
+      // Progress beacon so a long first sync (every spec changed) never looks dead.
+      if (seen % 25 === 0) {
+        logger.info(
+          `[${project.key}] ${seen}/${files.length} processed (added ${added}, updated ${updated})`
+        )
+      }
       const stored = existing.get(file.number)
       // Process the content when the blob changed or no render exists yet; capture commits when
       // the blob changed or none are stored yet (so enabling either capability backfills the

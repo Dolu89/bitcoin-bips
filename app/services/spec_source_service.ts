@@ -4,6 +4,7 @@
  * — a later switch to GraphQL stays behind this seam.
  */
 import { Octokit } from 'octokit'
+import logger from '@adonisjs/core/services/logger'
 import env from '#start/env'
 import { canonicalize } from '#values/document_number'
 import { toCommitRef } from '#values/commit_mapping'
@@ -21,7 +22,36 @@ export default class SpecSourceService {
       if (!auth) {
         throw new Error('GITHUB_API_KEY is not set — required to read the upstream spec source')
       }
-      this.#octokit = new Octokit({ auth, userAgent: 'bips-xyz-ingestion' })
+      // Octokit's throttling plugin otherwise waits on a rate limit silently; log the wait so a
+      // long sync never looks dead. Retry a couple of times, then let the error surface.
+      this.#octokit = new Octokit({
+        auth,
+        userAgent: 'bips-xyz-ingestion',
+        throttle: {
+          onRateLimit(
+            retryAfter: number,
+            options: { method: string; url: string },
+            _octokit: Octokit,
+            retryCount: number
+          ) {
+            logger.warn(
+              `GitHub rate limit on ${options.method} ${options.url} — waiting ${retryAfter}s (retry ${retryCount + 1})`
+            )
+            return retryCount < 2
+          },
+          onSecondaryRateLimit(
+            retryAfter: number,
+            options: { method: string; url: string },
+            _octokit: Octokit,
+            retryCount: number
+          ) {
+            logger.warn(
+              `GitHub secondary rate limit on ${options.method} ${options.url} — waiting ${retryAfter}s (retry ${retryCount + 1})`
+            )
+            return retryCount < 2
+          },
+        },
+      })
     }
     return this.#octokit
   }
