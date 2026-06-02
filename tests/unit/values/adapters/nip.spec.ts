@@ -64,6 +64,14 @@ test.group('adapters/nip extractReferences', () => {
   test('returns raw numbers of cited NIPs', ({ assert }) => {
     assert.deepEqual(nipAdapter.extractReferences('See NIP-12 and [[01]].'), ['12', '01'])
   })
+
+  test('extracts a NIP referenced only via a markdown file link with an anchor', ({ assert }) => {
+    assert.deepEqual(nipAdapter.extractReferences('[Extra metadata fields](24.md#kind-0)'), ['24'])
+  })
+
+  test('ignores a link to a non-spec file', ({ assert }) => {
+    assert.deepEqual(nipAdapter.extractReferences('[home](README.md)'), [])
+  })
 })
 
 test.group('adapters/nip rewriteInternalLinks', () => {

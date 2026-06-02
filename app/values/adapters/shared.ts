@@ -46,16 +46,34 @@ export function markdownHeadings(raw: string): string[] {
   return found.sort((a, b) => a.index - b.index).map((h) => h.text)
 }
 
+/** Markdown `](target)` and mediawiki `[[target]]` / `[[target|label]]` link targets in raw source. */
+function linkTargets(raw: string): string[] {
+  const targets: string[] = []
+  // Markdown inline links: `](target)` or `](<target> "title")`.
+  for (const m of raw.matchAll(/\]\(\s*<?([^)\s>]+)>?[^)]*\)/g)) {
+    targets.push(m[1])
+  }
+  // Mediawiki wiki-links: `[[target]]` or `[[target|label]]`.
+  for (const m of raw.matchAll(/\[\[([^\]|]+?)(?:\|[^\]]*)?\]\]/g)) {
+    targets.push(m[1].trim())
+  }
+  return targets
+}
+
 /**
  * Raw cross-references a spec cites, for a given label (`BIP` / `NIP`). Returns raw number strings
- * (e.g. `0032`, `141`, `32`) — canonicalization is the caller's responsibility. Forms: `BIP-0032`,
- * `BIP 141`, `NIP-12`, `[[32]]`. De-duplicated, order preserved.
+ * (e.g. `0032`, `141`, `32`, `24`) — canonicalization is the caller's responsibility. Catches both
+ * labelled prose (`BIP-0032`, `BIP 141`, `NIP-12`, `[[32]]`) AND links whose target resolves to a
+ * sibling spec file per `linkPattern` (`[…](24.md#kind-0)`, `[[bip-0032.mediawiki]]`) — so a spec
+ * referenced only via a link still lands in the related graph, matching the body's internal links.
+ * A link to a non-spec repo file (e.g. `README.mediawiki`) does not match `linkPattern`, so it is
+ * not treated as a reference. De-duplicated, order preserved.
  */
-export function extractLabelledReferences(raw: string, label: string): string[] {
+export function extractSpecReferences(raw: string, label: string, linkPattern: RegExp): string[] {
   const found: string[] = []
   const seen = new Set<string>()
   const push = (n: string) => {
-    if (!seen.has(n)) {
+    if (n && !seen.has(n)) {
       seen.add(n)
       found.push(n)
     }
@@ -69,6 +87,13 @@ export function extractLabelledReferences(raw: string, label: string): string[] 
   // Wiki-style `[[32]]` / `[[bip-32]]`
   for (const m of raw.matchAll(/\[\[(?:bip-|nip-)?(\d+)\]\]/gi)) {
     push(m[1])
+  }
+  // Links pointing at a sibling spec file.
+  for (const target of linkTargets(raw)) {
+    const m = target.match(linkPattern)
+    if (m) {
+      push(m[1])
+    }
   }
 
   return found

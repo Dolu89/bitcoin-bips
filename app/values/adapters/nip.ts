@@ -20,11 +20,7 @@ import type {
   RelatedSpec,
   SearchHitView,
 } from '#types/view_models'
-import {
-  extractLabelledReferences,
-  markdownHeadings,
-  rewriteSpecLinks,
-} from '#values/adapters/shared'
+import { extractSpecReferences, markdownHeadings, rewriteSpecLinks } from '#values/adapters/shared'
 
 /** Link to a NIP spec file; group 1 = raw hex number, group 2 = optional `#fragment`. */
 const LINK_PATTERN = /^0*([0-9a-f]+)\.md(#.*)?$/i
@@ -152,7 +148,7 @@ export const nipAdapter: ProjectAdapter = {
   },
 
   extractReferences(raw: string): string[] {
-    return extractLabelledReferences(raw, 'NIP')
+    return extractSpecReferences(raw, 'NIP', LINK_PATTERN)
   },
 
   rewriteInternalLinks($: CheerioAPI, numberBase: 10 | 16): void {

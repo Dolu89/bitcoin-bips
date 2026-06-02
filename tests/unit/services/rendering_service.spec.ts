@@ -6,6 +6,7 @@ import RenderingService from '#services/rendering_service'
 import { bipAdapter } from '#values/adapters/bip'
 
 const BASE = 'https://raw.githubusercontent.com/bitcoin/bips/master/'
+const BLOB = 'https://github.com/bitcoin/bips/blob/master/'
 
 function input(extra = {}) {
   return {
@@ -14,6 +15,7 @@ function input(extra = {}) {
     adapter: bipAdapter,
     numberBase: 10 as const,
     imageBaseUrl: BASE,
+    linkBaseUrl: BLOB,
     ...extra,
   }
 }
@@ -90,6 +92,20 @@ test.group('services/rendering_service render', () => {
     assert.include(r.contentText, 'Abstract')
     assert.include(r.contentText, 'Hello world.')
     assert.notInclude(r.contentText, '<')
+  })
+
+  test('externalizes a relative non-spec link to the source repo', async ({ assert, swap }) => {
+    swap(
+      PandocService,
+      new FakePandocService({ render: () => '<a href="README.mediawiki">readme</a>' })
+    )
+    const svc = await app.container.make(RenderingService)
+
+    const r = await svc.render(input())
+
+    assert.include(r.contentHtml, `href="${BLOB}README.mediawiki"`)
+    assert.include(r.contentHtml, 'target="_blank"')
+    assert.include(r.contentHtml, 'rel="noreferrer"')
   })
 
   test('rewrites a NIP-style markdown link with a hex number', async ({ assert, swap }) => {

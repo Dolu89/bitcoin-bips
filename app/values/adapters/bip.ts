@@ -20,7 +20,7 @@ import type {
 } from '#types/view_models'
 import {
   cleanAuthor,
-  extractLabelledReferences,
+  extractSpecReferences,
   rewriteSpecLinks,
   scalar,
   toAuthorList,
@@ -146,7 +146,7 @@ export const bipAdapter: ProjectAdapter = {
   },
 
   extractReferences(raw: string): string[] {
-    return extractLabelledReferences(raw, 'BIP')
+    return extractSpecReferences(raw, 'BIP', LINK_PATTERN)
   },
 
   rewriteInternalLinks($: CheerioAPI, numberBase: 10 | 16): void {

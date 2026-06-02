@@ -29,11 +29,20 @@ import type {
 /** Most recent commits captured per spec — the "recent window" cap (revisable). */
 const RECENT_COMMIT_LIMIT = 5
 
+/** Trailing-slash path prefix of a repo file's directory (`''` at the repo root). */
+function repoDirPrefix(path: string): string {
+  const dir = dirname(path)
+  return dir === '.' ? '' : `${dir}/`
+}
+
 /** Raw-content base URL for a repo file's directory — relative images resolve against it. */
 function rawBaseUrl(repo: ProjectConfig['repo'], path: string): string {
-  const dir = dirname(path)
-  const prefix = dir === '.' ? '' : `${dir}/`
-  return `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${repo.branch ?? 'HEAD'}/${prefix}`
+  return `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${repo.branch ?? 'HEAD'}/${repoDirPrefix(path)}`
+}
+
+/** GitHub blob (human-viewable) base URL for a repo file's directory — non-spec links resolve against it. */
+function blobBaseUrl(repo: ProjectConfig['repo'], path: string): string {
+  return `https://github.com/${repo.owner}/${repo.repo}/blob/${repo.branch ?? 'HEAD'}/${repoDirPrefix(path)}`
 }
 
 @inject()
@@ -114,6 +123,7 @@ export default class IngestionService {
               adapter,
               numberBase: project.numberBase,
               imageBaseUrl: rawBaseUrl(project.repo, file.path),
+              linkBaseUrl: blobBaseUrl(project.repo, file.path),
             })
           } catch (error) {
             errors.push({ number: file.number, message: `render: ${(error as Error).message}` })
@@ -330,6 +340,7 @@ export default class IngestionService {
         adapter: adapterFor(project.adapter),
         numberBase: project.numberBase,
         imageBaseUrl: rawBaseUrl(project.repo, project.repo.homeFile ?? ''),
+        linkBaseUrl: blobBaseUrl(project.repo, project.repo.homeFile ?? ''),
       })
     } catch {
       // Leave home_html unchanged on a render failure; the raw home is still captured.

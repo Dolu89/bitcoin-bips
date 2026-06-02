@@ -4,6 +4,7 @@ import {
   slugify,
   assignAnchorsAndBuildToc,
   rewriteImages,
+  rewriteRelativeLinks,
   extractText,
 } from '#values/html_postprocess'
 
@@ -75,6 +76,32 @@ test.group('values/html_postprocess rewriteImages', () => {
     assert.equal($('img').eq(0).attr('src'), `${base}bip-0174/coinjoin.png`)
     assert.equal($('img').eq(1).attr('src'), 'https://x/y.png')
     assert.equal($('img').eq(2).attr('src'), 'data:image/png;base64,AA')
+  })
+})
+
+test.group('values/html_postprocess rewriteRelativeLinks', () => {
+  test('externalizes relative non-spec links; leaves on-site, absolute, and anchors', ({
+    assert,
+  }) => {
+    const blob = 'https://github.com/bitcoin/bips/blob/master/'
+    const $ = cheerio.load(
+      '<a href="README.mediawiki">a</a>' +
+        '<a href="/32">b</a>' +
+        '<a href="https://x.test/y">c</a>' +
+        '<a href="#sec">d</a>',
+      null,
+      false
+    )
+
+    rewriteRelativeLinks($, blob)
+
+    assert.equal($('a').eq(0).attr('href'), `${blob}README.mediawiki`)
+    assert.equal($('a').eq(0).attr('target'), '_blank')
+    assert.equal($('a').eq(0).attr('rel'), 'noreferrer')
+    assert.equal($('a').eq(1).attr('href'), '/32')
+    assert.isUndefined($('a').eq(1).attr('target'))
+    assert.equal($('a').eq(2).attr('href'), 'https://x.test/y')
+    assert.equal($('a').eq(3).attr('href'), '#sec')
   })
 })
 

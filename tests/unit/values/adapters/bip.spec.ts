@@ -105,6 +105,7 @@ test.group('adapters/bip extractReferences', () => {
       { label: 'BIP-0032', body: 'See BIP-0032 for details.', expected: ['0032'] },
       { label: 'BIP 141', body: 'Defined in BIP 141.', expected: ['141'] },
       { label: 'wiki [[32]]', body: 'Refer to [[32]].', expected: ['32'] },
+      { label: 'non-spec file link', body: 'See [[README.mediawiki]].', expected: [] },
       { label: 'no citation', body: 'No references at all.', expected: [] },
     ])
     .run(({ assert }, { body, expected }) => {

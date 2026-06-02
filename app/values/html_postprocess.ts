@@ -85,6 +85,29 @@ export function rewriteImages($: CheerioAPI, imageBaseUrl: string): void {
   })
 }
 
+/**
+ * Point any still-relative `<a href>` at the source repo (GitHub blob) and mark it external. Runs
+ * after the adapter rewrote sibling-spec links to on-site `/N` URLs, so what remains are links to
+ * non-spec repo files (e.g. `README.mediawiki`) — which would otherwise resolve against the current
+ * page and 404. Absolute, protocol-relative, on-site (`/…`), anchor and mail/tel links are left.
+ */
+export function rewriteRelativeLinks($: CheerioAPI, linkBaseUrl: string): void {
+  $('a[href]').each((_, el) => {
+    const $el = $(el)
+    const href = $el.attr('href') ?? ''
+    if (href === '' || /^(https?:|mailto:|tel:|\/\/|\/|#)/i.test(href)) {
+      return
+    }
+    try {
+      $el.attr('href', new URL(href, linkBaseUrl).toString())
+      $el.attr('target', '_blank')
+      $el.attr('rel', 'noreferrer')
+    } catch {
+      // Leave an unresolvable href untouched.
+    }
+  })
+}
+
 /** Plain-text projection of the document — markup stripped, whitespace collapsed. */
 export function extractText($: CheerioAPI): string {
   return $.root().text().replace(/\s+/g, ' ').trim()

@@ -9,7 +9,12 @@ import * as cheerio from 'cheerio'
 import type { CheerioAPI } from 'cheerio'
 import { codeToHtml } from 'shiki'
 import PandocService from '#services/pandoc_service'
-import { assignAnchorsAndBuildToc, rewriteImages, extractText } from '#values/html_postprocess'
+import {
+  assignAnchorsAndBuildToc,
+  rewriteImages,
+  rewriteRelativeLinks,
+  extractText,
+} from '#values/html_postprocess'
 import type { ProjectAdapter } from '#types/project_adapter'
 
 export type RenderInput = {
@@ -19,6 +24,8 @@ export type RenderInput = {
   adapter: ProjectAdapter
   numberBase: 10 | 16
   imageBaseUrl: string
+  /** GitHub blob base for the file's directory — non-spec relative links resolve against it. */
+  linkBaseUrl: string
 }
 
 export type RenderedContent = {
@@ -38,6 +45,7 @@ export default class RenderingService {
     const $ = cheerio.load(html, null, false)
 
     input.adapter.rewriteInternalLinks($, input.numberBase)
+    rewriteRelativeLinks($, input.linkBaseUrl)
     rewriteImages($, input.imageBaseUrl)
 
     // Plain text before anchor links are appended, so the `#` markers stay out of the projection.
