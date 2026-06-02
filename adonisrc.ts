@@ -1,6 +1,23 @@
 import { indexEntities } from '@adonisjs/core'
 import { defineConfig } from '@adonisjs/core/app'
 
+/**
+ * Flow is a dev-only harness shipped as a private package; it isn't installed in
+ * production images or fresh clones. Register its ace commands only when the module
+ * resolves, so `node ace` keeps working without it.
+ */
+function devHarnessCommands() {
+  // Variable specifier (not a string literal) so the typecheck doesn't resolve the
+  // module when it's absent in production / fresh clones.
+  const flowCommands = '@adonisplus/flow/commands'
+  try {
+    import.meta.resolve(flowCommands)
+    return [() => import(flowCommands)]
+  } catch {
+    return []
+  }
+}
+
 export default defineConfig({
   /*
   |--------------------------------------------------------------------------
@@ -27,7 +44,7 @@ export default defineConfig({
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/lucid/commands'),
     () => import('@adonisjs/session/commands'),
-    () => import('@adonisplus/flow/commands'),
+    ...devHarnessCommands(),
   ],
 
   /*

@@ -70,7 +70,6 @@
     "@adonisjs/shield": "^9.0.0",
     "@adonisjs/static": "^2.0.1",
     "@adonisjs/vite": "^5.1.1",
-    "@adonisplus/flow": "^0.0.7",
     "@iconify-json/lucide": "^1.2.111",
     "@vinejs/vine": "^4.4.0",
     "better-sqlite3": "^12.10.0",
