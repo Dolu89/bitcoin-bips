@@ -3,8 +3,8 @@
  * line, body, references, hex internal links) and DISPLAY (turning a stored Document into the shared
  * slot contract). NIPs have no `<pre>` block: the title is the first non-`NIP-<n>` heading, and a
  * leading line of backtick tokens (`` `draft` `mandatory` ``) is Status (first) + Tags (the rest).
- * The functional tags (`mandatory`/`optional`) sit in the header; advisory tags (`unrecommended`,
- * `deprecated`, …) surface in the About rail. Created/Updated dates come from git, not the source.
+ * Classification tags listed in `HEADER_TAGS` sit in the header next to the status; any other tag
+ * surfaces in the About rail. Created/Updated dates come from git, not the source.
  */
 import type { CheerioAPI } from 'cheerio'
 import type Document from '#models/document'
@@ -45,7 +45,7 @@ const TAG_TONE: Record<string, BadgeTone> = {
 }
 
 /** Tags pinned to the header (functional classification); all others go to the About rail. */
-const HEADER_TAGS = new Set(['mandatory', 'optional', 'unrecommended'])
+export const HEADER_TAGS = new Set(['mandatory', 'optional', 'unrecommended'])
 
 /** First line made only of backtick-wrapped tokens (the NIP classification tags), or `[]`. */
 function classificationTags(raw: string): string[] {

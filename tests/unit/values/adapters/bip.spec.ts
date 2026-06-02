@@ -147,7 +147,9 @@ test.group('adapters/bip buildDocumentView', () => {
     const view = bipAdapter.buildDocumentView(doc, bips, [], [])
 
     assert.equal(view.eyebrow, 'BIP 32')
-    assert.deepEqual(view.badges, [{ label: 'Final', tone: 'positive' }])
+    // One header badge labelled with the status (mechanism). Its tone is policy → not pinned here.
+    assert.lengthOf(view.badges, 1)
+    assert.equal(view.badges[0].label, 'Final')
     assert.includeDeepMembers(view.headerChips, [
       { label: 'Type', value: 'Standards Track' },
       { label: 'Layer', value: 'Applications' },
@@ -158,6 +160,18 @@ test.group('adapters/bip buildDocumentView', () => {
       { type: 'date', label: 'Updated', display: '2020-05-01' },
     ])
     assert.isTrue(view.preamble.show)
+  })
+
+  // Real fallback logic (not policy): a status with no tone mapping reads as neutral.
+  test('an unknown status falls back to the neutral tone', async ({ assert }) => {
+    const doc = await DocumentFactory.merge({
+      number: '32',
+      title: 'HD Wallets',
+      preamble: JSON.stringify({ Status: 'zzz-unknown' }),
+    }).makeStubbed()
+
+    const view = bipAdapter.buildDocumentView(doc, bips, [], [])
+    assert.deepEqual(view.badges, [{ label: 'zzz-unknown', tone: 'neutral' }])
   })
 
   test('tags related specs with their direction', async ({ assert }) => {

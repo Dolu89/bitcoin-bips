@@ -1,7 +1,7 @@
 import { test } from '@japa/runner'
 import { DateTime } from 'luxon'
 import * as cheerio from 'cheerio'
-import { nipAdapter } from '#values/adapters/nip'
+import { nipAdapter, HEADER_TAGS } from '#values/adapters/nip'
 import { projects } from '#config/projects'
 import { DocumentFactory } from '#database/factories/document_factory'
 
@@ -75,28 +75,48 @@ test.group('adapters/nip rewriteInternalLinks', () => {
 })
 
 test.group('adapters/nip buildDocumentView', () => {
-  test('pins functional tags to the header and advisory tags to the About rail', async ({
+  // Mechanism, not policy: the status leads, then each tag is routed by HEADER_TAGS membership.
+  // Expectations derive from HEADER_TAGS itself, so editing which tags are pinned (or their tones)
+  // never touches this test.
+  test('puts the status first, then routes each tag by HEADER_TAGS membership', async ({
     assert,
   }) => {
+    const tags = ['mandatory', 'optional', 'unrecommended', 'zzz-unknown'] // spans both buckets
     const doc = await DocumentFactory.merge({
       project: 'nips',
       number: '4',
       title: 'Encrypted Direct Message',
-      preamble: JSON.stringify({ Status: 'final', Tags: ['unrecommended', 'optional'] }),
+      preamble: JSON.stringify({ Status: 'final', Tags: tags }),
     }).makeStubbed()
 
     const view = nipAdapter.buildDocumentView(doc, nips, [], [])
 
-    // Status + the header-pinned functional tag.
-    assert.deepEqual(view.badges, [
-      { label: 'final', tone: 'positive' },
-      { label: 'optional', tone: 'neutral' },
-    ])
-    // The advisory tag lands in an About `badges` slot, coloured as a warning.
-    assert.includeDeepMembers(view.aboutSlots, [
-      { type: 'badges', label: 'Tags', badges: [{ label: 'unrecommended', tone: 'danger' }] },
-    ])
-    assert.isFalse(view.preamble.show)
+    assert.equal(view.badges[0].label, 'final') // the status is always the first header badge
+    const header = view.badges.slice(1).map((b) => b.label)
+    const about = view.aboutSlots.flatMap((s) =>
+      s.type === 'badges' ? s.badges.map((b) => b.label) : []
+    )
+
+    for (const tag of tags) {
+      if (HEADER_TAGS.has(tag)) assert.include(header, tag)
+      else assert.include(about, tag)
+    }
+    assert.sameMembers([...header, ...about], tags) // every tag placed exactly once
+    assert.isFalse(view.preamble.show) // NIPs render their preamble in the header
+  })
+
+  // Real fallback logic (not policy): a tag with no tone mapping reads as neutral.
+  test('an unknown tag falls back to the neutral tone', async ({ assert }) => {
+    const doc = await DocumentFactory.merge({
+      project: 'nips',
+      number: '4',
+      title: 'Encrypted Direct Message',
+      preamble: JSON.stringify({ Tags: ['zzz-unknown'] }),
+    }).makeStubbed()
+
+    const view = nipAdapter.buildDocumentView(doc, nips, [], [])
+    const badges = view.aboutSlots.flatMap((s) => (s.type === 'badges' ? s.badges : []))
+    assert.deepInclude(badges, { label: 'zzz-unknown', tone: 'neutral' })
   })
 
   test('shows a Created date from the first git commit (NIPs have none in-source)', async ({
