@@ -200,6 +200,35 @@ test.group('services/ingestion_service syncProject', (group) => {
     assert.isAbove(summary.links, 0)
   })
 
+  test('re-renders a render-only backfill from stored content without re-fetching', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    const fake = new FakeSpecSourceService({
+      specs: { bips: [{ number: '1', sha: 's1', content: '<pre>\n  Title: One\n</pre>' }] },
+    })
+    swap(SpecSourceService, fake)
+    const service = await app.container.make(IngestionService)
+
+    await service.syncProject(bips)
+    const fetchesAfterFirst = fake.specFetchCount
+    assert.isAbove(fetchesAfterFirst, 0)
+
+    // Drop the rendered HTML but keep the stored source + sha — a render-only backfill.
+    const doc = await Document.query().where('project', 'bips').where('number', '1').firstOrFail()
+    doc.contentHtml = null
+    await doc.save()
+
+    const summary = await service.syncProject(bips)
+
+    const after = await Document.query().where('project', 'bips').where('number', '1').firstOrFail()
+    assert.isNotNull(after.contentHtml) // re-rendered…
+    assert.equal(fake.specFetchCount, fetchesAfterFirst) // …from stored content, no new fetch
+    assert.equal(summary.updated, 1)
+    assert.equal(summary.unchanged, 0)
+  })
+
   test('captures the project home file into project_metas', async ({ assert, swap }) => {
     useFakePandoc()
     swap(

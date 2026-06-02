@@ -60,12 +60,13 @@ export default class IngestionService {
     let updated = 0
     let unchanged = 0
 
-    // Existing catalog state for this project: number -> { id, hash, contentHtml, commitsCount }.
+    // Existing catalog state for this project: number -> { id, hash, rawContent, contentHtml, … }.
     // The blob sha drives the content diff; contentHtml and commitsCount let an unrendered or
-    // commit-less spec be backfilled when activating those capabilities.
+    // commit-less spec be backfilled when activating those capabilities. rawContent lets a
+    // render-only backfill re-render from the stored source, with no network round-trip.
     const existingRows = await Document.query()
       .where('project', project.key)
-      .select('id', 'number', 'hash', 'content_html', 'commit_count')
+      .select('id', 'number', 'hash', 'raw_content', 'content_html', 'commit_count')
       .withCount('commits')
     const existing = new Map(
       existingRows.map((row) => [
@@ -73,6 +74,7 @@ export default class IngestionService {
         {
           id: row.id,
           hash: row.hash,
+          rawContent: row.rawContent,
           contentHtml: row.contentHtml,
           commitsCount: Number(row.$extras.commits_count ?? 0),
           commitCount: row.commitCount,
@@ -96,12 +98,9 @@ export default class IngestionService {
       // Process the content when the blob changed or no render exists yet; capture commits when
       // the blob changed or none are stored yet (so enabling either capability backfills the
       // already-ingested catalog without clearing hashes). Skip only when neither is needed.
-      const needsContent = !stored || stored.hash !== file.sha || stored.contentHtml === null
-      const needsCommits =
-        !stored ||
-        stored.hash !== file.sha ||
-        stored.commitsCount === 0 ||
-        stored.commitCount === null
+      const blobChanged = !stored || stored.hash !== file.sha
+      const needsContent = blobChanged || stored.contentHtml === null
+      const needsCommits = blobChanged || stored.commitsCount === 0 || stored.commitCount === null
       if (!needsContent && !needsCommits) {
         unchanged++
         continue
@@ -110,7 +109,12 @@ export default class IngestionService {
       try {
         let doc: Document
         if (needsContent) {
-          const raw = await this.source.fetchContent(project, file.sha)
+          // Fetch only when the blob actually changed (or we have no stored source); a render-only
+          // backfill re-renders from the stored rawContent, so it costs no GitHub round-trip.
+          const raw =
+            blobChanged || !stored?.rawContent
+              ? await this.source.fetchContent(project, file.sha)
+              : stored.rawContent
           const { title, preamble } = adapter.parsePreamble(raw)
 
           // Render the changed spec; a per-spec render failure is recorded and leaves the
