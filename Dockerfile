@@ -25,11 +25,19 @@ FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-# pandoc: the conversion service shells out to the binary (not an npm package).
-# tini: clean PID 1 so SIGTERM reaches node for a graceful shutdown.
+# pandoc: the conversion service shells out to the binary. Pin a recent release rather
+# than Debian's (bookworm ships 2.17, too old for `--syntax-highlighting` → every render
+# fails). Keep this in sync with the dev pandoc version. tini: clean PID 1 for SIGTERM.
+ARG PANDOC_VERSION=3.9.0.2
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends pandoc tini ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends tini ca-certificates curl \
+  && arch="$(dpkg --print-architecture)" \
+  && curl -fsSL -o /tmp/pandoc.deb \
+     "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-${arch}.deb" \
+  && apt-get install -y --no-install-recommends /tmp/pandoc.deb \
+  && apt-get purge -y curl \
+  && apt-get autoremove -y \
+  && rm -rf /tmp/pandoc.deb /var/lib/apt/lists/*
 
 # The built app already carries its production node_modules.
 COPY --from=build --chown=node:node /app/build ./

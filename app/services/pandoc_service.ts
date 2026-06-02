@@ -1,8 +1,9 @@
 /**
  * Thin boundary over the system `pandoc` binary (not an npm package — no harness cookbook).
  * Converts a spec's raw source to HTML at sync time. Highlighting is delegated to Shiki
- * downstream, so `--no-highlight` is passed here. Isolated as its own class so tests swap a
- * fake (same pattern as SpecSourceService) and never shell out.
+ * downstream, so `--syntax-highlighting=none` is passed here — that flag needs pandoc ≥3.1.8
+ * (the Docker image pins a 3.x build). Isolated as its own class so tests swap a fake (same
+ * pattern as SpecSourceService) and never shell out.
  */
 import { spawn } from 'node:child_process'
 import { normalizeForPandoc } from '#values/mediawiki'
