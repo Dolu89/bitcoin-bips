@@ -9,6 +9,7 @@ import * as cheerio from 'cheerio'
 import type { CheerioAPI } from 'cheerio'
 import { codeToHtml } from 'shiki'
 import PandocService from '#services/pandoc_service'
+import { linkifyRootRelativeLinks } from '#values/mediawiki'
 import {
   assignAnchorsAndBuildToc,
   rewriteImages,
@@ -26,6 +27,8 @@ export type RenderInput = {
   imageBaseUrl: string
   /** GitHub blob base for the file's directory — non-spec relative links resolve against it. */
   linkBaseUrl: string
+  /** GitHub blob base at the repo root — repo-root-relative (`/path`) mediawiki links resolve here. */
+  repoBlobBaseUrl: string
 }
 
 export type RenderedContent = {
@@ -41,7 +44,13 @@ export default class RenderingService {
   constructor(protected pandoc: PandocService) {}
 
   async render(input: RenderInput): Promise<RenderedContent> {
-    const html = await this.pandoc.toHtml(input.raw, input.format)
+    // Repair repo-root-relative mediawiki external links before Pandoc, which would otherwise emit
+    // them as literal bracketed text (the `[url text]` syntax needs a protocol).
+    const raw =
+      input.format === 'mediawiki'
+        ? linkifyRootRelativeLinks(input.raw, input.repoBlobBaseUrl)
+        : input.raw
+    const html = await this.pandoc.toHtml(raw, input.format)
     const $ = cheerio.load(html, null, false)
 
     input.adapter.rewriteInternalLinks($, input.numberBase)

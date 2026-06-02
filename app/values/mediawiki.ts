@@ -17,3 +17,23 @@ export function normalizeForPandoc(raw: string): string {
       .replace(/<references\b[^>]*>[\s\S]*?<\/references>/gi, '')
   )
 }
+
+/**
+ * MediaWiki external-link syntax `[url text]` only linkifies when `url` carries a protocol, so a
+ * repo-root-relative path — e.g. `[/bip-0119/vectors the bip-0119/vectors directory]` in BIP 119,
+ * or `[/bip-0075/paymentrequest.proto paymentrequest.proto]` in BIP 75 — is emitted as literal
+ * bracketed text. Rewrite each to an absolute GitHub URL so Pandoc renders a real external link:
+ * `/blob/` for a file (a trailing `.ext` in the last segment), `/tree/` for a directory.
+ * `repoBlobBase` is the repo-root blob base (`https://github.com/<owner>/<repo>/blob/<branch>/`).
+ */
+export function linkifyRootRelativeLinks(raw: string, repoBlobBase: string): string {
+  const treeBase = repoBlobBase.replace('/blob/', '/tree/')
+  // `[/path` then whitespace (may span lines) then the link text up to the closing `]`.
+  return raw.replace(
+    /\[\/([^\s\]]+)[ \t\r\n]+([^\]]+?)\]/g,
+    (_whole, path: string, text: string) => {
+      const base = /\.[a-z0-9]+$/i.test(path) ? repoBlobBase : treeBase
+      return `[${base}${path} ${text.replace(/\s+/g, ' ').trim()}]`
+    }
+  )
+}

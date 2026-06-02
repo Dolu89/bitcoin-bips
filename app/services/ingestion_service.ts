@@ -128,6 +128,7 @@ export default class IngestionService {
               numberBase: project.numberBase,
               imageBaseUrl: rawBaseUrl(project.repo, file.path),
               linkBaseUrl: blobBaseUrl(project.repo, file.path),
+              repoBlobBaseUrl: blobBaseUrl(project.repo, ''),
             })
           } catch (error) {
             errors.push({ number: file.number, message: `render: ${(error as Error).message}` })
@@ -345,6 +346,7 @@ export default class IngestionService {
         numberBase: project.numberBase,
         imageBaseUrl: rawBaseUrl(project.repo, project.repo.homeFile ?? ''),
         linkBaseUrl: blobBaseUrl(project.repo, project.repo.homeFile ?? ''),
+        repoBlobBaseUrl: blobBaseUrl(project.repo, ''),
       })
     } catch {
       // Leave home_html unchanged on a render failure; the raw home is still captured.

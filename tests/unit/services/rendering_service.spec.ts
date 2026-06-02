@@ -16,6 +16,7 @@ function input(extra = {}) {
     numberBase: 10 as const,
     imageBaseUrl: BASE,
     linkBaseUrl: BLOB,
+    repoBlobBaseUrl: BLOB,
     ...extra,
   }
 }
@@ -106,6 +107,30 @@ test.group('services/rendering_service render', () => {
     assert.include(r.contentHtml, `href="${BLOB}README.mediawiki"`)
     assert.include(r.contentHtml, 'target="_blank"')
     assert.include(r.contentHtml, 'rel="noreferrer"')
+  })
+
+  test('linkifies a repo-root-relative mediawiki link before Pandoc sees it', async ({
+    assert,
+    swap,
+  }) => {
+    let seen = ''
+    swap(
+      PandocService,
+      new FakePandocService({
+        render: (raw) => {
+          seen = raw
+          return '<p>x</p>'
+        },
+      })
+    )
+    const svc = await app.container.make(RenderingService)
+
+    await svc.render(input({ raw: 'See [/bip-0119/vectors the vectors directory].' }))
+
+    assert.include(
+      seen,
+      `[${BLOB.replace('/blob/', '/tree/')}bip-0119/vectors the vectors directory]`
+    )
   })
 
   test('rewrites a NIP-style markdown link with a hex number', async ({ assert, swap }) => {
