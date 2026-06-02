@@ -17,6 +17,10 @@ import router from '@adonisjs/core/services/router'
  */
 router.where('number', { match: /^[0-9a-fA-F]+$/ })
 
+// Liveness probe for the container/proxy. Outside the project group, so it answers
+// 200 on any host (the per-host project is irrelevant to "is the process up?").
+router.get('/up', ({ response }) => response.ok({ status: 'ok' }))
+
 // Every public page lives under the host's project. Register static routes before `/:number`.
 router
   .group(() => {

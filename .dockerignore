@@ -1,0 +1,24 @@
+# VCS / editor
+.git
+.gitignore
+.gitattributes
+.DS_Store
+
+# Dependencies & build artefacts (rebuilt inside the image)
+node_modules
+build
+public/assets
+tmp/*
+!tmp/.gitkeep
+
+# Secrets & local env (provided by Dokploy at runtime)
+.env
+.env.*
+
+# Harness / tooling not needed for the build
+# (tests/ stays in the context: `node ace build` compiles bin/test.ts → tests/bootstrap)
+.flow
+.claude
+design-system
+PLAN-REECRITURE-V4.md
+*.log
