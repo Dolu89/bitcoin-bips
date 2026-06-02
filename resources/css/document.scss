@@ -9,6 +9,15 @@
   gap: 44px;
   align-items: start;
 }
+/* Specs with no sub-headings produce an empty TOC, so its partial renders nothing.
+   Keep the 3-column tracks (content stays its normal width and position) and just
+   leave the TOC column empty by pinning the article and rail to columns 2 and 3. */
+.bip-layout--no-toc > .bip-detail {
+  grid-column: 2;
+}
+.bip-layout--no-toc > .bip-meta-rail {
+  grid-column: 3;
+}
 .bip-detail {
   min-width: 0;
 }
@@ -427,6 +436,11 @@
   }
   .bip-toc-rail {
     display: none;
+  }
+  /* Single-column grid: clear the column pin so the article isn't pushed into a
+     phantom second track. */
+  .bip-layout--no-toc > .bip-detail {
+    grid-column: auto;
   }
 }
 @media (max-width: 640px) {
