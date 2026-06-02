@@ -12,7 +12,9 @@ edge.use(edgeIconify)
 
 /**
  * Per-project theme as inline CSS vars: derives every brand shade from the one
- * accent color via `color-mix`, so a new project only supplies `color`.
+ * accent color via `color-mix`, so a new project only supplies `color`. The
+ * tints mix toward `transparent` (not white/black) so they read correctly over
+ * both the light and dark page backgrounds — this inline style applies to both.
  */
 edge.global('brandStyle', (project?: ProjectConfig) => {
   if (!project) return ''
@@ -26,6 +28,8 @@ edge.global('brandStyle', (project?: ProjectConfig) => {
     `--brand-ink:color-mix(in srgb, ${c}, #000 26%)`,
     `--link-hover:color-mix(in srgb, ${c}, #000 26%)`,
     `--brand-tint:color-mix(in srgb, ${c} 12%, transparent)`,
+    `--bg-tint:color-mix(in srgb, ${c} 6%, transparent)`,
+    `--shadow-brand:0 6px 20px color-mix(in srgb, ${c} 28%, transparent)`,
   ].join(';')
 })
 

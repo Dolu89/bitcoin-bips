@@ -16,7 +16,7 @@
   --orange-100: #ffe9d2;
   --orange-200: #ffd6a8;
   --orange-300: #ffbf73;
-  --orange-400: #ffab3a; /* bright orange — link hover, accents */
+  --orange-400: #ffab3a; /* bright orange — ramp step */
   --orange-500: #ff9500; /* PRIMARY brand orange (from screenshots) */
   --orange-600: #e8820a; /* hover/active fill */
   --orange-700: #c26b08; /* pressed, text-on-light */
@@ -65,7 +65,6 @@
 [data-theme='light'] {
   --brand: var(--orange-500);
   --brand-hover: var(--orange-600);
-  --brand-bright: var(--orange-400);
   --brand-ink: var(--orange-700); /* orange text on light bg */
   --brand-tint: var(--orange-50); /* cream tint surfaces */
 
@@ -120,7 +119,6 @@
 [data-theme='dark'] {
   --brand: #ffa733; /* slightly lifted for contrast */
   --brand-hover: #ffb95a;
-  --brand-bright: #ffc676;
   --brand-ink: #ffb95a;
   --brand-tint: rgba(255, 149, 0, 0.1);
 
