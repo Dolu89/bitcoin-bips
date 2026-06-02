@@ -2,7 +2,8 @@
  * All BIP-specific code lives here — both DATA (parsing the RFC-2822 `<pre>`/fenced preamble, body,
  * references, internal links) and DISPLAY (turning a stored Document into the shared slot contract).
  * BIPs carry `Key: value` metadata, a colored Status, Type/Layer header chips, an authors list, and
- * a `Created` date in the preamble; they cite other BIPs as `BIP-0032` / `BIP 141` / `[[32]]`.
+ * an `Assigned` date in the preamble (the date the BIP number was assigned — the BIP-2 spec names
+ * this header `Created`, but every file uses `Assigned`); they cite other BIPs as `BIP-0032` / `BIP 141` / `[[32]]`.
  */
 import type { CheerioAPI } from 'cheerio'
 import type Document from '#models/document'
@@ -173,9 +174,11 @@ export const bipAdapter: ProjectAdapter = {
     if (authors.length) {
       aboutSlots.push({ type: 'authors', label: 'Authors', authors })
     }
-    const created = scalar(preamble.Created)
-    if (created) {
-      aboutSlots.push({ type: 'date', label: 'Created', display: created })
+    // The date the BIP number was assigned. Files use `Assigned`; the BIP-2 spec calls the header
+    // `Created` — fall back to it so a spec following the spec text to the letter still shows a date.
+    const assigned = scalar(preamble.Assigned) ?? scalar(preamble.Created)
+    if (assigned) {
+      aboutSlots.push({ type: 'date', label: 'Assigned', display: assigned })
     }
     if (document.lastCommitAt) {
       aboutSlots.push({

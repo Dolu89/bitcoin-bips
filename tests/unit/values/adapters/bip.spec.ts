@@ -15,7 +15,7 @@ const BIP_HEADER = `<pre>
   Status: Final
   Type: Informational
   Layer: Applications
-  Created: 2012-02-11
+  Assigned: 2012-02-11
 </pre>
 == Abstract ==
 Body text here.`
@@ -26,7 +26,7 @@ const BIP_MULTI_AUTHOR = `<pre>
   Author: Luke Dashjr <luke@example.com>
           Amir Taaki <amir@example.com>, Jane Roe (jane)
   Status: Active
-  Created: 2016-02-03
+  Assigned: 2016-02-03
 </pre>`
 
 const BIP_MARKDOWN = `\`\`\`
@@ -48,7 +48,7 @@ test.group('adapters/bip parsePreamble', () => {
     assert.equal(preamble.Status, 'Final')
     assert.equal(preamble.Type, 'Informational')
     assert.equal(preamble.Layer, 'Applications')
-    assert.equal(preamble.Created, '2012-02-11')
+    assert.equal(preamble.Assigned, '2012-02-11')
   })
 
   test('normalizes the author line into a clean list — {label}')
@@ -128,7 +128,7 @@ test.group('adapters/bip rewriteInternalLinks', () => {
 })
 
 test.group('adapters/bip buildDocumentView', () => {
-  test('surfaces authors, a Created date from the preamble, and an Updated date from git', async ({
+  test('surfaces authors, an Assigned date from the preamble, and an Updated date from git', async ({
     assert,
   }) => {
     const doc = await DocumentFactory.merge({
@@ -140,7 +140,7 @@ test.group('adapters/bip buildDocumentView', () => {
         Type: 'Standards Track',
         Layer: 'Applications',
         Author: ['Pieter Wuille'],
-        Created: '2012-02-11',
+        Assigned: '2012-02-11',
       }),
       lastCommitAt: DateTime.fromISO('2020-05-01T00:00:00Z'),
     }).makeStubbed()
@@ -157,10 +157,24 @@ test.group('adapters/bip buildDocumentView', () => {
     ])
     assert.includeDeepMembers(view.aboutSlots, [
       { type: 'authors', label: 'Authors', authors: ['Pieter Wuille'] },
-      { type: 'date', label: 'Created', display: '2012-02-11' },
+      { type: 'date', label: 'Assigned', display: '2012-02-11' },
       { type: 'date', label: 'Updated', display: '2020-05-01' },
     ])
     assert.isTrue(view.preamble.show)
+  })
+
+  // Real fallback logic: files use `Assigned`, but the BIP-2 spec names the header `Created`.
+  test('falls back to a `Created` header when `Assigned` is absent', async ({ assert }) => {
+    const doc = await DocumentFactory.merge({
+      number: '32',
+      title: 'HD Wallets',
+      preamble: JSON.stringify({ Created: '2012-02-11' }),
+    }).makeStubbed()
+
+    const view = bipAdapter.buildDocumentView(doc, bips, [], [])
+    assert.includeDeepMembers(view.aboutSlots, [
+      { type: 'date', label: 'Assigned', display: '2012-02-11' },
+    ])
   })
 
   // Real fallback logic (not policy): a status with no tone mapping reads as neutral.
