@@ -17,6 +17,7 @@ import SearchService from '#services/search_service'
 import { adapterFor } from '#values/adapters'
 import { canonicalize } from '#values/document_number'
 import type { ProjectConfig } from '#types/project'
+import type { ProjectAdapter } from '#types/project_adapter'
 import type {
   SyncSummary,
   SyncError,
@@ -72,9 +73,6 @@ export default class IngestionService {
 
     const files = await this.source.listSpecFiles(project)
     logger.info(`[${project.key}] ${files.length} spec files found; syncing changed ones…`)
-
-    // Specs whose body we parsed this run, so we can resolve their references afterwards.
-    const refsByNumber = new Map<string, string[]>()
 
     let seen = 0
     for (const file of files) {
@@ -141,7 +139,6 @@ export default class IngestionService {
             }
           )
 
-          refsByNumber.set(file.number, adapter.extractReferences(raw))
           if (stored) {
             updated++
           } else {
@@ -161,7 +158,7 @@ export default class IngestionService {
       }
     }
 
-    const links = await this.resolveLinks(project, refsByNumber)
+    const links = await this.resolveLinks(project, adapter)
     await this.captureHome(project)
 
     await ProjectMeta.updateOrCreate({ project: project.key }, { lastUpdate: DateTime.now() })
@@ -223,42 +220,34 @@ export default class IngestionService {
   }
 
   /**
-   * Resolve raw references to known specs in this project and sync the relatedOut pivot.
-   * References to a number absent from the catalog are dropped (the pivot cannot hold an
-   * unresolved ref). Returns the count of edges written.
+   * Rebuild the relatedOut pivot for the whole project from each spec's stored rawContent.
+   * Decoupled from the per-run content diff so links self-heal: a spec whose content did not
+   * change this sync — or whose pivot rows were lost to a schema rebuild — still gets its edges
+   * re-resolved, since references are a regex over already-stored content (no network). A
+   * reference to a number absent from the catalog is dropped (the pivot cannot hold an unresolved
+   * ref). Returns the count of edges written.
    */
-  private async resolveLinks(
-    project: ProjectConfig,
-    refsByNumber: Map<string, string[]>
-  ): Promise<number> {
-    if (refsByNumber.size === 0) {
-      return 0
-    }
-
-    // Rebuild number -> id including specs just inserted this run.
-    const rows = await Document.query().where('project', project.key).select('id', 'number')
-    const idByNumber = new Map(rows.map((row) => [row.number, row.id]))
+  private async resolveLinks(project: ProjectConfig, adapter: ProjectAdapter): Promise<number> {
+    const docs = await Document.query()
+      .where('project', project.key)
+      .select('id', 'number', 'rawContent')
+    const idByNumber = new Map(docs.map((doc) => [doc.number, doc.id]))
 
     let links = 0
-    for (const [number, rawRefs] of refsByNumber) {
-      const fromId = idByNumber.get(number)
-      if (!fromId) {
-        continue
-      }
-      const targetIds: number[] = []
-      for (const rawRef of rawRefs) {
+    for (const doc of docs) {
+      const targetIds = new Set<number>()
+      for (const rawRef of adapter.extractReferences(doc.rawContent ?? '')) {
         const canonical = canonicalize(rawRef, project.numberBase)
-        if (canonical === null || canonical === number) {
+        if (canonical === null || canonical === doc.number) {
           continue
         }
         const toId = idByNumber.get(canonical)
         if (toId) {
-          targetIds.push(toId)
+          targetIds.add(toId)
         }
       }
-      const doc = await Document.findOrFail(fromId)
-      await doc.related('relatedOut').sync(targetIds)
-      links += targetIds.length
+      await doc.related('relatedOut').sync([...targetIds])
+      links += targetIds.size
     }
 
     return links

@@ -160,6 +160,46 @@ test.group('services/ingestion_service syncProject', (group) => {
     assert.lengthOf(summary.errors, 0)
   })
 
+  test('rebuilds relatedOut for an unchanged spec whose pivot rows were lost', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    const fake = new FakeSpecSourceService({
+      specs: {
+        bips: [
+          { number: '10', sha: 'a', content: '<pre>\n  Title: A\n</pre>' },
+          { number: '20', sha: 'b', content: '<pre>\n  Title: B\n</pre>\nSee BIP-10.' },
+        ],
+      },
+    })
+    swap(SpecSourceService, fake)
+    const service = await app.container.make(IngestionService)
+
+    await service.syncProject(bips)
+    const a = await Document.query().where('project', 'bips').where('number', '10').firstOrFail()
+    const b = await Document.query().where('project', 'bips').where('number', '20').firstOrFail()
+
+    // Simulate the pivot being wiped (e.g. a schema rebuild) while documents keep their hash and
+    // rendered content — so the next sync sees every spec as unchanged.
+    await b.related('relatedOut').detach()
+    await b.load('relatedOut')
+    assert.lengthOf(b.relatedOut, 0)
+
+    // Second sync, identical shas: no content is reprocessed, yet the edge is restored from the
+    // stored rawContent — link resolution no longer depends on the content diff.
+    const summary = await service.syncProject(bips)
+
+    await b.load('relatedOut')
+    assert.includeMembers(
+      b.relatedOut.map((d) => d.id),
+      [a.id]
+    )
+    assert.equal(summary.added, 0)
+    assert.equal(summary.updated, 0)
+    assert.isAbove(summary.links, 0)
+  })
+
   test('captures the project home file into project_metas', async ({ assert, swap }) => {
     useFakePandoc()
     swap(
