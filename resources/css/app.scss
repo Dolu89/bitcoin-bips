@@ -71,14 +71,18 @@ main {
 }
 .bips-brand {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   text-decoration: none;
   flex: none;
 }
 .bips-brand__coin {
   border-radius: 50%;
-  align-self: center;
+}
+.bips-brand__text {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
 }
 .bips-brand__name {
   font-family: var(--font-display);

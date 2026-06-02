@@ -4,8 +4,10 @@
     @if(project)
       <a class="bips-brand" href="/">
         <img class="bips-brand__coin" src="{{ project.logo }}" alt="" width="36" height="36" />
-        <span class="bips-brand__name">{{ project.name }}</span>
-        <span class="bips-brand__tag">{{ project.tagline }}</span>
+        <span class="bips-brand__text">
+          <span class="bips-brand__name">{{ project.name }}</span>
+          <span class="bips-brand__tag">{{ project.tagline }}</span>
+        </span>
       </a>
       {{-- Live overlay search (Alpine). The GET action is the no-JS progressive fallback. --}}
       <form class="bips-search" method="GET" action="{{ urlFor('search.show') }}" x-on:submit.prevent="run()">
