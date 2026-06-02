@@ -5,6 +5,7 @@ import { icons as lucide } from '@iconify-json/lucide'
 import env from '#start/env'
 import type { ProjectConfig } from '#types/project'
 import { umamiTag } from '#values/analytics'
+import { resolveMeta, iconPaths, type PageMeta } from '#values/site_meta'
 
 // Register the Lucide icon collection so templates can use `@svg('lucide:<name>')`.
 addCollection(lucide)
@@ -42,6 +43,16 @@ edge.global('brandStyle', (project?: ProjectConfig) => {
 edge.global('analyticsTag', (project?: ProjectConfig) =>
   umamiTag(project, { enabled: app.inProduction, scriptUrl: env.get('UMAMI_SCRIPT_URL') ?? null })
 )
+
+/**
+ * Resolves the full `<head>` metadata (title, description, canonical, Open Graph/Twitter) for a
+ * page. Rendered by `partials/head.edge`, which passes the shared `project` + `currentPath` plus
+ * any page-level overrides. Logic lives in `#values/site_meta` so it stays pure and unit-testable.
+ */
+edge.global('siteMeta', (page: PageMeta = {}) => resolveMeta(page))
+
+/** Per-project favicon asset URLs, derived from the project key — see `partials/head.edge`. */
+edge.global('iconPaths', (key: string) => iconPaths(key))
 
 // Builds the segmented additions/deletions diff bar (5 cells) for a commit.
 edge.global('diffBar', (additions: number, deletions: number) => {

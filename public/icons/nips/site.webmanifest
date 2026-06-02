@@ -1,0 +1,13 @@
+{
+  "name": "NIPs — nostr implementation possibilities",
+  "short_name": "NIPs",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0E1116",
+  "theme_color": "#8E44AD",
+  "icons": [
+    { "src": "/icons/nips/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/nips/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/nips/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

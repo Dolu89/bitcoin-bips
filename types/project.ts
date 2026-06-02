@@ -1,7 +1,10 @@
 /** Typed contract for a mirrored specs project; one entry per project in `config/projects.ts`. */
 export type ProjectConfig = {
   key: string
+  /** Short brand / acronym, e.g. `BIPs`. Used in the header and as `og:site_name`. */
   name: string
+  /** Expanded brand name, e.g. `Bitcoin Improvement Proposals`. Used as the page-title suffix. */
+  fullName: string
   tagline: string
   domain: string
   enabled: boolean
@@ -9,6 +12,11 @@ export type ProjectConfig = {
   color: string
   logo: string
   specLabel: string
+
+  /** One-sentence site description — meta description + Open Graph/Twitter default. */
+  description: string
+  /** Social card image, served from `public/` (1200×630). Path or absolute URL. */
+  ogImage: string
 
   /** Umami `data-website-id` for this project. Absent = no analytics tag (see `app/values/analytics.ts`). */
   analyticsId?: string

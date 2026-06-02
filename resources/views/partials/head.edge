@@ -1,0 +1,53 @@
+{{--
+  Page <head> metadata. Reads the shared `project` + `currentPath` plus any page-level overrides
+  passed through the layout (`title`, `description`, `ogImage`, `ogType`). All per-project values
+  are data-driven — see `#values/site_meta`.
+--}}
+@let(meta = siteMeta({ project, path: currentPath, title, description, ogImage, ogType }))
+
+<title>{{ meta.title }}</title>
+@if(meta.description)
+  <meta name="description" content="{{ meta.description }}" />
+@end
+@if(meta.canonical)
+  <link rel="canonical" href="{{ meta.canonical }}" />
+@end
+
+{{-- Open Graph --}}
+<meta property="og:site_name" content="{{ meta.siteName }}" />
+<meta property="og:title" content="{{ meta.title }}" />
+@if(meta.description)
+  <meta property="og:description" content="{{ meta.description }}" />
+@end
+<meta property="og:type" content="{{ meta.ogType }}" />
+@if(meta.canonical)
+  <meta property="og:url" content="{{ meta.canonical }}" />
+@end
+@if(meta.ogImage)
+  <meta property="og:image" content="{{ meta.ogImage }}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+@end
+
+{{-- Twitter card --}}
+<meta name="twitter:card" content="{{ meta.twitterCard }}" />
+<meta name="twitter:title" content="{{ meta.title }}" />
+@if(meta.description)
+  <meta name="twitter:description" content="{{ meta.description }}" />
+@end
+@if(meta.ogImage)
+  <meta name="twitter:image" content="{{ meta.ogImage }}" />
+@end
+
+{{-- Favicons + manifest + theme color (per project) --}}
+@if(project)
+  @let(icons = iconPaths(project.key))
+  <link rel="icon" href="{{ icons.ico }}" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="{{ icons.svg }}" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ icons.png32 }}" />
+  <link rel="apple-touch-icon" href="{{ icons.apple }}" />
+  <link rel="manifest" href="{{ icons.manifest }}" />
+@end
+@if(meta.themeColor)
+  <meta name="theme-color" content="{{ meta.themeColor }}" />
+@end

@@ -1,0 +1,13 @@
+{
+  "name": "BIPs — bitcoin improvement proposals",
+  "short_name": "BIPs",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0E1116",
+  "theme_color": "#FF9500",
+  "icons": [
+    { "src": "/icons/bips/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/bips/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/bips/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

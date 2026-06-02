@@ -25,6 +25,7 @@ router.get('/up', ({ response }) => response.ok({ status: 'ok' }))
 router
   .group(() => {
     router.get('/', [controllers.Index, 'show']).as('home')
+    router.get('/favicon.ico', [controllers.Favicon, 'show'])
     router.get('/robots.txt', [controllers.Robots, 'show'])
     router.get('/sitemap.xml', [controllers.Sitemap, 'show'])
     router.get('/search', [controllers.Search, 'show'])

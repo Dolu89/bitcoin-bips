@@ -20,6 +20,7 @@ import type {
 } from '#types/view_models'
 import {
   cleanAuthor,
+  documentDescription,
   extractSpecReferences,
   rewriteSpecLinks,
   scalar,
@@ -199,6 +200,7 @@ export const bipAdapter: ProjectAdapter = {
     return {
       eyebrow: `${project.specLabel} ${document.number}`,
       title: document.title,
+      description: documentDescription(project, document),
       badges: badge ? [badge] : [],
       headerChips,
       aboutSlots,

@@ -5,6 +5,8 @@
  * status tones) live in the adapters themselves (`app/values/adapters/<id>.ts`), never here.
  */
 import type { CheerioAPI } from 'cheerio'
+import type Document from '#models/document'
+import type { ProjectConfig } from '#types/project'
 import { canonicalize } from '#values/document_number'
 
 /** Strip contact noise (`<email>`, `(handle)`) and trim a single author token. */
@@ -44,6 +46,38 @@ export function markdownHeadings(raw: string): string[] {
     found.push({ index: m.index ?? 0, text: m[1].trim() })
   }
   return found.sort((a, b) => a.index - b.index).map((h) => h.text)
+}
+
+/**
+ * A meta-description excerpt from plain body text: whitespace collapsed and trimmed, cut to `max`
+ * chars at a word boundary with an ellipsis. Empty input → empty string. Used to turn a spec's
+ * abstract/first paragraph into a card description.
+ */
+export function metaExcerpt(text: string | null | undefined, max = 155): string {
+  if (!text) {
+    return ''
+  }
+  const clean = text.replace(/\s+/g, ' ').trim()
+  if (clean.length <= max) {
+    return clean
+  }
+  const cut = clean.slice(0, max)
+  const lastSpace = cut.lastIndexOf(' ')
+  // Prefer a word boundary, but don't backtrack so far the excerpt becomes stubby.
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`
+}
+
+/**
+ * The card/meta description for a spec: the body's opening text (its abstract/first paragraph),
+ * or — when a spec has little or no body text — a self-describing fallback naming the spec, so the
+ * description always reads well and lands in the ~110-160 char band.
+ */
+export function documentDescription(project: ProjectConfig, document: Document): string {
+  const excerpt = metaExcerpt(document.contentText)
+  if (excerpt.length >= 80) {
+    return excerpt
+  }
+  return `${project.specLabel} ${document.number}: ${document.title}. Read the full specification — status, authors, references, and complete revision history — on ${project.name}.`
 }
 
 /** Markdown `](target)` and mediawiki `[[target]]` / `[[target|label]]` link targets in raw source. */

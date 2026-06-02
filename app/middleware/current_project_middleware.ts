@@ -17,6 +17,9 @@ declare module '@adonisjs/core/http' {
  */
 export default class CurrentProjectMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
+    // Path (no query) for the canonical/og:url — shared on every request, project or not.
+    ctx.view.share({ currentPath: ctx.request.url() })
+
     const project = findProjectByDomain(ctx.request.hostname() ?? '')
 
     if (project) {

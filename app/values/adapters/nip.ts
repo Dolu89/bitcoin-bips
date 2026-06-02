@@ -20,7 +20,12 @@ import type {
   RelatedSpec,
   SearchHitView,
 } from '#types/view_models'
-import { extractSpecReferences, markdownHeadings, rewriteSpecLinks } from '#values/adapters/shared'
+import {
+  documentDescription,
+  extractSpecReferences,
+  markdownHeadings,
+  rewriteSpecLinks,
+} from '#values/adapters/shared'
 
 /** Link to a NIP spec file; group 1 = raw hex number, group 2 = optional `#fragment`. */
 const LINK_PATTERN = /^0*([0-9a-f]+)\.md(#.*)?$/i
@@ -194,6 +199,7 @@ export const nipAdapter: ProjectAdapter = {
     return {
       eyebrow: `${project.specLabel} ${document.number}`,
       title: document.title,
+      description: documentDescription(project, document),
       badges: headerBadges(preamble),
       headerChips: [],
       aboutSlots,

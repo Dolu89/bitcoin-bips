@@ -1,4 +1,8 @@
-@layout({ title: project.specLabel + ' ' + document.number + ' - ' + document.title })
+@layout({
+  title: project.specLabel + ' ' + document.number + ' - ' + document.title,
+  description: view.description,
+  ogType: 'article',
+})
   <div class="bip-layout {{ document.toc ? '' : 'bip-layout--no-toc' }}">
     @include('partials/documents/show/toc')
 

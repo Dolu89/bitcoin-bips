@@ -50,6 +50,8 @@ export type RelatedSpec = {
 export type DocumentView = {
   eyebrow: string
   title: string
+  /** Plain-text card/meta description (Open Graph + `<meta name="description">`). ~110-160 chars. */
+  description: string
   badges: Badge[]
   headerChips: HeaderChip[]
   aboutSlots: AboutSlot[]

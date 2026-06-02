@@ -5,6 +5,7 @@
 
 export const controllers = {
   Documents: () => import('#controllers/documents_controller'),
+  Favicon: () => import('#controllers/favicon_controller'),
   Index: () => import('#controllers/index_controller'),
   Robots: () => import('#controllers/robots_controller'),
   Search: () => import('#controllers/search_controller'),
