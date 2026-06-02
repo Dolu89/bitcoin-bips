@@ -1,0 +1,118 @@
+{{-- Support / donate modal — a self-contained Lightning donation flow (TwentyUno-style: pick an
+     amount, get a BOLT11 invoice + QR), styled with our design system. Shares the `donate` x-data
+     on the footer. The on-chain address is intentionally omitted (to be reworked later). --}}
+<div class="donate-scrim" :class="{ 'is-open': open }" x-on:click="close()"></div>
+
+<div
+  class="donate-dialog"
+  :class="{ 'is-open': open }"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="donate-title"
+  x-on:keydown.escape.window="close()"
+>
+  <button class="donate-dialog__close" type="button" x-on:click="close()" aria-label="Close">
+    @svg('lucide:x', { width: 18, height: 18 })
+  </button>
+
+  <div class="donate-dialog__head">
+    <span class="donate-dialog__zap">
+      @svg('lucide:zap', { width: 22, height: 22 })
+    </span>
+    <h3 id="donate-title">Support {{ project.name }}</h3>
+    <p>{{ project.name }} is free and open-source. A few sats keep it running — thank you.</p>
+  </div>
+
+  {{-- Step 1 — pick an amount --}}
+  <div x-show="step === 'choose'">
+    <div class="donate-amounts">
+      <button type="button" class="donate-amount" x-on:click="request(1000)">
+        @svg('lucide:zap', { width: 14, height: 14 })
+        <span class="donate-amount__n">1,000</span>
+        <span class="donate-amount__u">sats</span>
+      </button>
+      <button type="button" class="donate-amount" x-on:click="request(10000)">
+        @svg('lucide:zap', { width: 14, height: 14 })
+        <span class="donate-amount__n">10,000</span>
+        <span class="donate-amount__u">sats</span>
+      </button>
+      <button type="button" class="donate-amount" x-on:click="request(100000)">
+        @svg('lucide:zap', { width: 14, height: 14 })
+        <span class="donate-amount__n">100,000</span>
+        <span class="donate-amount__u">sats</span>
+      </button>
+    </div>
+
+    <form class="donate-custom" x-on:submit.prevent="requestCustom()">
+      <input
+        class="donate-custom__input"
+        type="number"
+        min="1"
+        inputmode="numeric"
+        placeholder="Custom amount in sats"
+        x-model="custom"
+      />
+      <button class="donate-custom__go" type="submit" aria-label="Continue">
+        @svg('lucide:arrow-right', { width: 18, height: 18 })
+      </button>
+    </form>
+
+    <button class="copyrow__btn donate-addr" type="button" x-on:click="copy(lnAddress)">
+      <span class="donate-addr__label">or copy address</span>
+      <code x-text="lnAddress"></code>
+      <span class="copyrow__ic">
+        <span x-show="!copied">
+          @svg('lucide:copy', { width: 15, height: 15 })
+        </span>
+        <span x-show="copied">
+          @svg('lucide:check', { width: 15, height: 15 })
+        </span>
+      </span>
+    </button>
+  </div>
+
+  {{-- Step 2 — creating the invoice --}}
+  <div class="donate-status" x-show="step === 'loading'" x-cloak>
+    <span class="donate-spinner" aria-hidden="true"></span>
+    <p>Creating a Lightning invoice…</p>
+  </div>
+
+  {{-- Step 3 — invoice + QR --}}
+  <div class="donate-invoice" x-show="step === 'invoice'" x-cloak>
+    <div class="donate-qr" x-html="qr"></div>
+    <p class="donate-invoice__amount">
+      <span x-text="Number(amount).toLocaleString('en-US')"></span> sats
+    </p>
+    <button class="copyrow__btn" type="button" x-on:click="copy(invoice)">
+      <code x-text="invoice"></code>
+      <span class="copyrow__ic">
+        <span x-show="!copied">
+          @svg('lucide:copy', { width: 15, height: 15 })
+        </span>
+        <span x-show="copied">
+          @svg('lucide:check', { width: 15, height: 15 })
+        </span>
+      </span>
+    </button>
+    <div class="donate-invoice__actions">
+      <a class="donate-btn donate-btn--block" :href="'lightning:' + invoice">
+        @svg('lucide:wallet', { width: 16, height: 16 })
+        Open in wallet
+      </a>
+      <button class="donate-link" type="button" x-on:click="reset()">
+        @svg('lucide:arrow-left', { width: 15, height: 15 })
+        Choose another amount
+      </button>
+    </div>
+  </div>
+
+  {{-- Error --}}
+  <div class="donate-status donate-status--error" x-show="step === 'error'" x-cloak>
+    @svg('lucide:circle-alert', { width: 22, height: 22 })
+    <p x-text="error"></p>
+    <button class="donate-link" type="button" x-on:click="reset()">
+      @svg('lucide:rotate-ccw', { width: 15, height: 15 })
+      Try again
+    </button>
+  </div>
+</div>

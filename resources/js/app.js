@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs'
+import qrcode from 'qrcode-generator'
 
 Alpine.data('alert', function () {
   return {
@@ -16,6 +17,98 @@ Alpine.data('alert', function () {
     },
   }
 })
+
+// Support modal: a self-contained Lightning donation flow (à la TwentyUno) — pick an amount, fetch
+// a BOLT11 invoice from the Lightning address via LNURL-pay, and show a QR + pay link. All client
+// side (npub.cash serves CORS `*`); no backend involved.
+const LN_ADDRESS = 'dolu@npub.cash'
+
+Alpine.data('donate', () => ({
+  open: false,
+  lnAddress: LN_ADDRESS,
+  step: 'choose', // 'choose' | 'loading' | 'invoice' | 'error'
+  amount: 0, // chosen amount, in sats
+  custom: '', // custom-amount input, in sats
+  invoice: '', // BOLT11 string for the chosen amount
+  qr: '', // inline SVG markup for the invoice QR
+  error: '',
+  copied: false,
+  _lnurl: null, // cached LNURL-pay metadata (resolved once per open)
+
+  close() {
+    this.open = false
+    // Reset after the close transition so the flow doesn't flicker on the way out.
+    setTimeout(() => this.reset(), 220)
+  },
+  reset() {
+    this.step = 'choose'
+    this.amount = 0
+    this.custom = ''
+    this.invoice = ''
+    this.qr = ''
+    this.error = ''
+  },
+
+  requestCustom() {
+    const sats = Math.floor(Number(this.custom))
+    if (Number.isFinite(sats) && sats > 0) this.request(sats)
+  },
+
+  async request(sats) {
+    this.amount = sats
+    this.error = ''
+    this.step = 'loading'
+    try {
+      const lnurl = await this.resolveLnurl()
+      const msat = sats * 1000
+      if (msat < lnurl.minSendable || msat > lnurl.maxSendable) {
+        const lo = Math.ceil(lnurl.minSendable / 1000)
+        const hi = Math.floor(lnurl.maxSendable / 1000)
+        throw new Error(`Amount must be between ${lo} and ${hi.toLocaleString('en-US')} sats.`)
+      }
+      const sep = lnurl.callback.includes('?') ? '&' : '?'
+      const res = await fetch(`${lnurl.callback}${sep}amount=${msat}`)
+      const data = await res.json()
+      if (!data.pr) throw new Error(data.reason || 'Could not create an invoice. Please try again.')
+      this.invoice = data.pr
+      this.qr = this.makeQr(`lightning:${data.pr.toUpperCase()}`)
+      this.step = 'invoice'
+    } catch (e) {
+      this.error = e?.message || 'Something went wrong. Please try again.'
+      this.step = 'error'
+    }
+  },
+
+  async resolveLnurl() {
+    if (this._lnurl) return this._lnurl
+    const [name, domain] = this.lnAddress.split('@')
+    const res = await fetch(`https://${domain}/.well-known/lnurlp/${name}`)
+    const data = await res.json()
+    if (data.tag !== 'payRequest')
+      throw new Error('This Lightning address cannot receive payments.')
+    this._lnurl = data
+    return data
+  },
+
+  makeQr(text) {
+    const qr = qrcode(0, 'M')
+    qr.addData(text)
+    qr.make()
+    return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true })
+  },
+
+  copy(value) {
+    try {
+      navigator.clipboard.writeText(value)
+    } catch (e) {
+      /* clipboard unavailable */
+    }
+    this.copied = true
+    setTimeout(() => {
+      this.copied = false
+    }, 1400)
+  },
+}))
 
 // Light/dark toggle: flips `data-theme` on <html> and persists it. Initial theme is set pre-paint in the layout head.
 window.toggleTheme = function () {

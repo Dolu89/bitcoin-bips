@@ -1,4 +1,4 @@
-<footer class="bips-footer">
+<footer class="bips-footer" x-data="donate">
   <div class="bips-footer__inner">
     @if(project)
       <div class="bips-footer__brand">
@@ -19,10 +19,10 @@
       </div>
 
       <div class="bips-footer__actions">
-        <a class="donate-btn" href="/support">
+        <button class="donate-btn" type="button" x-on:click="open = true">
           @svg('lucide:zap', { width: 16, height: 16 })
           Donate
-        </a>
+        </button>
         <a
           class="footer-link"
           href="https://github.com/Dolu89/bitcoin-bips"
@@ -45,4 +45,8 @@
       </div>
     @end
   </div>
+
+  @if(project)
+    @include('partials/donate')
+  @end
 </footer>
