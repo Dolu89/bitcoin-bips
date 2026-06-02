@@ -45,7 +45,7 @@ const TAG_TONE: Record<string, BadgeTone> = {
 }
 
 /** Tags pinned to the header (functional classification); all others go to the About rail. */
-const HEADER_TAGS = new Set(['mandatory', 'optional'])
+const HEADER_TAGS = new Set(['mandatory', 'optional', 'unrecommended'])
 
 /** First line made only of backtick-wrapped tokens (the NIP classification tags), or `[]`. */
 function classificationTags(raw: string): string[] {
