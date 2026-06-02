@@ -315,6 +315,14 @@ export default class IngestionService {
 
   /** Capture the project's curated home file, skipping the download when the sha is unchanged. */
   private async captureHome(project: ProjectConfig): Promise<void> {
+    // No curated home configured → clear anything a previous config captured, so the index
+    // falls back to the table variant. Keyed on config (not a null findHome) so a transient
+    // fetch failure for a project that *does* have a homeFile never wipes its captured home.
+    if (!project.repo.homeFile) {
+      await this.clearHome(project)
+      return
+    }
+
     const home = await this.source.findHome(project)
     if (!home) {
       return
@@ -348,5 +356,23 @@ export default class IngestionService {
         ...(rendered ? { homeHtml: rendered.contentHtml } : {}),
       }
     )
+  }
+
+  /**
+   * Null out a previously captured home (e.g. its homeFile was removed from config). No-op when
+   * already empty — homeContent is the sentinel since the capture path always writes it together
+   * with the rest, so a null one means the whole group is clear and no write is needed.
+   */
+  private async clearHome(project: ProjectConfig): Promise<void> {
+    const meta = await ProjectMeta.find(project.key)
+    if (!meta || meta.homeContent === null) {
+      return
+    }
+    meta.homeContent = null
+    meta.homeFormat = null
+    meta.homeSourceUrl = null
+    meta.homeHash = null
+    meta.homeHtml = null
+    await meta.save()
   }
 }

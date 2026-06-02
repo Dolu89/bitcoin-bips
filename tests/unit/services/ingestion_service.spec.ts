@@ -13,6 +13,11 @@ import { projects } from '#config/projects'
 
 const bips = projects.find((p) => p.key === 'bips')!
 
+// Home capture is gated on a configured homeFile. bips no longer sets one (it uses the table
+// index), so home-capture tests exercise the mechanism via a project that does configure one —
+// keeping them about the rule, not bips's current policy.
+const bipsWithHome = { ...bips, repo: { ...bips.repo, homeFile: 'README.mediawiki' } }
+
 test.group('services/ingestion_service syncProject', (group) => {
   group.each.setup(() => testUtils.db().truncate())
 
@@ -168,7 +173,7 @@ test.group('services/ingestion_service syncProject', (group) => {
     )
     const service = await app.container.make(IngestionService)
 
-    await service.syncProject(bips)
+    await service.syncProject(bipsWithHome)
 
     const meta = await ProjectMeta.findOrFail('bips')
     assert.equal(meta.homeContent, '# Bitcoin Improvement Proposals')
@@ -189,11 +194,11 @@ test.group('services/ingestion_service syncProject', (group) => {
     swap(SpecSourceService, fake)
     const service = await app.container.make(IngestionService)
 
-    await service.syncProject(bips)
+    await service.syncProject(bipsWithHome)
     const homeFetchesAfterFirst = fake.homeFetchCount
     const metaBefore = await ProjectMeta.findOrFail('bips')
 
-    await service.syncProject(bips)
+    await service.syncProject(bipsWithHome)
     const metaAfter = await ProjectMeta.findOrFail('bips')
 
     assert.equal(fake.homeFetchCount, homeFetchesAfterFirst)
@@ -324,10 +329,44 @@ test.group('services/ingestion_service syncProject', (group) => {
     )
     const service = await app.container.make(IngestionService)
 
-    await service.syncProject(bips)
+    await service.syncProject(bipsWithHome)
 
     const meta = await ProjectMeta.findOrFail('bips')
     assert.isNotNull(meta.homeHtml)
+  })
+
+  test('clears a previously captured home when the project no longer configures one', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    // First sync with a homeFile-bearing config captures the home.
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: { bips: [{ number: '1', sha: 's1', content: '<pre>\n  Title: One\n</pre>' }] },
+        home: { bips: { sha: 'h1', content: '# Home', format: 'mediawiki' } },
+      })
+    )
+    let service = await app.container.make(IngestionService)
+    await service.syncProject(bipsWithHome)
+    const captured = await ProjectMeta.findOrFail('bips')
+    assert.isNotNull(captured.homeContent)
+
+    // Same project without a homeFile (config change) → home columns nulled on next sync.
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: { bips: [{ number: '1', sha: 's1', content: '<pre>\n  Title: One\n</pre>' }] },
+      })
+    )
+    service = await app.container.make(IngestionService)
+    await service.syncProject(bips)
+
+    const meta = await ProjectMeta.findOrFail('bips')
+    assert.isNull(meta.homeContent)
+    assert.isNull(meta.homeHtml)
+    assert.isNull(meta.homeHash)
   })
 
   test('captures a changed spec commits into document_commits', async ({ assert, swap }) => {

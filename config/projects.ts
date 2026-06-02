@@ -18,7 +18,6 @@ export const projects: ProjectConfig[] = [
       repo: 'bips',
       branch: 'master',
       filePattern: '^bip-(\\d+)\\.(mediawiki|md)$',
-      homeFile: 'README.mediawiki',
     },
     numberBase: 10,
     adapter: 'bip',
