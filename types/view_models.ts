@@ -62,8 +62,14 @@ export type DocumentView = {
 /** A catalog table column header. */
 export type CatalogColumn = { label: string }
 
-/** A catalog table cell: coloured badges, or plain text. */
-export type CatalogCell = { type: 'badges'; badges: Badge[] } | { type: 'text'; value?: string }
+/**
+ * A catalog table cell: coloured badges, clickable author chips (each links to a search for that
+ * name — the catalog equivalent of the document page's author rail), or plain text.
+ */
+export type CatalogCell =
+  | { type: 'badges'; badges: Badge[] }
+  | { type: 'authors'; authors: string[] }
+  | { type: 'text'; value?: string }
 
 /** A catalog table row. `filterKey` is the value the status-filter chips match against. */
 export type CatalogRow = {

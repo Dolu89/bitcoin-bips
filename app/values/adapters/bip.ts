@@ -216,7 +216,12 @@ export const bipAdapter: ProjectAdapter = {
   },
 
   buildCatalogView(_project: ProjectConfig, documents: Document[]): CatalogView {
-    const columns = [{ label: 'Status' }, { label: 'Type' }, { label: 'Layer' }]
+    const columns = [
+      { label: 'Author' },
+      { label: 'Status' },
+      { label: 'Type' },
+      { label: 'Layer' },
+    ]
 
     const rows = documents.map((doc) => {
       const preamble = doc.preambleData
@@ -226,6 +231,7 @@ export const bipAdapter: ProjectAdapter = {
         title: doc.title,
         filterKey: scalar(preamble.Status),
         cells: [
+          { type: 'authors' as const, authors: toAuthorList(preamble.Author) },
           { type: 'badges' as const, badges: badge ? [badge] : [] },
           { type: 'text' as const, value: scalar(preamble.Type) },
           { type: 'text' as const, value: scalar(preamble.Layer) },

@@ -122,6 +122,9 @@
   width: 150px;
   white-space: nowrap;
 }
+.col-author {
+  width: 220px;
+}
 .bips-table__link {
   color: var(--link);
   font-weight: 600;
@@ -199,6 +202,7 @@
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 720px) {
+  .col-author,
   .col-layer,
   .col-type {
     display: none;

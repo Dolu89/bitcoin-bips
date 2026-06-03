@@ -220,7 +220,11 @@ test.group('adapters/bip buildCatalogView', () => {
       await DocumentFactory.merge({
         number: '1',
         title: 'First',
-        preamble: JSON.stringify({ Status: 'Final', Type: 'Standards Track' }),
+        preamble: JSON.stringify({
+          Status: 'Final',
+          Type: 'Standards Track',
+          Author: ['Satoshi Nakamoto', 'Hal Finney'],
+        }),
       }).makeStubbed(),
       await DocumentFactory.merge({
         number: '2',
@@ -234,12 +238,38 @@ test.group('adapters/bip buildCatalogView', () => {
     assert.lengthOf(view.rows, 2)
     assert.deepEqual(
       view.columns.map((c) => c.label),
-      ['Status', 'Type', 'Layer']
+      ['Author', 'Status', 'Type', 'Layer']
     )
     assert.includeMembers(
       view.filters.map((f) => f.label),
       ['Final', 'Draft']
     )
+  })
+
+  test('renders the author cell as a chip list, empty when absent', async ({ assert }) => {
+    const documents = [
+      await DocumentFactory.merge({
+        number: '1',
+        title: 'First',
+        preamble: JSON.stringify({ Author: ['Satoshi Nakamoto', 'Hal Finney'] }),
+      }).makeStubbed(),
+      await DocumentFactory.merge({
+        number: '2',
+        title: 'Second',
+        preamble: JSON.stringify({ Status: 'Draft' }),
+      }).makeStubbed(),
+    ]
+
+    const view = bipAdapter.buildCatalogView(bips, documents)
+
+    // Author cells are positional to the Author column — derive its index, don't hardcode it.
+    // The template turns each name into a clickable search chip; an absent author yields no chips.
+    const authorCol = view.columns.findIndex((c) => c.label === 'Author')
+    const authorLists = view.rows.map((row) => {
+      const cell = row.cells[authorCol]
+      return cell.type === 'authors' ? cell.authors : null
+    })
+    assert.deepEqual(authorLists, [['Satoshi Nakamoto', 'Hal Finney'], []])
   })
 })
 
