@@ -40,6 +40,9 @@ services:
       UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-}
       BIPS_ANALYTICS_ID: ${BIPS_ANALYTICS_ID:-}
       NIPS_ANALYTICS_ID: ${NIPS_ANALYTICS_ID:-}
+      QUEUE_DRIVER: database
+      SYNC_SCHEDULER_ENABLED: ${SYNC_SCHEDULER_ENABLED:-false}
+      SYNC_INTERVAL: ${SYNC_INTERVAL:-6h}
     volumes:
       - sqlite_data:/app/tmp
     healthcheck:

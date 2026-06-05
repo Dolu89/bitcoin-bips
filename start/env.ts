@@ -46,4 +46,13 @@ export default await Env.create(new URL('../', import.meta.url), {
   // only at call time when the host is unset. Tests fake the service and need no value.
   MEILISEARCH_HOST: Env.schema.string.optional(),
   MEILISEARCH_API_KEY: Env.schema.string.optional(),
+
+  // Queue (@adonisjs/queue) — adapter selection. `database` persists jobs/schedules in the
+  // app's SQLite DB; `sync` runs jobs inline (dev/tests). Required at boot.
+  QUEUE_DRIVER: Env.schema.enum(['redis', 'database', 'sync'] as const),
+
+  // Embedded sync scheduler — optional in-app recurring full sync. Unset/false ⇒ no internal
+  // scheduler runs (today's behavior). SYNC_INTERVAL is the cadence passed to `.every()`.
+  SYNC_SCHEDULER_ENABLED: Env.schema.boolean.optional(),
+  SYNC_INTERVAL: Env.schema.string.optional(),
 })
