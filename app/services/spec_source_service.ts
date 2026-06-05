@@ -1,7 +1,7 @@
 /**
  * Gateway to the upstream spec source (GitHub). Encapsulates Octokit so the rest of the
- * app depends on a small typed surface (list / fetch / locate-home), not on the REST client
- * — a later switch to GraphQL stays behind this seam.
+ * app depends on a small typed surface (get* — files, commits, content, home), not on the REST
+ * client — a later switch to GraphQL stays behind this seam.
  */
 import { Octokit } from 'octokit'
 import logger from '@adonisjs/core/services/logger'
@@ -60,8 +60,8 @@ export default class SpecSourceService {
     return path.endsWith('.mediawiki') ? 'mediawiki' : 'markdown'
   }
 
-  /** List the project's spec files from its repo tree (recursive), one ref per match. */
-  async listSpecFiles(project: ProjectConfig): Promise<SpecFileRef[]> {
+  /** Get the project's spec files from its repo tree (recursive), one ref per match. */
+  async getSpecFiles(project: ProjectConfig): Promise<SpecFileRef[]> {
     const { owner, repo, branch, filePattern } = project.repo
     const { data } = await this.client.rest.git.getTree({
       owner,
@@ -107,7 +107,7 @@ export default class SpecSourceService {
    * list carries no per-file line stats, so each commit is fetched in detail to read the spec
    * file's additions/deletions; the pure `toCommitRef` does the mapping.
    */
-  async listSpecCommits(project: ProjectConfig, path: string, limit: number): Promise<CommitRef[]> {
+  async getSpecCommits(project: ProjectConfig, path: string, limit: number): Promise<CommitRef[]> {
     const { owner, repo, branch } = project.repo
     const { data: list } = await this.client.rest.repos.listCommits({
       owner,
@@ -134,7 +134,7 @@ export default class SpecSourceService {
    * commit and read the `rel="last"` page of the Link header, which equals the commit count when
    * `per_page=1`. Falls back to the returned length when there is no pagination (0 or 1 commit).
    */
-  async countSpecCommits(project: ProjectConfig, path: string): Promise<number> {
+  async getSpecCommitCount(project: ProjectConfig, path: string): Promise<number> {
     const { owner, repo, branch } = project.repo
     const res = await this.client.rest.repos.listCommits({
       owner,
@@ -149,11 +149,11 @@ export default class SpecSourceService {
 
   /**
    * Author date of a spec file's FIRST (oldest) commit, or null when it has none. Same Link-header
-   * trick as countSpecCommits: page with per_page=1, read the `rel="last"` page index (the oldest
+   * trick as getSpecCommitCount: page with per_page=1, read the `rel="last"` page index (the oldest
    * commit), then fetch exactly that one commit. No `rel="last"` → a single page, so the head commit
    * is also the first.
    */
-  async firstCommitDate(project: ProjectConfig, path: string): Promise<string | null> {
+  async getFirstCommitDate(project: ProjectConfig, path: string): Promise<string | null> {
     const { owner, repo, branch } = project.repo
     const head = await this.client.rest.repos.listCommits({
       owner,
@@ -179,8 +179,8 @@ export default class SpecSourceService {
     return oldest.data[0]?.commit.author?.date ?? null
   }
 
-  /** Fetch a blob's UTF-8 content by its git sha (100 MB limit vs 1 MB for getContent). */
-  async fetchContent(project: ProjectConfig, fileSha: string): Promise<string> {
+  /** Get a blob's UTF-8 content by its git sha (100 MB limit vs 1 MB for the REST contents API). */
+  async getContent(project: ProjectConfig, fileSha: string): Promise<string> {
     const { owner, repo } = project.repo
     const { data } = await this.client.rest.git.getBlob({ owner, repo, file_sha: fileSha })
     return Buffer.from(data.content, 'base64').toString('utf-8')
@@ -190,7 +190,7 @@ export default class SpecSourceService {
    * Locate the project's curated home file in the repo tree (sha only, no content fetch),
    * so the caller can skip the download when the sha matches what is already stored.
    */
-  async findHome(project: ProjectConfig): Promise<HomeFileRef | null> {
+  async getHome(project: ProjectConfig): Promise<HomeFileRef | null> {
     const { owner, repo, branch, homeFile } = project.repo
     if (!homeFile) {
       return null

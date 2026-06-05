@@ -36,7 +36,7 @@ export type FakeSource = {
   specs?: Record<string, FakeSpec[]>
   /** Home file served per project key. */
   home?: Record<string, FakeHome>
-  /** Blob shas whose fetchContent should throw (per-spec error path). */
+  /** Blob shas whose getContent should throw (per-spec error path). */
   failingShas?: string[]
   /** Commits served per project key, then per file path (the spec's `path`). */
   commits?: Record<string, Record<string, FakeCommit[]>>
@@ -47,9 +47,9 @@ export type FakeSource = {
    * unlike the real service which would hit GitHub). Lets tests assert the captured `firstCommitAt`.
    */
   firstCommitDates?: Record<string, Record<string, string>>
-  /** File paths whose listSpecCommits should throw (commit-capture error path). */
+  /** File paths whose getSpecCommits should throw (commit-capture error path). */
   failingCommitPaths?: string[]
-  /** Project keys whose listSpecFiles should throw (whole-project upstream failure). */
+  /** Project keys whose getSpecFiles should throw (whole-project upstream failure). */
   failingListProjects?: string[]
 }
 
@@ -62,7 +62,7 @@ export default class FakeSpecSourceService extends SpecSourceService {
     super()
   }
 
-  async listSpecCommits(project: ProjectConfig, path: string, limit: number): Promise<CommitRef[]> {
+  async getSpecCommits(project: ProjectConfig, path: string, limit: number): Promise<CommitRef[]> {
     if (this.fixture.failingCommitPaths?.includes(path)) {
       throw new Error(`Simulated commit failure for path ${path}`)
     }
@@ -71,7 +71,7 @@ export default class FakeSpecSourceService extends SpecSourceService {
     return commits.slice(0, limit)
   }
 
-  async countSpecCommits(project: ProjectConfig, path: string): Promise<number> {
+  async getSpecCommitCount(project: ProjectConfig, path: string): Promise<number> {
     const explicit = this.fixture.commitTotals?.[project.key]?.[path]
     if (explicit !== undefined) {
       return explicit
@@ -79,11 +79,11 @@ export default class FakeSpecSourceService extends SpecSourceService {
     return this.fixture.commits?.[project.key]?.[path]?.length ?? 0
   }
 
-  async firstCommitDate(project: ProjectConfig, path: string): Promise<string | null> {
+  async getFirstCommitDate(project: ProjectConfig, path: string): Promise<string | null> {
     return this.fixture.firstCommitDates?.[project.key]?.[path] ?? null
   }
 
-  async listSpecFiles(project: ProjectConfig): Promise<SpecFileRef[]> {
+  async getSpecFiles(project: ProjectConfig): Promise<SpecFileRef[]> {
     if (this.fixture.failingListProjects?.includes(project.key)) {
       throw new Error(`Simulated listing failure for project ${project.key}`)
     }
@@ -98,7 +98,7 @@ export default class FakeSpecSourceService extends SpecSourceService {
     }))
   }
 
-  async fetchContent(project: ProjectConfig, fileSha: string): Promise<string> {
+  async getContent(project: ProjectConfig, fileSha: string): Promise<string> {
     if (this.fixture.failingShas?.includes(fileSha)) {
       throw new Error(`Simulated fetch failure for sha ${fileSha}`)
     }
@@ -117,7 +117,7 @@ export default class FakeSpecSourceService extends SpecSourceService {
     return spec.content
   }
 
-  async findHome(project: ProjectConfig): Promise<HomeFileRef | null> {
+  async getHome(project: ProjectConfig): Promise<HomeFileRef | null> {
     const home = this.fixture.home?.[project.key]
     if (!home) {
       return null

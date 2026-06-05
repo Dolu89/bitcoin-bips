@@ -95,7 +95,7 @@ export default class IngestionService {
       ])
     )
 
-    const files = await this.source.listSpecFiles(project)
+    const files = await this.source.getSpecFiles(project)
     logger.info(`[${project.key}] ${files.length} spec files found; syncing changed ones…`)
 
     let seen = 0
@@ -129,7 +129,7 @@ export default class IngestionService {
           // backfill re-renders from the stored rawContent, so it costs no GitHub round-trip.
           const raw =
             blobChanged || !stored?.rawContent
-              ? await this.source.fetchContent(project, file.sha)
+              ? await this.source.getContent(project, file.sha)
               : stored.rawContent
           const { title, preamble } = adapter.parsePreamble(raw)
 
@@ -315,15 +315,15 @@ export default class IngestionService {
     errors: SyncError[]
   ): Promise<void> {
     try {
-      const commits = await this.source.listSpecCommits(project, file.path, RECENT_COMMIT_LIMIT)
-      const total = await this.source.countSpecCommits(project, file.path)
+      const commits = await this.source.getSpecCommits(project, file.path, RECENT_COMMIT_LIMIT)
+      const total = await this.source.getSpecCommitCount(project, file.path)
       // first commit is immutable → fetch only when not yet captured (the network call stays out of
       // the transaction). last commit moves with each change → refreshed from the newest of the
       // newest-first window every sync.
       const firstCommitAt =
         doc.firstCommitAt ??
         (await this.source
-          .firstCommitDate(project, file.path)
+          .getFirstCommitDate(project, file.path)
           .then((iso) => (iso ? DateTime.fromISO(iso) : null)))
       await db.transaction(async (trx) => {
         doc.useTransaction(trx)
@@ -355,14 +355,14 @@ export default class IngestionService {
   /** Capture the project's curated home file, skipping the download when the sha is unchanged. */
   private async captureHome(project: ProjectConfig): Promise<void> {
     // No curated home configured → clear anything a previous config captured, so the index
-    // falls back to the table variant. Keyed on config (not a null findHome) so a transient
+    // falls back to the table variant. Keyed on config (not a null getHome) so a transient
     // fetch failure for a project that *does* have a homeFile never wipes its captured home.
     if (!project.repo.homeFile) {
       await this.clearHome(project)
       return
     }
 
-    const home = await this.source.findHome(project)
+    const home = await this.source.getHome(project)
     if (!home) {
       return
     }
@@ -370,7 +370,7 @@ export default class IngestionService {
     if (meta && meta.homeHash === home.sha) {
       return
     }
-    const raw = await this.source.fetchContent(project, home.sha)
+    const raw = await this.source.getContent(project, home.sha)
 
     let rendered = null
     try {
