@@ -28,3 +28,5 @@ yarn-error.log
 .flow/
 design-system/
 .claude/skills/flow-*
+# @adonisplus private registry config (local-only; committing it 401s Docker `npm ci`)
+.npmrc
