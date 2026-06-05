@@ -30,3 +30,7 @@ design-system/
 .claude/skills/flow-*
 # @adonisplus private registry config (local-only; committing it 401s Docker `npm ci`)
 .npmrc
+
+# Local working docs (AI instructions + rewrite plan) — keep out of the repo
+CLAUDE.md
+PLAN-REECRITURE-V4.md
