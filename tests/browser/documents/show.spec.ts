@@ -34,7 +34,7 @@ test.group('documents show — About dates', (group) => {
   // browser path renders a bips page; the NIP first-commit → date-slot path is covered in
   // tests/unit/values/adapters/nip.spec.ts. This proves the About rail renders both a preamble
   // date (Created) and a git-sourced date (Updated) end-to-end through the real template.
-  test('renders a Created date from the preamble and an Updated date from git', async ({
+  test('renders an Assigned date from the preamble and an Updated date from git', async ({
     visit,
     route,
   }) => {
@@ -49,9 +49,10 @@ test.group('documents show — About dates', (group) => {
 
     const page = await visit(route('documents.show', { number: '32' }))
 
-    // Scope to the About rail: "Created"/the date also appear in the raw preamble panel, so an
-    // unscoped text= locator is ambiguous under Playwright strict mode.
-    await page.assertExists('.bip-meta-rail >> text=Created')
+    // Scope to the About rail: the date also appears in the raw preamble panel, so an unscoped
+    // text= locator is ambiguous under Playwright strict mode. The bip adapter labels the
+    // preamble date "Assigned" (it falls back to the spec's `Created` header for the value).
+    await page.assertExists('.bip-meta-rail >> text=Assigned')
     await page.assertExists('.bip-meta-rail >> text=2012-02-11')
     await page.assertExists('.bip-meta-rail >> text=Updated')
     await page.assertExists('.bip-meta-rail >> text=2020-05-01')
