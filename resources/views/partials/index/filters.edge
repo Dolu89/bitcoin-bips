@@ -1,0 +1,10 @@
+<div class="bips-filters">
+  <span class="bips-filters__icon">
+    @svg('lucide:filter', { width: 15, height: 15 })
+  </span>
+  <button class="bips-chip is-active" data-filter="all">All</button>
+  @each(f in filters)
+    <button class="bips-chip" data-filter="{{ f.key }}">{{ f.label }}</button>
+  @end
+  <span class="bips-filters__count">{{ total }} proposal{{ total === 1 ? '' : 's' }}</span>
+</div>

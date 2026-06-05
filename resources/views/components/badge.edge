@@ -1,0 +1,3 @@
+{{-- Generic coloured label pill. `badge` = { label, tone? } (see #types/view_models). The tone
+     maps to a design-system colour via CSS `[data-tone]`; the adapter chose the tone. --}}
+<span class="bip-badge" data-tone="{{ badge.tone || 'neutral' }}">{{ badge.label }}</span>

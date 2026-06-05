@@ -12,18 +12,47 @@
 import { Env } from '@adonisjs/core/env'
 
 export default await Env.create(new URL('../', import.meta.url), {
-  APP_URL: Env.schema.string(),
+  // Node
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
   PORT: Env.schema.number(),
-  APP_KEY: Env.schema.string(),
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.string(),
-  CACHE_VIEWS: Env.schema.boolean(),
-  GITHUB_API_KEY: Env.schema.string.optional(),
-  CACHE_FOLDER: Env.schema.string(),
-  UNGH_URL: Env.schema.string(),
 
-  // Websites
-  BIPS_URL: Env.schema.string.optional(),
-  NIPS_URL: Env.schema.string.optional(),
+  // App
+  APP_KEY: Env.schema.secret(),
+  APP_URL: Env.schema.string({ format: 'url', tld: false }),
+
+  // Session
+  SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
+
+  // Projects — optional per-project domain override (defaults live in config/projects.ts).
+  BIPS_DOMAIN: Env.schema.string.optional(),
+  NIPS_DOMAIN: Env.schema.string.optional(),
+
+  // Analytics — optional Umami instrumentation. Boot never blocks; absent values = no tag rendered.
+  // UMAMI_SCRIPT_URL is the shared instance's script URL; *_ANALYTICS_ID is the per-project website id.
+  UMAMI_SCRIPT_URL: Env.schema.string.optional(),
+  BIPS_ANALYTICS_ID: Env.schema.string.optional(),
+  NIPS_ANALYTICS_ID: Env.schema.string.optional(),
+
+  // Database — sqlite filename under tmp/ (overridden in .env.test for an isolated test DB).
+  DB_DATABASE: Env.schema.string.optional(),
+
+  // GitHub — authenticated ingestion reads (~5000 req/h). Optional: boot never blocks;
+  // a sync errors only when invoked without it. Tests fake the source and need no value.
+  GITHUB_API_KEY: Env.schema.string.optional(),
+
+  // Meilisearch — search index host + key. Optional: boot never blocks; search/reindex errors
+  // only at call time when the host is unset. Tests fake the service and need no value.
+  MEILISEARCH_HOST: Env.schema.string.optional(),
+  MEILISEARCH_API_KEY: Env.schema.string.optional(),
+
+  // Queue (@adonisjs/queue) — adapter selection. `database` persists jobs/schedules in the
+  // app's SQLite DB; `sync` runs jobs inline (dev/tests). Required at boot.
+  QUEUE_DRIVER: Env.schema.enum(['redis', 'database', 'sync'] as const),
+
+  // Embedded sync scheduler — optional in-app recurring full sync. Unset/false ⇒ no internal
+  // scheduler runs (today's behavior). SYNC_INTERVAL is the cadence passed to `.every()`.
+  SYNC_SCHEDULER_ENABLED: Env.schema.boolean.optional(),
+  SYNC_INTERVAL: Env.schema.string.optional(),
 })

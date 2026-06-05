@@ -1,0 +1,39 @@
+import '@adonisjs/core/types/http'
+
+type ParamValue = string | number | bigint | boolean
+
+export type ScannedRoutes = {
+  ALL: {
+    'home': { paramsTuple?: []; params?: {} }
+    'favicon.show': { paramsTuple?: []; params?: {} }
+    'robots.show': { paramsTuple?: []; params?: {} }
+    'sitemap.show': { paramsTuple?: []; params?: {} }
+    'search.show': { paramsTuple?: []; params?: {} }
+    'documents.raw': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+    'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+    'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+  }
+  GET: {
+    'home': { paramsTuple?: []; params?: {} }
+    'favicon.show': { paramsTuple?: []; params?: {} }
+    'robots.show': { paramsTuple?: []; params?: {} }
+    'sitemap.show': { paramsTuple?: []; params?: {} }
+    'search.show': { paramsTuple?: []; params?: {} }
+    'documents.raw': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+    'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+    'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+  }
+  HEAD: {
+    'home': { paramsTuple?: []; params?: {} }
+    'favicon.show': { paramsTuple?: []; params?: {} }
+    'robots.show': { paramsTuple?: []; params?: {} }
+    'sitemap.show': { paramsTuple?: []; params?: {} }
+    'search.show': { paramsTuple?: []; params?: {} }
+    'documents.raw': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+    'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+    'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
+  }
+}
+declare module '@adonisjs/core/types/http' {
+  export interface RoutesList extends ScannedRoutes {}
+}

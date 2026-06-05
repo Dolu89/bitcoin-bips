@@ -1,0 +1,14 @@
+{{-- Live search overlay: fills the page below the sticky header (opaque, no scrim). Shares the
+     `searchOverlay` x-data on .bips-app (header input drives it). Results are fetched as a bare
+     fragment and injected via x-html; clicks (card / author / clear) are delegated. --}}
+<section
+  class="search-overlay"
+  :class="{ 'is-open': isOpen }"
+  :aria-hidden="!isOpen"
+  aria-label="Search results"
+  x-on:keydown.escape.window="close()"
+>
+  <div class="search-overlay__inner">
+    <div class="search-overlay__body" x-html="content" x-on:click="onOverlayClick($event)"></div>
+  </div>
+</section>

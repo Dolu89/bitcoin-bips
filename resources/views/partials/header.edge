@@ -1,0 +1,40 @@
+<header class="bips-header">
+  <div class="bips-header__bar"></div>
+  <div class="bips-header__inner">
+    @if(project)
+      <a class="bips-brand" href="/">
+        <img class="bips-brand__coin" src="{{ project.logo }}" alt="" width="36" height="36" />
+        <span class="bips-brand__text">
+          <span class="bips-brand__name">{{ project.name }}</span>
+          <span class="bips-brand__tag">{{ project.tagline }}</span>
+        </span>
+      </a>
+      {{-- Live overlay search (Alpine). The GET action is the no-JS progressive fallback. --}}
+      <form class="bips-search" method="GET" action="{{ urlFor('search.show') }}" x-on:submit.prevent="run()">
+        <input
+          class="bips-search__input"
+          type="text"
+          name="q"
+          placeholder="search by title, authors, keyword"
+          minlength="3"
+          x-model="query"
+          x-on:input.debounce.250ms="run()"
+        />
+        <button type="submit" class="bips-search__btn" aria-label="Search">
+          @svg('lucide:search', { width: 20, height: 20 })
+        </button>
+      </form>
+    @else
+      <a class="bips-brand" href="/"><span class="bips-brand__name">Specs</span></a>
+    @end
+
+    <button type="button" class="bips-theme" data-theme-toggle aria-label="Toggle theme">
+      <span class="theme-moon">
+        @svg('lucide:moon', { width: 19, height: 19 })
+      </span>
+      <span class="theme-sun">
+        @svg('lucide:sun', { width: 19, height: 19 })
+      </span>
+    </button>
+  </div>
+</header>

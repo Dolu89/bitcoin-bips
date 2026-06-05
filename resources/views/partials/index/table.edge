@@ -1,0 +1,51 @@
+<div class="bips-table-wrap">
+  <table class="bips-table">
+    <thead>
+      <tr>
+        <th class="col-n">#</th>
+        <th>Title</th>
+        @each(col in columns)
+          <th class="col-{{ col.label.toLowerCase() }}">{{ col.label }}</th>
+        @end
+      </tr>
+    </thead>
+    <tbody>
+      @each(row in rows)
+        <tr
+          data-status="{{ row.filterKey ?? '' }}"
+          data-href="{{ urlFor('documents.show', { number: row.number }) }}"
+        >
+          <td class="col-n">{{ row.number }}</td>
+          <td><span class="bips-table__link">{{ row.title }}</span></td>
+          @each((cell, i) in row.cells)
+            @if(cell.type === 'badges')
+              <td class="col-{{ columns[i].label.toLowerCase() }}">
+                @each(badge in cell.badges)
+                  @!badge({ badge })
+                @end
+              </td>
+            @elseif(cell.type === 'authors')
+              <td class="col-{{ columns[i].label.toLowerCase() }}">
+                @if(cell.authors.length)
+                  <div class="meta-authors">
+                    @each(author in cell.authors)
+                      {{-- Chip searches for the author; the row click handler ignores link clicks. --}}
+                      <a
+                        class="author-chip"
+                        href="/search?q={{ encodeURIComponent(author) }}"
+                      >{{ author }}</a>
+                    @end
+                  </div>
+                @else
+                  —
+                @end
+              </td>
+            @else
+              <td class="col-{{ columns[i].label.toLowerCase() }}">{{ cell.value || '—' }}</td>
+            @end
+          @end
+        </tr>
+      @end
+    </tbody>
+  </table>
+</div>

@@ -7,31 +7,32 @@
 |
 */
 
+import { middleware } from '#start/kernel'
+import { controllers } from '#generated/controllers'
 import router from '@adonisjs/core/services/router'
-import env from '#start/env'
 
-const BipsController = () => import('#controllers/bips_controller')
-const NipsController = () => import('#controllers/nips_controller')
+/**
+ * Broad spec-number matcher (decimal digits are a subset of hex). Strict
+ * per-base validation lives in `canonicalize`, not here.
+ */
+router.where('number', { match: /^[0-9a-fA-F]+$/ })
 
-const bipsUrl = env.get('BIPS_URL')
-const nipsUrl = env.get('NIPS_URL')
+// Liveness probe for the container/proxy. Outside the project group, so it answers
+// 200 on any host (the per-host project is irrelevant to "is the process up?").
+router.get('/up', ({ response }) => response.ok({ status: 'ok' }))
 
-if (bipsUrl) {
-    router.group(() => {
-        router.get('/', [BipsController, 'index'])
-        router.get('/search', [BipsController, 'search']).as('search')
-        router.get('/:bip', [BipsController, 'show']).where('bip', '[0-9]').as('show')
-        router.get('/support', async ({ view }) => view.render('support'))
-        router.get('/robots.txt', async ({ response }) => response.ok(`User-agent: *\nAllow: /\nSitemap: https://${bipsUrl}/sitemap.xml`))
-    }).domain(bipsUrl)
-}
-
-if (nipsUrl) {
-    router.group(() => {
-        router.get('/', [NipsController, 'index'])
-        router.get('/search', [NipsController, 'search']).as('search')
-        router.get('/:nip', [NipsController, 'show']).where('nip', '[0-9a-fA-F]').as('show')
-        router.get('/support', async ({ view }) => view.render('support'))
-        router.get('/robots.txt', async ({ response }) => response.ok(`User-agent: *\nAllow: /`))
-    }).domain(nipsUrl)
-}
+// Every public page lives under the host's project. Register static routes before `/:number`.
+router
+  .group(() => {
+    router.get('/', [controllers.Index, 'show']).as('home')
+    router.get('/favicon.ico', [controllers.Favicon, 'show'])
+    router.get('/robots.txt', [controllers.Robots, 'show'])
+    router.get('/sitemap.xml', [controllers.Sitemap, 'show'])
+    router.get('/search', [controllers.Search, 'show'])
+    router
+      .get('/:number.md', [controllers.Documents, 'raw'])
+      .where('number', { match: /^[0-9a-fA-F]+\.md$/ })
+    router.get('/:number/history', [controllers.Documents, 'history'])
+    router.get('/:number', [controllers.Documents, 'show'])
+  })
+  .use(middleware.requireProject())

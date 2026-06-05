@@ -1,0 +1,33 @@
+{{-- Related specs in two distinct rail cards, split by edge direction. Outgoing (specs this one
+     cites) is shown by default; incoming (specs that cite this one) is collapsed by default to
+     keep the rail compact — it can grow large and is secondary to what the spec itself links. --}}
+@let(outgoing = view.related.filter((spec) => spec.direction === 'out'))
+@let(incoming = view.related.filter((spec) => spec.direction === 'in'))
+
+@if(outgoing.length)
+  <section class="rail-card">
+    <div class="rail-label">Related <span class="rail-count">{{ outgoing.length }}</span></div>
+    <ul class="related-list">
+      @each(spec in outgoing)
+        @include('partials/documents/show/related_item')
+      @end
+    </ul>
+  </section>
+@end
+
+@if(incoming.length)
+  <details class="rail-card rail-disclosure">
+    <summary class="rail-disclosure__summary">
+      <span class="rail-disclosure__chevron">
+        @svg('lucide:chevron-right', { width: 16, height: 16 })
+      </span>
+      Referenced by
+      <span class="rail-count">{{ incoming.length }}</span>
+    </summary>
+    <ul class="related-list rail-disclosure__list">
+      @each(spec in incoming)
+        @include('partials/documents/show/related_item')
+      @end
+    </ul>
+  </details>
+@end

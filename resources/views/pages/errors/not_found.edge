@@ -1,0 +1,11 @@
+@layout({ title: 'Page not found' })
+  <div class="bips-notfound">
+    <p class="bips-notfound__code">404</p>
+    @if(project)
+      <p class="bips-notfound__msg">This page doesn't exist on {{ project.name }}.</p>
+      <a class="bips-link" href="/">← Back to all proposals</a>
+    @else
+      <p class="bips-notfound__msg">No specs project is configured for this address.</p>
+    @end
+  </div>
+@end

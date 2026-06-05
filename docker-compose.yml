@@ -1,0 +1,71 @@
+name: bips
+
+networks:
+  # Provided by Dokploy so its Traefik can reach the app.
+  # Local run: `docker network create dokploy-network` first.
+  dokploy-network:
+    external: true
+  internal:
+
+volumes:
+  sqlite_data:
+  meili_data:
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - meilisearch
+    networks:
+      - dokploy-network
+      - internal
+    expose:
+      - '3333'
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: '3333'
+      LOG_LEVEL: info
+      SESSION_DRIVER: cookie
+      APP_KEY: ${APP_KEY:?set APP_KEY (node ace generate:key)}
+      APP_URL: ${APP_URL:?set APP_URL (e.g. https://bips.xyz)}
+      GITHUB_API_KEY: ${GITHUB_API_KEY:-}
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_API_KEY: ${MEILISEARCH_API_KEY:?set MEILISEARCH_API_KEY}
+      BIPS_DOMAIN: ${BIPS_DOMAIN:-bips.xyz}
+      NIPS_DOMAIN: ${NIPS_DOMAIN:-nips.nostr.com}
+      UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-}
+      BIPS_ANALYTICS_ID: ${BIPS_ANALYTICS_ID:-}
+      NIPS_ANALYTICS_ID: ${NIPS_ANALYTICS_ID:-}
+      QUEUE_DRIVER: database
+      SYNC_SCHEDULER_ENABLED: ${SYNC_SCHEDULER_ENABLED:-false}
+      SYNC_INTERVAL: ${SYNC_INTERVAL:-6h}
+    volumes:
+      - sqlite_data:/app/tmp
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3333/up').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    restart: unless-stopped
+    networks:
+      - internal
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_API_KEY:?set MEILISEARCH_API_KEY}
+      MEILI_ENV: production
+      MEILI_NO_ANALYTICS: 'true'
+    volumes:
+      - meili_data:/meili_data

@@ -1,0 +1,5 @@
+{{-- Per-project Umami tag. Renders nothing unless prod + script URL + project id are all set. --}}
+@let(tag = analyticsTag(project))
+@if(tag)
+  <script defer src="{{ tag.src }}" data-website-id="{{ tag.websiteId }}"></script>
+@end

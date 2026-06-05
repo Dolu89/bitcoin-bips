@@ -1,0 +1,215 @@
+/* ---------- PAGE / LIST ---------- */
+.bips-page {
+  max-width: var(--maxw-page);
+  margin: 0 auto;
+  padding: 40px 28px 96px;
+}
+.bips-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-2xl);
+  color: var(--fg-strong);
+  letter-spacing: -0.01em;
+  margin: 0 0 18px;
+  line-height: 1.1;
+}
+.bips-intro {
+  max-width: var(--maxw-prose);
+  margin-bottom: 28px;
+}
+.bips-intro p {
+  margin: 0 0 12px;
+}
+.bips-prose {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--fg);
+}
+
+/* ---------- FILTERS ---------- */
+.bips-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.bips-filters__icon {
+  color: var(--fg-faint);
+  display: flex;
+  margin-right: 2px;
+}
+.bips-chip {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 13px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+.bips-chip:hover {
+  border-color: var(--border-brand);
+  color: var(--brand-ink);
+}
+.bips-chip.is-active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--fg-on-brand);
+}
+.bips-filters__count {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--fg-faint);
+}
+
+/* ---------- TABLE ---------- */
+.bips-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.bips-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.bips-table thead tr {
+  background: var(--brand);
+}
+.bips-table th {
+  text-align: left;
+  padding: 11px 16px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--fg-on-brand);
+}
+.bips-table tbody tr {
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.bips-table tbody tr:nth-child(even) {
+  background: var(--bg-tint);
+}
+.bips-table tbody tr:hover {
+  background: var(--brand-tint);
+}
+.bips-table td {
+  padding: 11px 16px;
+  font-size: 14px;
+  color: var(--fg);
+  vertical-align: middle;
+}
+.col-n {
+  width: 56px;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
+.col-layer {
+  color: var(--fg);
+  white-space: nowrap;
+}
+.col-status {
+  width: 130px;
+}
+.col-type {
+  width: 150px;
+  white-space: nowrap;
+}
+.col-author {
+  width: 220px;
+}
+.bips-table__link {
+  color: var(--link);
+  font-weight: 600;
+}
+.bips-table tbody tr:hover .bips-table__link {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+.muted {
+  color: var(--fg-faint);
+}
+
+/* ---------- EMPTY STATES ---------- */
+.bips-table__empty td {
+  text-align: center;
+  color: var(--fg-muted);
+  padding: 32px;
+  cursor: default;
+}
+.bips-table__empty:hover {
+  background: transparent !important;
+}
+.bips-table__empty-state {
+  text-align: center;
+  color: var(--fg-muted);
+  padding: 64px 28px;
+  font-size: 15px;
+}
+
+/* ---------- README HOME ---------- */
+.readme-home {
+  line-height: 1.7;
+}
+.readme-home h1,
+.readme-home h2,
+.readme-home h3 {
+  font-family: var(--font-display);
+  color: var(--fg-strong);
+  margin: 1.6em 0 0.6em;
+}
+.readme-home h1 {
+  font-size: var(--text-2xl);
+}
+.readme-home table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 14px;
+}
+.readme-home th,
+.readme-home td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+.readme-home th {
+  background: var(--brand-tint);
+  font-weight: 600;
+}
+.readme-home a {
+  color: var(--link);
+  text-decoration: none;
+}
+.readme-home a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+.readme-home code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--bg-tint);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 720px) {
+  .col-author,
+  .col-layer,
+  .col-type {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .bips-page {
+    padding: 28px 16px 64px;
+  }
+}

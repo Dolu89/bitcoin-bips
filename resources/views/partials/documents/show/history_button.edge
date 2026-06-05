@@ -1,0 +1,33 @@
+<div
+  x-data="historyDrawer('{{ urlFor('documents.history', [document.number]) }}')"
+  x-on:keydown.escape.window="close()"
+>
+  <button type="button" class="bips-btn bips-btn--ghost bip-history-btn" x-on:click="open()">
+    @svg('lucide:history', { width: 16, height: 16 })
+    Change history
+    <span class="bip-history-btn__n">{{ historyCount }}</span>
+  </button>
+
+  <div class="drawer-scrim" :class="{ 'is-open': isOpen }" x-on:click="close()"></div>
+  <aside
+    class="drawer"
+    :class="{ 'is-open': isOpen }"
+    :aria-hidden="!isOpen"
+    aria-label="Change history"
+  >
+    <div class="drawer__head">
+      <div>
+        <div class="drawer__eyebrow">
+          @svg('lucide:history', { width: 15, height: 15 })
+          Change history
+        </div>
+        <div class="drawer__title">{{ project.specLabel }} {{ document.number }}</div>
+      </div>
+      <button type="button" class="drawer__close" x-on:click="close()" aria-label="Close">
+        @svg('lucide:x', { width: 18, height: 18 })
+      </button>
+    </div>
+    <p class="drawer__note">Commits that touched this proposal, newest first.</p>
+    <div class="drawer__commits" x-html="content"></div>
+  </aside>
+</div>

@@ -1,0 +1,15 @@
+@layout()
+  <div class="bips-page">
+    <h1 class="bips-title">{{ project.name }}</h1>
+    <div class="bips-intro bips-prose">
+      {{{ introHtml }}}
+    </div>
+
+    @if(total === 0)
+      @include('partials/index/empty_catalog')
+    @else
+      @include('partials/index/filters')
+      @include('partials/index/table')
+    @end
+  </div>
+@end

@@ -1,50 +1,71 @@
-import Bip from '#models/bip'
-import { inject } from '@adonisjs/core'
-import Fuse, { FuseResult } from 'fuse.js'
-import BipService from '#services/bip_service'
-import NipService from '#services/nip_service'
-import Nip from '#models/nip'
+/**
+ * Gateway to the search index (Meilisearch). Encapsulates the official client so the rest of the
+ * app depends on a small typed surface (search / reindex), not on the SDK — the same seam pattern
+ * as SpecSourceService over Octokit. Single index `documents`; per-project scope is a filter.
+ */
+import { Meilisearch } from 'meilisearch'
+import type { Hit } from 'meilisearch'
+import env from '#start/env'
+import Document from '#models/document'
+import { adapterFor } from '#values/adapters'
+import type { ProjectConfig } from '#types/project'
+import type { SearchRecord } from '#types/search'
+import type { SearchHitView } from '#types/view_models'
 
-@inject()
+const INDEX = 'documents'
+
 export default class SearchService {
-  constructor(private bipService: BipService, private nipService: NipService) { }
+  #client: Meilisearch | null = null
 
-  private fuseBips: Fuse<Bip> | null = null
-  private fuseNips: Fuse<Nip> | null = null
-  private static options = {
-    shouldSort: true,
-    includeMatches: true,
-    threshold: 0.1,
-    location: 0,
-    distance: 100000,
-    maxPatternLength: 32,
-    minMatchCharLength: 1,
-    keys: [{ name: 'title', weight: 2 }, 'authors', 'contentTextOnly'],
+  /** Lazily build the client so a missing host errors at call time, never at boot. */
+  private get client(): Meilisearch {
+    if (!this.#client) {
+      const host = env.get('MEILISEARCH_HOST')
+      if (!host) {
+        throw new Error('MEILISEARCH_HOST is not set — required for the search index')
+      }
+      this.#client = new Meilisearch({ host, apiKey: env.get('MEILISEARCH_API_KEY') })
+    }
+    return this.#client
   }
 
-  public async searchBips(terms: string): Promise<FuseResult<Bip>[]> {
-    if (!this.fuseBips) {
+  /** Idempotently apply index settings: title-first searchable ranking + filterable facets. */
+  async configureIndex(): Promise<void> {
+    await this.client.index(INDEX).updateSettings({
+      searchableAttributes: ['title', 'authors', 'content_text'],
+      filterableAttributes: ['project', 'status', 'type', 'layer'],
+    })
+  }
+
+  /** Project every spec of `project` into the index. Returns the number of records pushed. */
+  async reindexProject(project: ProjectConfig): Promise<number> {
+    await this.configureIndex()
+    const adapter = adapterFor(project.adapter)
+    const documents = await Document.query().where('project', project.key)
+    const records = documents.map((doc) => adapter.buildSearchRecord(project, doc))
+    if (records.length) {
+      await this.client.index(INDEX).addDocuments(records, { primaryKey: 'id' })
+    }
+    return records.length
+  }
+
+  /** Full-text search scoped to one project. Returns [] when the index is missing/unreachable. */
+  async search(project: ProjectConfig, query: string): Promise<SearchHitView[]> {
+    const adapter = adapterFor(project.adapter)
+    let hits: Hit<SearchRecord>[]
+    try {
+      const response = await this.client.index(INDEX).search<SearchRecord>(query, {
+        filter: `project = "${project.key}"`,
+        attributesToHighlight: ['title', 'authors', 'content_text'],
+        attributesToCrop: ['content_text'],
+        cropLength: 40,
+        highlightPreTag: '<mark class="hl">',
+        highlightPostTag: '</mark>',
+      })
+      hits = response.hits
+    } catch {
       return []
     }
-    return this.fuseBips.search(terms)
-  }
-
-  public async searchNips(terms: string): Promise<FuseResult<Nip>[]> {
-    if (!this.fuseNips) {
-      return []
-    }
-    return this.fuseNips.search(terms)
-  }
-
-  public async initBips() {
-    const bips = await this.bipService.getBips()
-    if (!bips) return
-    this.fuseBips = new Fuse(bips, SearchService.options)
-  }
-
-  public async initNips() {
-    const nips = await this.nipService.getNips()
-    if (!nips) return
-    this.fuseNips = new Fuse(nips, SearchService.options)
+    return hits.map((hit) => adapter.buildSearchHit(project, hit, hit._formatted))
   }
 }

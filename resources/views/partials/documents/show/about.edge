@@ -1,0 +1,37 @@
+<section class="rail-card">
+  <div class="rail-label">About this {{ project.specLabel }}</div>
+  <dl class="meta-dl">
+    @each(slot in view.aboutSlots)
+      @if(slot.type === 'authors')
+        <dt>{{ slot.label }}</dt>
+        <dd class="meta-authors">
+          @each(author in slot.authors)
+            <a class="author-chip" href="/search?q={{ encodeURIComponent(author) }}">{{ author }}</a>
+          @end
+        </dd>
+      @elseif(slot.type === 'badges')
+        <dt>{{ slot.label }}</dt>
+        <dd class="meta-tags">
+          @each(badge in slot.badges)
+            @!badge({ badge })
+          @end
+        </dd>
+      @elseif(slot.type === 'date')
+        <dt>{{ slot.label }}</dt>
+        <dd>{{ slot.display }}</dd>
+      @elseif(slot.type === 'link')
+        <dt>{{ slot.label }}</dt>
+        <dd>
+          @if(slot.external)
+            <a class="bips-link" href="{{ slot.href }}" target="_blank" rel="noreferrer">{{ slot.text }}</a>
+          @else
+            <a class="bips-link" href="{{ slot.href }}">{{ slot.text }}</a>
+          @end
+        </dd>
+      @else
+        <dt>{{ slot.label }}</dt>
+        <dd>{{ slot.value }}</dd>
+      @end
+    @end
+  </dl>
+</section>
