@@ -121,6 +121,25 @@ window.toggleTheme = function () {
   }
 }
 
+// Split copy button on the spec page: copies the spec's canonical URL, or its `.md` variant.
+// `location.pathname` drops query/fragment and the show route 301s non-canonical numbers, so the
+// copied URL is always the canonical spec link. Clipboard failures are swallowed (like `donate`).
+Alpine.data('copyLink', () => ({
+  copied: '', // '' | 'page' | 'md'
+  copy(which) {
+    const url = location.origin + location.pathname + (which === 'md' ? '.md' : '')
+    try {
+      navigator.clipboard.writeText(url)
+    } catch (e) {
+      /* clipboard unavailable */
+    }
+    this.copied = which
+    setTimeout(() => {
+      this.copied = ''
+    }, 1400)
+  },
+}))
+
 // "On this page" scroll-spy: highlights the TOC link for the section currently in view.
 Alpine.data('scrollSpy', function () {
   return {

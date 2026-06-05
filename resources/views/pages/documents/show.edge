@@ -7,10 +7,33 @@
     @include('partials/documents/show/toc')
 
     <article class="bip-detail bips-prose">
-      <a class="bips-back" href="/">
-        @svg('lucide:arrow-left', { width: 16, height: 16 })
-        All proposals
-      </a>
+      <div class="bips-back-row">
+        <a class="bips-back" href="/">
+          @svg('lucide:arrow-left', { width: 16, height: 16 })
+          All proposals
+        </a>
+
+        <div class="copy-link" x-data="copyLink">
+          <button
+            type="button"
+            class="copy-link__btn copy-link__btn--main"
+            x-on:click="copy('page')"
+            :class="{ 'is-copied': copied === 'page' }"
+          >
+            <span class="copy-link__ico">{{ svg('lucide:copy', { width: 15, height: 15 }) }}</span>
+            <span x-text="copied === 'page' ? 'Copied' : 'Copy link'">Copy link</span>
+          </button>
+          <button
+            type="button"
+            class="copy-link__btn copy-link__btn--md"
+            x-on:click="copy('md')"
+            :class="{ 'is-copied': copied === 'md' }"
+            aria-label="Copy Markdown link"
+          >
+            <span x-text="copied === 'md' ? 'Copied' : '.md'">.md</span>
+          </button>
+        </div>
+      </div>
       @include('partials/documents/show/header')
       @include('partials/documents/show/preamble')
       @include('partials/documents/show/content')

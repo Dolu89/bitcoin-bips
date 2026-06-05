@@ -38,6 +38,67 @@
   color: var(--brand);
 }
 
+.bips-back-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: 22px;
+}
+.bips-back-row .bips-back {
+  margin-bottom: 0;
+}
+
+/* Split copy button: primary "Copy link" + an attached ".md" sub-action (added with that segment). */
+.copy-link {
+  display: inline-flex;
+  align-items: stretch;
+  flex: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.copy-link__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.copy-link__btn:hover {
+  background: var(--bg-tint);
+  color: var(--fg);
+}
+.copy-link__btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+.copy-link__btn.is-copied {
+  color: var(--brand-ink);
+  background: var(--brand-tint);
+}
+.copy-link__btn--md {
+  border-left: 1px solid var(--border);
+  min-width: 46px;
+  justify-content: center;
+}
+.copy-link__ico {
+  display: inline-flex;
+}
+.copy-link__ico svg {
+  display: block;
+}
+
 /* Shiki code blocks — give the block a surface, padding and a border (Shiki's inline
    background is page-white in light mode), and switch to the dark token set under [data-theme='dark']. */
 .bips-prose .shiki {
