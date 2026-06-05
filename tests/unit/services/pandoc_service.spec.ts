@@ -45,6 +45,21 @@ test.group('services/pandoc_service toHtml', () => {
     assert.include(html, 'multi line note')
     assert.notInclude(html, '<references')
   }).skip(pandocMissing(), 'pandoc not on PATH')
+
+  test('emits a real <img> (keeping its alt) instead of escaping the raw tag to text', async ({
+    assert,
+  }) => {
+    const svc = await app.container.make(PandocService)
+
+    const html = await svc.toHtml(
+      '== T ==\n\n<img src="bip-0052/x.png" alt="A chart">',
+      'mediawiki'
+    )
+
+    assert.match(html, /<img[^>]*\bsrc="bip-0052\/x\.png"/)
+    assert.include(html, 'alt="A chart"')
+    assert.notInclude(html, '&lt;img')
+  }).skip(pandocMissing(), 'pandoc not on PATH')
 })
 
 test.group('services/pandoc_service toMarkdown', () => {
@@ -66,4 +81,15 @@ test.group('services/pandoc_service toMarkdown', () => {
       }
     })
     .skip(pandocMissing(), 'pandoc not on PATH')
+
+  test('keeps a raw <img> as inline HTML rather than escaping it to \\<img\\> text', async ({
+    assert,
+  }) => {
+    const svc = await app.container.make(PandocService)
+
+    const md = await svc.toMarkdown('<img src="bip-0052/x.png" alt="A chart">', 'mediawiki')
+
+    assert.include(md, '<img src="bip-0052/x.png" alt="A chart">')
+    assert.notInclude(md, '\\<img')
+  }).skip(pandocMissing(), 'pandoc not on PATH')
 })

@@ -6,18 +6,21 @@
  * pattern as SpecSourceService) and never shell out.
  */
 import { spawn } from 'node:child_process'
-import { normalizeForPandoc } from '#values/mediawiki'
+import { normalizeForPandoc, shieldRawImages } from '#values/mediawiki'
 
 const TIMEOUT_MS = 15_000
 
 export default class PandocService {
   async toHtml(raw: string, format: 'mediawiki' | 'markdown'): Promise<string> {
     const reader = format === 'mediawiki' ? 'mediawiki' : 'gfm'
-    const source = format === 'mediawiki' ? normalizeForPandoc(raw) : raw
-    return this.run(
-      ['-f', reader, '-t', 'html5', '--syntax-highlighting=none', '--wrap=none'],
-      source
-    )
+    const args = ['-f', reader, '-t', 'html5', '--syntax-highlighting=none', '--wrap=none']
+    // gfm passes raw <img> through; the mediawiki reader escapes it to text, so shield each tag
+    // across the conversion and restore it afterward (preserving src/alt). See shieldRawImages.
+    if (format !== 'mediawiki') {
+      return this.run(args, raw)
+    }
+    const { source, restore } = shieldRawImages(normalizeForPandoc(raw))
+    return restore(await this.run(args, source))
   }
 
   async toMarkdown(raw: string, format: 'mediawiki' | 'markdown'): Promise<string> {
@@ -25,7 +28,10 @@ export default class PandocService {
     if (format === 'markdown') {
       return raw
     }
-    return this.run(['-f', 'mediawiki', '-t', 'gfm', '--wrap=none'], normalizeForPandoc(raw))
+    // Shield raw <img> as in toHtml — the mediawiki reader would otherwise emit it as escaped
+    // `\<img …\>` text; restored, it stays a valid inline-HTML image tag in the GFM projection.
+    const { source, restore } = shieldRawImages(normalizeForPandoc(raw))
+    return restore(await this.run(['-f', 'mediawiki', '-t', 'gfm', '--wrap=none'], source))
   }
 
   private run(args: string[], input: string): Promise<string> {

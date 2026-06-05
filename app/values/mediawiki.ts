@@ -18,6 +18,34 @@ export function normalizeForPandoc(raw: string): string {
   )
 }
 
+/** Placeholder base for a shielded `<img>` — the `END` suffix keeps indexed tokens non-overlapping. */
+const IMG_SHIELD = 'BIPSIMGSHIELD'
+
+/**
+ * Pandoc's mediawiki reader escapes raw `<img>` HTML to literal text, so the diagrams BIPs embed
+ * with it (1, 2, 8, 9, 52, 75, 174…) would render as visible tag source. Replace each tag with an
+ * inert text placeholder the reader passes through untouched, returning the shielded source and a
+ * `restore` that swaps the placeholders back into the emitted HTML — so the original element (its
+ * `src`, `alt`, …) reaches the DOM intact, exactly as the gfm reader passes one through. A trailing
+ * `</img>`, invalid for a void element, is dropped. PandocService runs this around the mediawiki
+ * conversion; `rewriteImages` then points a relative `src` at the repo's raw base.
+ */
+export function shieldRawImages(raw: string): {
+  source: string
+  restore: (html: string) => string
+} {
+  const tags: string[] = []
+  const source = raw.replace(/(<img\b[^>]*?>)(?:\s*<\/img>)?/gi, (_whole, tag: string) => {
+    const token = `${IMG_SHIELD}${tags.length}END`
+    tags.push(tag)
+    return token
+  })
+  // Replacement passed as a function so a `$` inside a tag is inserted literally, not as a group ref.
+  const restore = (html: string): string =>
+    tags.reduce((acc, tag, i) => acc.replaceAll(`${IMG_SHIELD}${i}END`, () => tag), html)
+  return { source, restore }
+}
+
 /**
  * MediaWiki external-link syntax `[url text]` only linkifies when `url` carries a protocol, so a
  * repo-root-relative path — e.g. `[/bip-0119/vectors the bip-0119/vectors directory]` in BIP 119,
