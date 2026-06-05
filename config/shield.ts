@@ -1,4 +1,20 @@
+import env from '#start/env'
 import { defineConfig } from '@adonisjs/shield'
+
+/**
+ * The Umami analytics origin, derived from the configured script URL, so the CSP can
+ * allow both the tracker `<script>` and its `/api/send` beacon. Null in development or
+ * when `UMAMI_SCRIPT_URL` is unset (analytics is production-only anyway).
+ */
+const umamiOrigin = (() => {
+  const url = env.get('UMAMI_SCRIPT_URL')
+  if (!url) return null
+  try {
+    return new URL(url).origin
+  } catch {
+    return null
+  }
+})()
 
 /**
  * Security configuration using Shield.
@@ -7,27 +23,45 @@ import { defineConfig } from '@adonisjs/shield'
  */
 const shieldConfig = defineConfig({
   /**
-   * Configure CSP policies for your app. Refer documentation
-   * to learn more
+   * Content Security Policy. Shipped in report-only first: violations are logged to the
+   * browser console without blocking, so the policy can be validated before it is enforced.
+   * Flip `reportOnly` to `false` to enforce.
    */
   csp: {
-    /**
-     * Enable Content Security Policy headers.
-     * CSP helps prevent XSS attacks by controlling which resources can be loaded.
-     */
-    enabled: false,
+    enabled: true,
 
-    /**
-     * CSP directives define the allowed sources for different resource types.
-     * Example: { defaultSrc: ["'self'"], scriptSrc: ["'self'", "'unsafe-inline'"] }
-     */
-    directives: {},
+    directives: {
+      defaultSrc: ["'self'"],
+      baseUri: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'self'"],
 
-    /**
-     * When true, CSP violations are reported but not enforced.
-     * Useful for testing CSP policies before enforcing them.
-     */
-    reportOnly: false,
+      /**
+       * `'unsafe-eval'` is required by Alpine's default build, which compiles `x-*`
+       * expressions through the Function constructor. `@nonce` whitelists the inline
+       * pre-paint theme script in the layout. The Umami origin serves the tracker script.
+       */
+      scriptSrc: ["'self'", "'unsafe-eval'", '@nonce', ...(umamiOrigin ? [umamiOrigin] : [])],
+
+      /**
+       * `'unsafe-inline'` covers the per-project `style="--brand:…"` attribute and the
+       * webfont stylesheet `@import`; the fonts host serves that stylesheet.
+       */
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://api.fonts.coollabs.io'],
+      fontSrc: ["'self'", 'https://api.fonts.coollabs.io'],
+
+      /** Specs embed remote `<img>` (e.g. mediawiki); keep image sources permissive. */
+      imgSrc: ["'self'", 'data:', 'https:'],
+
+      /**
+       * `'self'` = search/history fragment fetches; `npub.cash` = the Lightning donate
+       * flow (LNURL-pay); the Umami origin receives the analytics beacon.
+       */
+      connectSrc: ["'self'", 'https://npub.cash', ...(umamiOrigin ? [umamiOrigin] : [])],
+    },
+
+    reportOnly: true,
   },
 
   /**
@@ -90,10 +124,15 @@ const shieldConfig = defineConfig({
     enabled: true,
 
     /**
-     * How long browsers should remember to use HTTPS.
-     * After this period, browsers may try HTTP again.
+     * How long browsers should remember to use HTTPS (one year, the recommended minimum).
      */
-    maxAge: '180 days',
+    maxAge: '1 year',
+
+    /**
+     * Apply the policy to every subdomain too. Safe here: it only covers children of the
+     * host serving the header (e.g. `*.bips.xyz`), all of which are HTTPS.
+     */
+    includeSubDomains: true,
   },
 
   /**

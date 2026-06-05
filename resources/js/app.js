@@ -121,6 +121,11 @@ window.toggleTheme = function () {
   }
 }
 
+// Theme toggle button: delegated click so the markup needs no inline `onclick` (CSP-friendly).
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-theme-toggle]')) window.toggleTheme()
+})
+
 // Split copy button on the spec page: copies the spec's canonical URL, or its `.md` variant.
 // `location.pathname` drops query/fragment and the show route 301s non-canonical numbers, so the
 // copied URL is always the canonical spec link. Clipboard failures are swallowed (like `donate`).
@@ -228,6 +233,18 @@ Alpine.data('historyDrawer', (url) => ({
         countEl.textContent = `${visible} proposal${visible === 1 ? '' : 's'}`
       }
     })
+  })
+})()
+
+// Index table: clicking a row opens the spec. Clicks on links/buttons inside the row
+// (e.g. the author chips) act normally and never trigger row navigation.
+;(function () {
+  const tbody = document.querySelector('.bips-table tbody')
+  if (!tbody) return
+  tbody.addEventListener('click', (e) => {
+    if (e.target.closest('a, button')) return
+    const row = e.target.closest('tr[data-href]')
+    if (row) window.location.href = row.getAttribute('data-href')
   })
 })()
 

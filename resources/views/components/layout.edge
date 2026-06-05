@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     @include('partials/head')
 
-    <script>
+    <script nonce="{{ cspNonce }}">
       (function () {
         try {
           var t = localStorage.getItem('theme');

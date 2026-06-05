@@ -13,7 +13,7 @@
       @each(row in rows)
         <tr
           data-status="{{ row.filterKey ?? '' }}"
-          onclick="location='{{ urlFor('documents.show', { number: row.number }) }}'"
+          data-href="{{ urlFor('documents.show', { number: row.number }) }}"
         >
           <td class="col-n">{{ row.number }}</td>
           <td><span class="bips-table__link">{{ row.title }}</span></td>
@@ -29,11 +29,10 @@
                 @if(cell.authors.length)
                   <div class="meta-authors">
                     @each(author in cell.authors)
-                      {{-- Chip searches for the author; stop the click from bubbling to the row's nav. --}}
+                      {{-- Chip searches for the author; the row click handler ignores link clicks. --}}
                       <a
                         class="author-chip"
                         href="/search?q={{ encodeURIComponent(author) }}"
-                        onclick="event.stopPropagation()"
                       >{{ author }}</a>
                     @end
                   </div>
