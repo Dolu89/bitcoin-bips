@@ -46,3 +46,24 @@ test.group('services/pandoc_service toHtml', () => {
     assert.notInclude(html, '<references')
   }).skip(pandocMissing(), 'pandoc not on PATH')
 })
+
+test.group('services/pandoc_service toMarkdown', () => {
+  test('toMarkdown converts MediaWiki to GFM and returns a Markdown source unchanged')
+    .with([
+      { raw: '== Motivation ==\nText.', format: 'mediawiki' as const, verbatim: false },
+      { raw: '## Goals\n\nBody.', format: 'markdown' as const, verbatim: true },
+    ])
+    .run(async ({ assert }, { raw, format, verbatim }) => {
+      const svc = await app.container.make(PandocService)
+
+      const md = await svc.toMarkdown(raw, format)
+
+      if (verbatim) {
+        assert.equal(md, raw)
+      } else {
+        assert.match(md, /^##\s+Motivation/m)
+        assert.include(md, 'Text.')
+      }
+    })
+    .skip(pandocMissing(), 'pandoc not on PATH')
+})

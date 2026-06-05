@@ -29,6 +29,9 @@ router
     router.get('/robots.txt', [controllers.Robots, 'show'])
     router.get('/sitemap.xml', [controllers.Sitemap, 'show'])
     router.get('/search', [controllers.Search, 'show'])
+    router
+      .get('/:number.md', [controllers.Documents, 'raw'])
+      .where('number', { match: /^[0-9a-fA-F]+\.md$/ })
     router.get('/:number/history', [controllers.Documents, 'history'])
     router.get('/:number', [controllers.Documents, 'show'])
   })

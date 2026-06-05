@@ -20,6 +20,14 @@ export default class PandocService {
     )
   }
 
+  async toMarkdown(raw: string, format: 'mediawiki' | 'markdown'): Promise<string> {
+    // Markdown sources are already GFM — pass them through untouched; only mediawiki needs Pandoc.
+    if (format === 'markdown') {
+      return raw
+    }
+    return this.run(['-f', 'mediawiki', '-t', 'gfm', '--wrap=none'], normalizeForPandoc(raw))
+  }
+
   private run(args: string[], input: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const child = spawn('pandoc', args, { timeout: TIMEOUT_MS })

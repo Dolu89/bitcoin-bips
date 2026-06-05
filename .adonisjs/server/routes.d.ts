@@ -9,6 +9,7 @@ export type ScannedRoutes = {
     'robots.show': { paramsTuple?: []; params?: {} }
     'sitemap.show': { paramsTuple?: []; params?: {} }
     'search.show': { paramsTuple?: []; params?: {} }
+    'documents.raw': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
   }
@@ -18,6 +19,7 @@ export type ScannedRoutes = {
     'robots.show': { paramsTuple?: []; params?: {} }
     'sitemap.show': { paramsTuple?: []; params?: {} }
     'search.show': { paramsTuple?: []; params?: {} }
+    'documents.raw': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
   }
@@ -27,6 +29,7 @@ export type ScannedRoutes = {
     'robots.show': { paramsTuple?: []; params?: {} }
     'sitemap.show': { paramsTuple?: []; params?: {} }
     'search.show': { paramsTuple?: []; params?: {} }
+    'documents.raw': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.history': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
   }

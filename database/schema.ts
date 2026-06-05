@@ -57,6 +57,7 @@ export class DocumentSchema extends BaseModel {
   static $columns = [
     'commitCount',
     'contentHtml',
+    'contentMarkdown',
     'contentText',
     'createdAt',
     'firstCommitAt',
@@ -79,6 +80,8 @@ export class DocumentSchema extends BaseModel {
   declare commitCount: number | null
   @column()
   declare contentHtml: string | null
+  @column()
+  declare contentMarkdown: string | null
   @column()
   declare contentText: string | null
   @column.dateTime({ autoCreate: true })

@@ -30,4 +30,9 @@ export default class FakePandocService extends PandocService {
     }
     return `<h2>Section</h2>\n<p>${raw}</p>`
   }
+
+  async toMarkdown(raw: string, format: 'mediawiki' | 'markdown'): Promise<string> {
+    this.calls.push({ raw, format })
+    return format === 'markdown' ? raw : `# Converted\n\n${raw}`
+  }
 }

@@ -56,6 +56,46 @@ export default class DocumentsController {
     })
   }
 
+  async raw({ params, response, request, project }: HttpContext) {
+    if (!project) {
+      return response.notFound()
+    }
+
+    const number = canonicalize(params.number, project.numberBase)
+    if (number === null) {
+      return response.notFound()
+    }
+
+    // Canonical URL: redirect non-canonical forms (leading zeros / hex casing) to the .md route.
+    if (params.number !== number) {
+      return response.redirect().status(301).toRoute('documents.raw', { number })
+    }
+
+    const document = await Document.query()
+      .where('project', project.key)
+      .where('number', number)
+      .firstOrFail()
+
+    // The Markdown is pre-rendered at sync (content_markdown); Markdown-native specs keep it null
+    // and fall back to their already-Markdown source. No Pandoc on the request path.
+    const body = document.contentMarkdown ?? document.rawContent
+    if (body === null) {
+      return response.notFound()
+    }
+
+    // Content changes only on sync (hash = source blob sha) — same conditional-GET shape as `show`.
+    const etag = document.hash
+    response.header('Cache-Control', 'public, no-cache')
+    response.header('ETag', etag)
+    if (request.header('if-none-match') === etag) {
+      response.status(304)
+      return
+    }
+
+    response.header('Content-Type', 'text/plain; charset=utf-8')
+    return body
+  }
+
   async history({ params, response, view, project }: HttpContext) {
     if (!project) {
       return response.notFound()

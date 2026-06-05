@@ -49,6 +49,66 @@ test.group('services/ingestion_service syncProject', (group) => {
     assert.equal(summary.updated, 0)
   })
 
+  test('stores converted content_markdown for a mediawiki spec and leaves it null for a markdown one', async ({
+    assert,
+    swap,
+  }) => {
+    useFakePandoc()
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [
+            { number: '10', sha: 'm1', content: '== Body ==\nMW.', sourceFormat: 'mediawiki' },
+            { number: '20', sha: 'k1', content: '## Body\n\nMD.', sourceFormat: 'markdown' },
+          ],
+        },
+      })
+    )
+    const service = await app.container.make(IngestionService)
+
+    await service.syncProject(bips)
+
+    const mw = await Document.query().where('project', 'bips').where('number', '10').firstOrFail()
+    const md = await Document.query().where('project', 'bips').where('number', '20').firstOrFail()
+    assert.include(mw.contentMarkdown ?? '', '# Converted')
+    assert.isNull(md.contentMarkdown)
+  })
+
+  test('backfills content_markdown for an already-rendered mediawiki spec without re-rendering', async ({
+    assert,
+    swap,
+  }) => {
+    const pandoc = useFakePandoc()
+    await DocumentFactory.merge({
+      project: 'bips',
+      number: '11',
+      hash: 's11',
+      rawContent: '== Body ==\nMW.',
+      contentHtml: '<p>done</p>',
+    }).create()
+
+    swap(
+      SpecSourceService,
+      new FakeSpecSourceService({
+        specs: {
+          bips: [
+            { number: '11', sha: 's11', content: '== Body ==\nMW.', sourceFormat: 'mediawiki' },
+          ],
+        },
+      })
+    )
+    const service = await app.container.make(IngestionService)
+
+    await service.syncProject(bips)
+
+    const doc = await Document.query().where('project', 'bips').where('number', '11').firstOrFail()
+    assert.include(doc.contentMarkdown ?? '', '# Converted')
+    // HTML is untouched (not re-rendered) and only the markdown conversion ran.
+    assert.equal(doc.contentHtml, '<p>done</p>')
+    assert.lengthOf(pandoc.calls, 1)
+  })
+
   test('updates a spec in place when the upstream blob sha differs', async ({ assert, swap }) => {
     useFakePandoc()
     await DocumentFactory.merge({
@@ -383,8 +443,11 @@ test.group('services/ingestion_service syncProject', (group) => {
 
     const doc = await Document.query().where('project', 'bips').where('number', '9').firstOrFail()
     assert.isNotNull(doc.contentHtml)
+    // A fully-unrendered mediawiki spec backfills both projections at once: HTML render + Markdown
+    // conversion — two pandoc calls — and content_markdown is populated alongside content_html.
+    assert.isNotNull(doc.contentMarkdown)
     assert.equal(summary.unchanged, 0)
-    assert.lengthOf(pandoc.calls, 1)
+    assert.lengthOf(pandoc.calls, 2)
   })
 
   test('renders the curated home into home_html', async ({ assert, swap }) => {
@@ -493,6 +556,7 @@ test.group('services/ingestion_service syncProject', (group) => {
       hash: 's9',
       rawContent: '<pre>\n  Title: Nine\n</pre>',
       contentHtml: '<p>done</p>',
+      contentMarkdown: '# Nine',
     }).create()
 
     const fake = new FakeSpecSourceService({

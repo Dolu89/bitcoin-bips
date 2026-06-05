@@ -14,6 +14,7 @@ import ProjectMeta from '#models/project_meta'
 import SpecSourceService from '#services/spec_source_service'
 import RenderingService from '#services/rendering_service'
 import SearchService from '#services/search_service'
+import PandocService from '#services/pandoc_service'
 import { adapterFor } from '#values/adapters'
 import { canonicalize } from '#values/document_number'
 import type { ProjectConfig } from '#types/project'
@@ -50,7 +51,8 @@ export default class IngestionService {
   constructor(
     protected source: SpecSourceService,
     protected rendering: RenderingService,
-    protected search: SearchService
+    protected search: SearchService,
+    protected pandoc: PandocService
   ) {}
 
   async syncProject(project: ProjectConfig): Promise<SyncSummary> {
@@ -66,7 +68,16 @@ export default class IngestionService {
     // render-only backfill re-render from the stored source, with no network round-trip.
     const existingRows = await Document.query()
       .where('project', project.key)
-      .select('id', 'number', 'hash', 'raw_content', 'content_html', 'commit_count')
+      .select(
+        'id',
+        'number',
+        'hash',
+        'raw_content',
+        'content_html',
+        'content_markdown',
+        'source_format',
+        'commit_count'
+      )
       .withCount('commits')
     const existing = new Map(
       existingRows.map((row) => [
@@ -76,6 +87,8 @@ export default class IngestionService {
           hash: row.hash,
           rawContent: row.rawContent,
           contentHtml: row.contentHtml,
+          contentMarkdown: row.contentMarkdown,
+          sourceFormat: row.sourceFormat,
           commitsCount: Number(row.$extras.commits_count ?? 0),
           commitCount: row.commitCount,
         },
@@ -99,7 +112,10 @@ export default class IngestionService {
       // the blob changed or none are stored yet (so enabling either capability backfills the
       // already-ingested catalog without clearing hashes). Skip only when neither is needed.
       const blobChanged = !stored || stored.hash !== file.sha
-      const needsContent = blobChanged || stored.contentHtml === null
+      const needsContent =
+        blobChanged ||
+        stored.contentHtml === null ||
+        (stored.sourceFormat === 'mediawiki' && stored.contentMarkdown === null)
       const needsCommits = blobChanged || stored.commitsCount === 0 || stored.commitCount === null
       if (!needsContent && !needsCommits) {
         unchanged++
@@ -117,21 +133,39 @@ export default class IngestionService {
               : stored.rawContent
           const { title, preamble } = adapter.parsePreamble(raw)
 
-          // Render the changed spec; a per-spec render failure is recorded and leaves the
-          // display columns untouched (stale on update, null on insert) without aborting the sync.
+          // Render HTML only when the blob changed or no render exists yet — a markdown-only
+          // backfill (content_markdown missing while content_html is present) skips the costly
+          // Shiki render. A per-spec render failure is recorded and leaves the display columns
+          // untouched (stale on update, null on insert) without aborting the sync.
           let rendered = null
-          try {
-            rendered = await this.rendering.render({
-              raw: adapter.extractBody(raw),
-              format: file.sourceFormat as 'mediawiki' | 'markdown',
-              adapter,
-              numberBase: project.numberBase,
-              imageBaseUrl: rawBaseUrl(project.repo, file.path),
-              linkBaseUrl: blobBaseUrl(project.repo, file.path),
-              repoBlobBaseUrl: blobBaseUrl(project.repo, ''),
-            })
-          } catch (error) {
-            errors.push({ number: file.number, message: `render: ${(error as Error).message}` })
+          if (blobChanged || stored?.contentHtml === null) {
+            try {
+              rendered = await this.rendering.render({
+                raw: adapter.extractBody(raw),
+                format: file.sourceFormat as 'mediawiki' | 'markdown',
+                adapter,
+                numberBase: project.numberBase,
+                imageBaseUrl: rawBaseUrl(project.repo, file.path),
+                linkBaseUrl: blobBaseUrl(project.repo, file.path),
+                repoBlobBaseUrl: blobBaseUrl(project.repo, ''),
+              })
+            } catch (error) {
+              errors.push({ number: file.number, message: `render: ${(error as Error).message}` })
+            }
+          }
+
+          // Pre-render the Markdown projection the `.md` view serves: convert the full MediaWiki
+          // source when the blob changed or the column is missing (backfill), and keep the stored
+          // value otherwise (a render-only reprocess does not re-convert). Markdown-native specs
+          // stay null and are served from rawContent. Isolated like the HTML render — a Pandoc
+          // failure leaves the column null (retried next sync via the backfill gate), never aborts.
+          let contentMarkdown: string | null = stored?.contentMarkdown ?? null
+          if (file.sourceFormat === 'mediawiki' && (blobChanged || contentMarkdown === null)) {
+            try {
+              contentMarkdown = await this.pandoc.toMarkdown(raw, 'mediawiki')
+            } catch (error) {
+              errors.push({ number: file.number, message: `markdown: ${(error as Error).message}` })
+            }
           }
 
           doc = await Document.updateOrCreate(
@@ -143,6 +177,7 @@ export default class IngestionService {
               sourceUrl: file.sourceUrl,
               sortOrder: file.sortOrder,
               rawContent: raw,
+              contentMarkdown,
               hash: file.sha,
               ...(rendered
                 ? {
