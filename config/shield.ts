@@ -23,9 +23,10 @@ const umamiOrigin = (() => {
  */
 const shieldConfig = defineConfig({
   /**
-   * Content Security Policy. Shipped in report-only first: violations are logged to the
-   * browser console without blocking, so the policy can be validated before it is enforced.
-   * Flip `reportOnly` to `false` to enforce.
+   * Content Security Policy (enforced). Was validated in report-only first, then switched
+   * to enforce. Adding a new third-party script/style/font/endpoint means updating the
+   * matching directive below, or the browser will block it. Set `reportOnly: true` to
+   * debug a new resource without blocking.
    */
   csp: {
     enabled: true,
@@ -49,7 +50,7 @@ const shieldConfig = defineConfig({
        * webfont stylesheet `@import`; the fonts host serves that stylesheet.
        */
       styleSrc: ["'self'", "'unsafe-inline'", 'https://api.fonts.coollabs.io'],
-      fontSrc: ["'self'", 'https://api.fonts.coollabs.io'],
+      fontSrc: ["'self'", 'https://api.fonts.coollabs.io', 'https://cdn.fonts.coollabs.io'],
 
       /** Specs embed remote `<img>` (e.g. mediawiki); keep image sources permissive. */
       imgSrc: ["'self'", 'data:', 'https:'],
@@ -61,7 +62,7 @@ const shieldConfig = defineConfig({
       connectSrc: ["'self'", 'https://npub.cash', ...(umamiOrigin ? [umamiOrigin] : [])],
     },
 
-    reportOnly: true,
+    reportOnly: false,
   },
 
   /**
