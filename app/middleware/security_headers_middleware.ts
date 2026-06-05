@@ -9,10 +9,7 @@ import type { NextFn } from '@adonisjs/core/types/http'
 export default class SecurityHeadersMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
     ctx.response.header('Referrer-Policy', 'strict-origin-when-cross-origin')
-    ctx.response.header(
-      'Permissions-Policy',
-      'camera=(), microphone=(), geolocation=(), browsing-topics=()'
-    )
+    ctx.response.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
 
     return next()
   }

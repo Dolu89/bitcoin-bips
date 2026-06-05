@@ -52,8 +52,8 @@ const shieldConfig = defineConfig({
       styleSrc: ["'self'", "'unsafe-inline'", 'https://api.fonts.coollabs.io'],
       fontSrc: ["'self'", 'https://api.fonts.coollabs.io', 'https://cdn.fonts.coollabs.io'],
 
-      /** Specs embed remote `<img>` (e.g. mediawiki); keep image sources permissive. */
-      imgSrc: ["'self'", 'data:', 'https:'],
+      /** Specs embed remote https `<img>` (e.g. mediawiki); no inline `data:` images are used. */
+      imgSrc: ["'self'", 'https:'],
 
       /**
        * `'self'` = search/history fragment fetches; `npub.cash` = the Lightning donate
